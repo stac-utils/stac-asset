@@ -1,11 +1,13 @@
 import json
 import os.path
 from abc import ABC, abstractmethod
+from asyncio import TaskGroup
 from pathlib import Path
-from typing import AsyncIterator
+from typing import AsyncIterator, Optional
 
 import aiofiles
-from pystac import Asset
+import pystac.utils
+from pystac import Asset, Item
 from yarl import URL
 
 from .constants import DEFAULT_ASSET_FILE_NAME
@@ -60,3 +62,27 @@ class Client(ABC):
         asset_as_str = json.dumps(asset.to_dict())
         async with aiofiles.open(directory_as_path / asset_file_name, "w") as f:
             await f.write(asset_as_str)
+
+    async def download_item(
+        self,
+        item: Item,
+        directory: PathLikeObject,
+        make_directory: bool = False,
+        item_file_name: Optional[str] = None,
+        include_self_link: bool = True,
+    ) -> None:
+        directory_as_path = Path(directory)
+        if make_directory:
+            directory_as_path.mkdir(exist_ok=True)
+        if item_file_name is None:
+            item_file_name = f"{item.id}.json"
+        item_path = directory_as_path / item_file_name
+        async with TaskGroup() as task_group:
+            for key, asset in item.assets.items():
+                # TODO allow different layout schemes
+                path = directory_as_path / os.path.basename(asset.href)
+                task_group.create_task(self.download_href(asset.href, path))
+                item.assets[key].href = pystac.utils.make_relative_href(
+                    str(path), str(item_path)
+                )
+        item.save_object(include_self_link=include_self_link, dest_href=str(item_path))
