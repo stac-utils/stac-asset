@@ -1,7 +1,8 @@
-from typing import AsyncIterator
+from typing import AsyncIterator, Optional
 
-from pystac import Asset
+from pystac import Asset, Item
 
+from .client import Client
 from .constants import DEFAULT_ASSET_FILE_NAME
 from .filesystem_client import FilesystemClient
 from .http_client import HttpClient
@@ -19,7 +20,7 @@ async def open_href(href: str) -> AsyncIterator[bytes]:
     Returns:
         AsyncIterator[bytes]: An iterator over the file's bytes.
     """
-    client = HttpClient()
+    client = guess_client(href)
     async for chunk in client.open_href(href):
         yield chunk
 
@@ -33,7 +34,7 @@ async def open_asset(asset: Asset) -> AsyncIterator[bytes]:
     Returns:
         AsyncIterator[bytes]: An iterator over the Asset's bytes.
     """
-    client = HttpClient()
+    client = guess_client(asset.href)
     async for chunk in client.open_href(asset.href):
         yield chunk
 
@@ -47,7 +48,7 @@ async def download_href(href: str, path: PathLikeObject) -> None:
         href: The href to download.
         path: The location of the downloaded file.
     """
-    client = HttpClient()
+    client = guess_client(href)
     await client.download_href(href, path)
 
 
@@ -69,8 +70,34 @@ async def download_asset(
         make_directory: If true, create the directory (with exists_ok=True)
             before downloading.
     """
-    client = HttpClient()
+    client = guess_client(asset.href)
     await client.download_asset(asset, directory, make_directory, asset_file_name)
+
+
+async def download_item(
+    item: Item,
+    directory: PathLikeObject,
+    make_directory: bool = False,
+    item_file_name: Optional[str] = None,
+    include_self_link: bool = True,
+) -> None:
+    if not item.assets:
+        raise ValueError("cannot guess a client if an item does not have any assets")
+    client = guess_client(next(iter(item.assets.values())).href)
+    await client.download_item(
+        item, directory, make_directory, item_file_name, include_self_link
+    )
+
+
+def guess_client(href: str) -> Client:
+    if href.startswith("https://landsatlook.usgs.gov"):
+        return UsgsErosClient()
+    elif href.startswith("http"):
+        return HttpClient()
+    elif href.startswith("s3"):
+        return S3Client()
+    else:
+        return FilesystemClient()
 
 
 __all__ = [

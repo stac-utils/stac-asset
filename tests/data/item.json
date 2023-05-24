@@ -1,0 +1,15 @@
+{
+    "stac_version": "1.0.0",
+    "id": "test-item",
+    "type": "Feature",
+    "geometry": null,
+    "properties": {
+        "datetime": "2023-05-24T12:00:00Z"
+    },
+    "links": [],
+    "assets": {
+        "data": {
+            "href": "./20201211_223832_CS2.jpg"
+        }
+    }
+}
