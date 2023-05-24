@@ -1,6 +1,18 @@
 [project]
 name = "stac-asset"
 version = "0.0.1"
+description = "Read, download, and write STAC assets across platforms and providers"
+authors = [
+    {name = "Pete Gadomski", email = "pete.gadomski@gmail.com"}
+]
+readme = "README.md"
+keywords = ["stac", "async"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 3 - Alpha",
+]
+license = {text = "Apache-2.0"}
+requires-python = ">=3.8"
 dependencies = [
     "aiofiles>=23.1.0",
     "aiobotocore>=2.5.0",
@@ -24,5 +36,12 @@ docs = [
     "sphinx~=7.0",
 ]
 
+[project.urls]
+repository = "https://github.com/gadomski/stac-asset"
+changelog = "https://github.com/gadomski/stac-asset/blob/main/CHANGELOG.md"
+
 [tool.mypy]
 strict = true
+
+[tool.ruff]
+select = ["F", "E", "W", "I", "ERA", "RUF"]
