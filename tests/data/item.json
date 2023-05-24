@@ -6,7 +6,12 @@
     "properties": {
         "datetime": "2023-05-24T12:00:00Z"
     },
-    "links": [],
+    "links": [
+        {
+            "href": "./catalog.json",
+            "rel": "parent"
+        }
+    ],
     "assets": {
         "data": {
             "href": "./20201211_223832_CS2.jpg"

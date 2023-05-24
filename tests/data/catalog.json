@@ -1,0 +1,12 @@
+{
+    "stac_version": "1.0.0",
+    "type": "Catalog",
+    "id": "test-catalog",
+    "description": "A simple test catalog",
+    "links": [
+        {
+            "href": "./item.json",
+            "rel": "child"
+        }
+    ]
+}

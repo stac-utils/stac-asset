@@ -1,6 +1,8 @@
+from pathlib import Path
 from typing import Any
 
 import pytest
+from pystac import Item
 from pytest import Config, Parser
 
 
@@ -9,6 +11,11 @@ def asset_href() -> str:
     return (
         "https://storage.googleapis.com/open-cogs/stac-examples/20201211_223832_CS2.jpg"
     )
+
+
+@pytest.fixture
+def item() -> Item:
+    return Item.from_file(str(Path(__file__).parent / "data" / "item.json"))
 
 
 def pytest_addoption(parser: Parser) -> None:

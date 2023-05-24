@@ -135,8 +135,14 @@ class Client(ABC):
             for key, asset in item.assets.items():
                 # TODO allow different layout schemes
                 path = directory_as_path / os.path.basename(asset.href)
-                task_group.create_task(self.download_href(asset.href, path))
+                absolute_href = asset.get_absolute_href()
+                if absolute_href is None:
+                    raise ValueError(f"asset '{key}' does not have an absolute href")
+                task_group.create_task(self.download_href(absolute_href, path))
                 item.assets[key].href = pystac.utils.make_relative_href(
                     str(path), str(item_path)
                 )
+        for link in item.links:
+            if link.is_hierarchical():
+                link.target = pystac.utils.make_absolute_href(link.href, item.self_href)
         item.save_object(include_self_link=include_self_link, dest_href=str(item_path))
