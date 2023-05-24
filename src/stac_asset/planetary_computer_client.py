@@ -19,12 +19,12 @@ from .http_client import HttpClient
 DEFAULT_SAS_TOKEN_ENDPOINT = "https://planetarycomputer.microsoft.com/api/sas/v1/token"
 
 
-class Token:
+class _Token:
     expiry: datetime.datetime
     token: str
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Token:
+    def from_dict(cls, data: dict[str, Any]) -> _Token:
         try:
             expiry = datetime.datetime.fromisoformat(data["msft:expiry"])
         except KeyError:
@@ -49,7 +49,7 @@ class Token:
 
 
 class PlanetaryComputerClient(HttpClient):
-    cache: Dict[URL, Token]
+    cache: Dict[URL, _Token]
     token_request_url: URL
 
     def __init__(
@@ -91,6 +91,6 @@ class PlanetaryComputerClient(HttpClient):
         if token is None or token.ttl() < 60:
             response = await self.session.get(url)
             response.raise_for_status()
-            token = Token.from_dict(await response.json())
+            token = _Token.from_dict(await response.json())
             self.cache[url] = token
         return str(token)

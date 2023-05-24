@@ -7,6 +7,11 @@ from .client import Client
 
 
 class FilesystemClient(Client):
+    """A simple client for moving files around on the filesystem.
+
+    Mostly used for testing, but could be useful in some real-world cases.
+    """
+
     async def open_url(self, url: URL) -> AsyncIterator[bytes]:
         if url.scheme:
             raise ValueError(

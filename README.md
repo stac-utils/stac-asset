@@ -84,7 +84,12 @@ As determined during a meeting at the Element 84 offices (formerly Azavea office
 - [ ] Checksum validation and creation
 - [ ] CLI
 
-## Developing
+## Contributing
+
+Use Github [issues](https://github.com/gadomski/stac-asset/issues) to report bugs and request new features.
+Use Github [pull requests](https://github.com/gadomski/stac-asset/pulls) to fix bugs and propose new features.
+
+### Developing
 
 Clone, install with the dev dependencies, and install **pre-commit**:
 
@@ -95,7 +100,7 @@ pip install '.[dev]'
 pre-commit install
 ```
 
-### Testing
+#### Testing
 
 All network-touching tests are disabled by default, because we can't use [pytest-vcr](https://pytest-vcr.readthedocs.io/en/latest/) (<https://github.com/kevin1024/vcrpy/issues/597>), and repeatedly hitting the network during testing and CI is bad behavior.
 To enable network-touching tests:
@@ -107,3 +112,28 @@ pytest --network-access
 Some tests are client-specific and need your environment to be configured correctly.
 See [each client's documentation](#clients) for instructions on setting up your environment for each client.
 If your environment is not configured for a certain client, that client's tests are skipped.
+
+#### Docs
+
+Install the documentation dependencies:
+
+```shell
+pip install -e '.[docs]'
+```
+
+Then, build the docs:
+
+```shell
+make -C docs html && open docs/_build/html/index.html
+```
+
+It can be handy to use [sphinx-autobuild](https://pypi.org/project/sphinx-autobuild/) if you're doing a lot of doc work:
+
+```shell
+pip install sphinx-autobuild
+sphinx-autobuild docs docs/_build/html
+```
+
+## License
+
+[Apache-2.0](https://github.com/gadomski/stac-asset/blob/main/LICENSE)

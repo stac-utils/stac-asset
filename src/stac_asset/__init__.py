@@ -1,3 +1,9 @@
+"""Get STAC Assets from various platforms and using different authentication schemes.
+
+The core class is :py:class:`Client`, which defines a common interface.
+Other clients inherit from :py:class:`Client` to implement any custom behavior.
+"""
+
 from typing import AsyncIterator, Optional
 
 from pystac import Asset, Item
@@ -83,6 +89,16 @@ async def download_item(
     item_file_name: Optional[str] = None,
     include_self_link: bool = True,
 ) -> None:
+    """Downloads an item to the local filesystem.
+
+    Args:
+        item: The :py:class:`pystac.Item`.
+        directory: The output directory that will hold the items and assets.
+        make_directory: Whether to create the directory if it doesn't exist.
+        item_file_name: The file name of the output item. If not provided, will
+            default to the item's id with a .json extension.
+        include_self_link: Whether to include a self link in the output item.
+    """
     if not item.assets:
         raise ValueError("cannot guess a client if an item does not have any assets")
     client = await guess_client(next(iter(item.assets.values())).href)
@@ -92,6 +108,14 @@ async def download_item(
 
 
 async def guess_client(href: str) -> Client:
+    """Guess which client should be used to open the given href.
+
+    Args:
+        href: The input href.
+
+    Returns:
+        Client: The most appropriate client for the href, maybe.
+    """
     url = URL(href)
     if not url.host:
         return FilesystemClient()
@@ -108,13 +132,14 @@ async def guess_client(href: str) -> Client:
 
 
 __all__ = [
-    "HttpClient",
     "FilesystemClient",
+    "HttpClient",
     "PlanetaryComputerClient",
     "S3Client",
     "UsgsErosClient",
     "download_asset",
     "download_href",
+    "download_item",
     "open_asset",
     "open_href",
 ]

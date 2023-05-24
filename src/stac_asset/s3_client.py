@@ -13,7 +13,10 @@ DEFAULT_REGION_NAME = "us-west-2"
 
 class S3Client(Client):
     session: AioSession
+    """The session that will be used for all s3 requests."""
+
     region_name: str
+    """The region that all clients will be rooted in."""
 
     def __init__(self, region_name: str = DEFAULT_REGION_NAME) -> None:
         super().__init__()
