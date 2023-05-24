@@ -1,0 +1,7 @@
+name: antimeridian-docs
+channels:
+  - conda-forge
+dependencies:
+  - pip~=22.3
+  - pip:
+      - ..[docs]
