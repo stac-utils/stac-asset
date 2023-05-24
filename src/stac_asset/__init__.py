@@ -1,28 +1,11 @@
-import json
-import os.path
-from os import PathLike
-from pathlib import Path
-from typing import Any, AsyncIterator, Union
+from typing import AsyncIterator
 
-import aiofiles
-from httpx import AsyncClient
 from pystac import Asset
 
-PathLikeObject = Union[PathLike[Any], str]
-"""An object representing a file system path, except we exclude `bytes` because
-`Path()` doesn't accept `bytes`.
-
-A path-like object is either a str or bytes object representing a path, or an
-object implementing the os.PathLike protocol. An object that supports the
-os.PathLike protocol can be converted to a str or bytes file system path by
-calling the os.fspath() function; os.fsdecode() and os.fsencode() can be used to
-guarantee a str or bytes result instead, respectively. Introduced by PEP 519.
-
-https://docs.python.org/3/glossary.html#term-path-like-object
-"""
-
-DEFAULT_ASSET_FILE_NAME = "asset.json"
-"""When downloading an asset, the default file name for the asset itself."""
+from .constants import DEFAULT_ASSET_FILE_NAME
+from .http_client import HttpClient
+from .types import PathLikeObject
+from .usgs_eros_client import UsgsErosClient
 
 
 async def open_href(href: str) -> AsyncIterator[bytes]:
@@ -34,10 +17,9 @@ async def open_href(href: str) -> AsyncIterator[bytes]:
     Returns:
         AsyncIterator[bytes]: An iterator over the file's bytes.
     """
-    client = AsyncClient()
-    async with client.stream("GET", href) as response:
-        async for chunk in response.aiter_bytes():
-            yield chunk
+    client = HttpClient()
+    async for chunk in client.open_href(href):
+        yield chunk
 
 
 async def open_asset(asset: Asset) -> AsyncIterator[bytes]:
@@ -49,7 +31,8 @@ async def open_asset(asset: Asset) -> AsyncIterator[bytes]:
     Returns:
         AsyncIterator[bytes]: An iterator over the Asset's bytes.
     """
-    async for chunk in open_href(asset.href):
+    client = HttpClient()
+    async for chunk in client.open_href(asset.href):
         yield chunk
 
 
@@ -62,9 +45,8 @@ async def download_href(href: str, path: PathLikeObject) -> None:
         href: The href to download.
         path: The location of the downloaded file.
     """
-    async with aiofiles.open(path, mode="wb") as f:
-        async for chunk in open_href(href):
-            await f.write(chunk)
+    client = HttpClient()
+    await client.download_href(href, path)
 
 
 async def download_asset(
@@ -85,12 +67,15 @@ async def download_asset(
         make_directory: If true, create the directory (with exists_ok=True)
             before downloading.
     """
-    directory_as_path = Path(directory)
-    if make_directory:
-        directory_as_path.mkdir(exist_ok=True)
-    path = directory_as_path / os.path.basename(asset.href)
-    await download_href(asset.href, path)
-    asset.href = str(path)
-    asset_as_str = json.dumps(asset.to_dict())
-    async with aiofiles.open(directory_as_path / asset_file_name, "w") as f:
-        await f.write(asset_as_str)
+    client = HttpClient()
+    await client.download_asset(asset, directory, make_directory, asset_file_name)
+
+
+__all__ = [
+    "HttpClient",
+    "UsgsErosClient",
+    "download_asset",
+    "download_href",
+    "open_asset",
+    "open_href",
+]
