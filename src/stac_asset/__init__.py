@@ -4,6 +4,7 @@ from pystac import Asset
 
 from .constants import DEFAULT_ASSET_FILE_NAME
 from .http_client import HttpClient
+from .s3_client import S3Client
 from .types import PathLikeObject
 from .usgs_eros_client import UsgsErosClient
 
@@ -73,6 +74,7 @@ async def download_asset(
 
 __all__ = [
     "HttpClient",
+    "S3Client",
     "UsgsErosClient",
     "download_asset",
     "download_href",
