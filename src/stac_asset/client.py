@@ -6,6 +6,7 @@ from typing import AsyncIterator
 
 import aiofiles
 from pystac import Asset
+from yarl import URL
 
 from .constants import DEFAULT_ASSET_FILE_NAME
 from .types import PathLikeObject
@@ -13,10 +14,14 @@ from .types import PathLikeObject
 
 class Client(ABC):
     @abstractmethod
-    async def open_href(self, href: str) -> AsyncIterator[bytes]:
+    async def open_url(self, url: URL) -> AsyncIterator[bytes]:
         # https://github.com/python/mypy/issues/5070
         if False:
             yield
+
+    async def open_href(self, href: str) -> AsyncIterator[bytes]:
+        async for chunk in self.open_url(URL(href)):
+            yield chunk
 
     async def open_asset(self, asset: Asset) -> AsyncIterator[bytes]:
         async for chunk in self.open_href(asset.href):

@@ -1,10 +1,10 @@
-import urllib.parse
 from typing import AsyncIterator
 
 import aiobotocore.session
 from aiobotocore.session import AioSession
 from botocore import UNSIGNED
 from botocore.config import Config
+from yarl import URL
 
 from .client import Client
 
@@ -20,8 +20,7 @@ class S3Client(Client):
         self.session = aiobotocore.session.get_session()
         self.region_name = region_name
 
-    async def open_href(self, href: str) -> AsyncIterator[bytes]:
-        url = urllib.parse.urlparse(href)
+    async def open_url(self, url: URL) -> AsyncIterator[bytes]:
         if url.scheme != "s3":
             raise ValueError(f"only s3 urls are allowed: {url}")
         async with self.session.create_client(
@@ -29,7 +28,7 @@ class S3Client(Client):
             region_name=self.region_name,
             config=Config(signature_version=UNSIGNED),
         ) as client:
-            bucket = url.hostname
+            bucket = url.host
             key = url.path[1:]
             response = await client.get_object(Bucket=bucket, Key=key)
             async for chunk in response["Body"]:
