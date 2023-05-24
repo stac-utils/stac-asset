@@ -48,5 +48,13 @@ As determined during a meeting at the Element 84 offices (formerly Azavea office
 
 ## Testing
 
-Because many tests are client-specific, they are skipped unless your environment is configured correctly.
+All network-touching tests are disabled by default, because we can't use [pytest-vcr](https://pytest-vcr.readthedocs.io/en/latest/) (<https://github.com/kevin1024/vcrpy/issues/597>), and repeatedly hitting the network during testing and CI is bad behavior.
+To enable network-touching tests:
+
+```shell
+pytest --network-access
+```
+
+Some tests are client-specific and need your environment to be configured correctly.
 See [each client's documentation](#clients) for instructions on setting up your environment for each client.
+If your environment is not configured, these tests are skipped.

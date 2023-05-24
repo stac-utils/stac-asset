@@ -3,6 +3,7 @@ from typing import AsyncIterator
 from pystac import Asset
 
 from .constants import DEFAULT_ASSET_FILE_NAME
+from .filesystem_client import FilesystemClient
 from .http_client import HttpClient
 from .s3_client import S3Client
 from .types import PathLikeObject
@@ -74,6 +75,7 @@ async def download_asset(
 
 __all__ = [
     "HttpClient",
+    "FilesystemClient",
     "S3Client",
     "UsgsErosClient",
     "download_asset",

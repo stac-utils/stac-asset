@@ -8,14 +8,17 @@ import pytest
 import stac_asset
 from pystac import Asset
 
+pytestmark = [
+    pytest.mark.asyncio,
+    pytest.mark.network_access,
+]
 
-@pytest.mark.asyncio
+
 async def test_download_http_href(tmp_path: Path, asset_href: str) -> None:
     await stac_asset.download_href(asset_href, tmp_path / "out.jpg")
     assert os.path.getsize(tmp_path / "out.jpg") == 31367
 
 
-@pytest.mark.asyncio
 async def test_open_http_asset(tmp_path: Path, asset_href: str) -> None:
     asset = Asset(href=asset_href)
     await stac_asset.download_asset(asset, tmp_path)

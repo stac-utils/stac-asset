@@ -4,11 +4,15 @@ from pathlib import Path
 import pytest
 from stac_asset import UsgsErosClient
 
-pytestmark = pytest.mark.skipif(
-    os.environ.get("USGS_EROS_USERNAME") is None
-    or os.environ.get("USGS_EROS_PAT") is None,
-    reason="USGS_EROS_USERNAME or USGS_EROS_PAT are not set",
-)
+pytestmark = [
+    pytest.mark.skipif(
+        os.environ.get("USGS_EROS_USERNAME") is None
+        or os.environ.get("USGS_EROS_PAT") is None,
+        reason="USGS_EROS_USERNAME or USGS_EROS_PAT are not set",
+    ),
+    pytest.mark.network_access,
+    pytest.mark.asyncio,
+]
 
 
 @pytest.fixture
@@ -19,7 +23,6 @@ def href() -> str:
     )
 
 
-@pytest.mark.asyncio
 async def test_download(tmp_path: Path, href: str) -> None:
     client = await UsgsErosClient.login()
     await client.download_href(href, tmp_path / "out.jpg")
