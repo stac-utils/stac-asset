@@ -1,20 +1,24 @@
-from typing import AsyncIterator, Optional
+from typing import AsyncIterator, TypeVar
 
 from aiohttp import ClientSession
 from yarl import URL
 
 from .client import Client
 
+T = TypeVar("T", bound="HttpClient")
+
 
 class HttpClient(Client):
     session: ClientSession
 
-    def __init__(self, session: Optional[ClientSession] = None) -> None:
+    @classmethod
+    async def default(cls: type[T]) -> T:
+        session = ClientSession()
+        return cls(session)
+
+    def __init__(self, session: ClientSession) -> None:
         super().__init__()
-        if session is None:
-            self.session = ClientSession()
-        else:
-            self.session = session
+        self.session = session
 
     async def open_url(self, url: URL) -> AsyncIterator[bytes]:
         async with self.session.get(url) as response:

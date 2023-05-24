@@ -11,6 +11,12 @@ from .http_client import HttpClient
 
 class UsgsErosClient(HttpClient):
     @classmethod
+    async def default(
+        cls,
+    ) -> UsgsErosClient:
+        return await cls.login()
+
+    @classmethod
     async def login(
         cls,
         username: Optional[str] = None,
