@@ -3,7 +3,7 @@ name = "stac-asset"
 version = "0.0.1"
 dependencies = [
     "aiofiles>=23.1.0",
-    "httpx>=0.24.1",
+    "aiohttp>=3.8.4",
     "pystac>=1.7.3",
 ]
 

@@ -4,7 +4,7 @@ import json
 import os
 from typing import Optional
 
-from httpx import AsyncClient
+from aiohttp import ClientSession
 
 from .http_client import HttpClient
 
@@ -15,8 +15,6 @@ class UsgsErosClient(HttpClient):
         cls,
         username: Optional[str] = None,
         pat: Optional[str] = None,
-        # The USGS download API has redirects in it so it can be nice to follow them.
-        follow_redirects: bool = True,
     ) -> UsgsErosClient:
         if username is None:
             try:
@@ -34,13 +32,13 @@ class UsgsErosClient(HttpClient):
                     "USGS_EROS_PAT is not set as an environment variable, "
                     "and no personal access token was provided"
                 )
-        client = AsyncClient()
-        response = await client.post(
+        session = ClientSession()
+        response = await session.post(
             "https://m2m.cr.usgs.gov/api/api/json/stable/login-token",
-            json={"username": username, "token": pat},
+            data=json.dumps({"username": username, "token": pat}),
         )
         response.raise_for_status()
-        data = response.json()
+        data = await response.json()
         try:
             api_key = data["data"]
         except KeyError:
@@ -48,7 +46,7 @@ class UsgsErosClient(HttpClient):
                 f"unexpected response format (expected 'data' key): {json.dumps(data)}"
             )
         return cls(
-            client=AsyncClient(
-                headers={"X-Auth-Token": api_key}, follow_redirects=follow_redirects
+            session=ClientSession(
+                headers={"X-Auth-Token": api_key},
             )
         )

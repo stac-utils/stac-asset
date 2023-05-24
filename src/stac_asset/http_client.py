@@ -1,22 +1,22 @@
 from typing import AsyncIterator, Optional
 
-from httpx import AsyncClient
+from aiohttp import ClientSession
 
 from .client import Client
 
 
 class HttpClient(Client):
-    client: AsyncClient
+    session: ClientSession
 
-    def __init__(self, client: Optional[AsyncClient] = None) -> None:
+    def __init__(self, session: Optional[ClientSession] = None) -> None:
         super().__init__()
-        if client is None:
-            self.client = AsyncClient()
+        if session is None:
+            self.session = ClientSession()
         else:
-            self.client = client
+            self.session = session
 
     async def open_href(self, href: str) -> AsyncIterator[bytes]:
-        async with self.client.stream("GET", href) as response:
+        async with self.session.get(href) as response:
             response.raise_for_status()
-            async for chunk in response.aiter_bytes():
+            async for chunk, _ in response.content.iter_chunks():
                 yield chunk
