@@ -9,7 +9,7 @@ Download STAC Assets using a variety of authentication schemes.
 ## Installation
 
 ```shell
-pip install git+https://github.com/gadomski/stac-async
+pip install stac-asset
 ```
 
 ## Usage
