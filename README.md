@@ -14,8 +14,9 @@ pip install stac-asset
 
 ## Usage
 
-Download a STAC [Item](https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md) and all of its assets to a local directory.
-Each Asset's href will be updated to point to the local file.
+Here's how to download a STAC [Item](https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md) and all of its assets to a local directory using the top-level function.
+The correct [client](#clients) will be guessed from the assets' href.
+Each asset's href will be updated to point to the local file.
 
 ```python
 import stac_asset
@@ -29,6 +30,8 @@ To download an item using the command line:
 ```python
 python -m stac_asset https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json .
 ```
+
+See [the documentation](https://stac-asset.readthedocs.io/en/stable/index.html) for more examples and complete API documentation.
 
 ### Clients
 
