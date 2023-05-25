@@ -16,6 +16,6 @@ def href() -> str:
 
 
 async def test_download(tmp_path: Path, href: str) -> None:
-    client = await PlanetaryComputerClient.default()
-    await client.download_href(href, tmp_path / "out.tif")
-    assert os.path.getsize(tmp_path / "out.tif") == 4096
+    async with await PlanetaryComputerClient.default() as client:
+        await client.download_href(href, tmp_path / "out.tif")
+        assert os.path.getsize(tmp_path / "out.tif") == 4096

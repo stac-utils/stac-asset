@@ -18,26 +18,25 @@ Usage
 -----
 
 Let's say you have a STAC Item that you'd like to download, with its assets, to your local system.
-You can use our top-level function, :py:func:`stac_asset.download_item` to do that.
+You can use our top-level function, :py:func:`stac_asset.download_item_from_href` to do that.
 This will download the item, with all of its assets, to the directory you specified, and update the asset hrefs to point to the new item.
 
 .. code-block:: python
 
    import stac_async
-   from pystac import Item
 
    href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
-   item = Item.from_file(href)
-   await stac_async.download_item(item, ".")
+   await stac_async.download_item_from_href(href, ".")
 
-If you'd like to do multiple downloads, it's more efficient to re-use the same client:
+If you'd like to do multiple downloads, it's more efficient to re-use the same client.
+Clients sometimes need to do cleanup after they're done, so they provide an asynchronous context manager interface to handle those cleanups:
 
 .. code-block:: python
 
    from stac_async import HttpClient
 
-   client = HttpClient.default()
-   await client.download_item(item, ".")
+   async with await HttpClient.default() as client:
+      await client.download_item(item, ".")
 
 We provide a suite of clients that are configured to access different data provides, using different communication protocols.
 We have a :py:class:`~stac_asset.S3Client`:
@@ -46,9 +45,9 @@ We have a :py:class:`~stac_asset.S3Client`:
 
    from stac_asset import S3Client
 
-   client = S3Client.default()
    href = "s3://sentinel-cogs/sentinel-s2-l2a-cogs/42/L/TQ/2023/5/S2B_42LTQ_20230524_0_L2A/thumbnail.jpg"
-   await client.download_item(href, ".")
+   async with await S3Client.default() as client:
+      await client.download_item(href, ".")
 
 The :py:class:`~stac_asset.PlanetaryComputerClient` knows how to retrieve and store Shared Access Signatures (SASs) from the `Planetary Computer Authentication API <https://planetarycomputer.microsoft.com/docs/reference/sas/>`_ and use those SASes to access data from their Azure Blob Storage:
 
@@ -56,9 +55,9 @@ The :py:class:`~stac_asset.PlanetaryComputerClient` knows how to retrieve and st
 
    from stac_asset import PlanetaryComputerClient
 
-   client = PlanetaryComputerClient.default()
    href = "https://sentinel2l2a01.blob.core.windows.net/sentinel2-l2/48/X/VR/2023/05/24/S2B_MSIL2A_20230524T084609_N0509_R107_T48XVR_20230524T120352.SAFE/GRANULE/L2A_T48XVR_A032451_20230524T084603/QI_DATA/T48XVR_20230524T084609_PVI.tif"
-   await client.download_item(href, ".")
+   async with await PlanetaryComputerClient.default() as client:
+      await client.download_item(href, ".")
 
 Other clients are provided for specific providers, such as :py:class:`~stac_asset.UsgsErosClient`.
 See the :doc:`api` for information on all of the clients available.

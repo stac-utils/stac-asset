@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import datetime
 from datetime import timezone
-from typing import Any, AsyncIterator, Dict
+from types import TracebackType
+from typing import Any, AsyncIterator, Dict, Optional
 
 from aiohttp import ClientSession
 from yarl import URL
@@ -94,3 +95,15 @@ class PlanetaryComputerClient(HttpClient):
             token = _Token.from_dict(await response.json())
             self.cache[url] = token
         return str(token)
+
+    async def __aenter__(self) -> PlanetaryComputerClient:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        await self.session.close()
+        return await super().__aexit__(exc_type, exc_val, exc_tb)

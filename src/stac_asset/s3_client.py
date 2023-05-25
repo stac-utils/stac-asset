@@ -1,4 +1,7 @@
-from typing import AsyncIterator
+from __future__ import annotations
+
+from types import TracebackType
+from typing import AsyncIterator, Optional
 
 import aiobotocore.session
 from aiobotocore.session import AioSession
@@ -36,3 +39,14 @@ class S3Client(Client):
             response = await client.get_object(Bucket=bucket, Key=key)
             async for chunk in response["Body"]:
                 yield chunk
+
+    async def __aenter__(self) -> S3Client:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        return None

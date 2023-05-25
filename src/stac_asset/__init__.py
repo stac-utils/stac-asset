@@ -4,6 +4,7 @@ The core class is :py:class:`Client`, which defines a common interface.
 Other clients inherit from :py:class:`Client` to implement any custom behavior.
 """
 
+import json
 from typing import AsyncIterator, Optional
 
 from pystac import Asset, Item
@@ -28,9 +29,9 @@ async def open_href(href: str) -> AsyncIterator[bytes]:
     Returns:
         AsyncIterator[bytes]: An iterator over the file's bytes.
     """
-    client = await guess_client(href)
-    async for chunk in client.open_href(href):
-        yield chunk
+    async with await guess_client(href) as client:
+        async for chunk in client.open_href(href):
+            yield chunk
 
 
 async def open_asset(asset: Asset) -> AsyncIterator[bytes]:
@@ -42,9 +43,9 @@ async def open_asset(asset: Asset) -> AsyncIterator[bytes]:
     Returns:
         AsyncIterator[bytes]: An iterator over the Asset's bytes.
     """
-    client = await guess_client(asset.href)
-    async for chunk in client.open_href(asset.href):
-        yield chunk
+    async with await guess_client(asset.href) as client:
+        async for chunk in client.open_href(asset.href):
+            yield chunk
 
 
 async def download_href(href: str, path: PathLikeObject) -> None:
@@ -56,8 +57,8 @@ async def download_href(href: str, path: PathLikeObject) -> None:
         href: The href to download.
         path: The location of the downloaded file.
     """
-    client = await guess_client(href)
-    await client.download_href(href, path)
+    async with await guess_client(href) as client:
+        await client.download_href(href, path)
 
 
 async def download_asset(
@@ -78,8 +79,8 @@ async def download_asset(
         make_directory: If true, create the directory (with exists_ok=True)
             before downloading.
     """
-    client = await guess_client(asset.href)
-    await client.download_asset(asset, directory, make_directory, asset_file_name)
+    async with await guess_client(asset.href) as client:
+        await client.download_asset(asset, directory, make_directory, asset_file_name)
 
 
 async def download_item(
@@ -101,10 +102,56 @@ async def download_item(
     """
     if not item.assets:
         raise ValueError("cannot guess a client if an item does not have any assets")
-    client = await guess_client(next(iter(item.assets.values())).href)
-    await client.download_item(
+    async with await guess_client(next(iter(item.assets.values())).href) as client:
+        await client.download_item(
+            item, directory, make_directory, item_file_name, include_self_link
+        )
+
+
+async def download_item_from_href(
+    href: str,
+    directory: PathLikeObject,
+    make_directory: bool = False,
+    item_file_name: Optional[str] = None,
+    include_self_link: bool = True,
+) -> None:
+    """Downloads an item from an href, then downloads its assets to the local
+    filesystem.
+
+    Args:
+        href: The href to the :py:class:`pystac.Item`.
+        directory: The output directory that will hold the items and assets.
+        make_directory: Whether to create the directory if it doesn't exist.
+        item_file_name: The file name of the output item. If not provided, will
+            default to the item's id with a .json extension.
+        include_self_link: Whether to include a self link in the output item.
+    """
+    data = json.loads(await read_file(href))
+    item = Item.from_dict(data)
+    item.set_self_href(href)
+    await download_item(
         item, directory, make_directory, item_file_name, include_self_link
     )
+
+
+async def read_file(
+    href: str,
+) -> bytes:
+    """Reads all data from an href and returns the bytes.
+
+    Uses :py:func:`guess_client` to determine the best client to use to read the bytes.
+
+    Args:
+        href: The href to the :py:class:`pystac.Item`.
+
+    Returns:
+        bytes: The data in the file
+    """
+    async with await guess_client(href) as client:
+        data = b""
+        async for chunk in client.open_href(href):
+            data += chunk
+        return data
 
 
 async def guess_client(href: str) -> Client:
@@ -113,22 +160,23 @@ async def guess_client(href: str) -> Client:
     Args:
         href: The input href.
 
-    Returns:
+    Yields:
         Client: The most appropriate client for the href, maybe.
     """
     url = URL(href)
     if not url.host:
-        return FilesystemClient()
-    if url.host.endswith("blob.core.windows.net"):
-        return await PlanetaryComputerClient.default()
-    if url.host == "https://landsatlook.usgs.gov":
-        return await UsgsErosClient.default()
+        client_type: type[Client] = FilesystemClient
+    elif url.host.endswith("blob.core.windows.net"):
+        client_type = PlanetaryComputerClient
+    elif url.host == "https://landsatlook.usgs.gov":
+        client_type = UsgsErosClient
     elif url.scheme == "http" or url.scheme == "https":
-        return await HttpClient.default()
+        client_type = HttpClient
     elif url.scheme == "s3":
-        return S3Client()
+        client_type = S3Client
     else:
-        return FilesystemClient()
+        client_type = FilesystemClient
+    return await client_type.default()
 
 
 __all__ = [
@@ -140,6 +188,9 @@ __all__ = [
     "download_asset",
     "download_href",
     "download_item",
+    "download_item_from_href",
+    "guess_client",
     "open_asset",
     "open_href",
+    "read_file",
 ]

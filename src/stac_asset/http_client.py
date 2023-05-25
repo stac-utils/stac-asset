@@ -1,4 +1,7 @@
-from typing import AsyncIterator, TypeVar
+from __future__ import annotations
+
+from types import TracebackType
+from typing import AsyncIterator, Optional, TypeVar
 
 from aiohttp import ClientSession
 from yarl import URL
@@ -33,3 +36,15 @@ class HttpClient(Client):
             response.raise_for_status()
             async for chunk, _ in response.content.iter_chunks():
                 yield chunk
+
+    async def __aenter__(self) -> HttpClient:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        await self.session.close()
+        return await super().__aexit__(exc_type, exc_val, exc_tb)

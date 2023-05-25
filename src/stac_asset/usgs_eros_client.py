@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from types import TracebackType
 from typing import Optional
 
 from aiohttp import ClientSession
@@ -65,3 +66,15 @@ class UsgsErosClient(HttpClient):
                 headers={"X-Auth-Token": api_key},
             )
         )
+
+    async def __aenter__(self) -> UsgsErosClient:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        await self.session.close()
+        return await super().__aexit__(exc_type, exc_val, exc_tb)

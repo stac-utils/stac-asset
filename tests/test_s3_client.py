@@ -16,6 +16,6 @@ def href() -> str:
 
 
 async def test_download(tmp_path: Path, href: str) -> None:
-    client = S3Client()
-    await client.download_href(href, tmp_path / "out.jpg")
-    assert os.path.getsize(tmp_path / "out.jpg") == 6060
+    async with await S3Client.default() as client:
+        await client.download_href(href, tmp_path / "out.jpg")
+        assert os.path.getsize(tmp_path / "out.jpg") == 6060

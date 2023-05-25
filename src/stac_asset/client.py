@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import json
 import os.path
 from abc import ABC, abstractmethod
 from asyncio import TaskGroup
 from pathlib import Path
+from types import TracebackType
 from typing import AsyncIterator, Optional, TypeVar
 
 import aiofiles
@@ -25,6 +28,9 @@ class Client(ABC):
 
         We can't just use the initializer, because some clients need to do
         asynchronous actions during their setup.
+
+        Returns:
+            T: The default version of this Client.
         """
         return cls()
 
@@ -146,3 +152,14 @@ class Client(ABC):
             if link.is_hierarchical():
                 link.target = pystac.utils.make_absolute_href(link.href, item.self_href)
         item.save_object(include_self_link=include_self_link, dest_href=str(item_path))
+
+    async def __aenter__(self) -> Client:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        return None

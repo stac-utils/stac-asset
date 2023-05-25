@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `stac_asset.download_item_from_href`
+
+### Fixed
+
+- Cleaning up connections is easier thanks to `__aexit__` implementations.
+
 ## [0.0.1] - 2023-05-24
 
 Initial release.

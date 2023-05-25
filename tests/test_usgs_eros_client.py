@@ -24,6 +24,6 @@ def href() -> str:
 
 
 async def test_download(tmp_path: Path, href: str) -> None:
-    client = await UsgsErosClient.login()
-    await client.download_href(href, tmp_path / "out.jpg")
-    assert os.path.getsize(tmp_path / "out.jpg") == 18517
+    async with await UsgsErosClient.login() as client:
+        await client.download_href(href, tmp_path / "out.jpg")
+        assert os.path.getsize(tmp_path / "out.jpg") == 18517

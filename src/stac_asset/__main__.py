@@ -1,8 +1,6 @@
 import asyncio
 import sys
 
-from pystac import Item
-
 import stac_asset
 
 if len(sys.argv) != 3:
@@ -13,5 +11,6 @@ if len(sys.argv) != 3:
     )
     sys.exit(1)
 
-item = Item.from_file(sys.argv[1])
-asyncio.run(stac_asset.download_item(item, sys.argv[2], make_directory=True))
+asyncio.run(
+    stac_asset.download_item_from_href(sys.argv[1], sys.argv[2], make_directory=True)
+)

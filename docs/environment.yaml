@@ -1,4 +1,4 @@
-name: antimeridian-docs
+name: stac-async-docs
 channels:
   - conda-forge
 dependencies:

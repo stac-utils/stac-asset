@@ -1,4 +1,7 @@
-from typing import AsyncIterator
+from __future__ import annotations
+
+from types import TracebackType
+from typing import AsyncIterator, Optional
 
 import aiofiles
 from yarl import URL
@@ -21,3 +24,14 @@ class FilesystemClient(Client):
         async with aiofiles.open(url.path, "rb") as f:
             async for chunk in f:
                 yield chunk
+
+    async def __aenter__(self) -> FilesystemClient:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        return None
