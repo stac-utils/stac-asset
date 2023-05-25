@@ -18,10 +18,10 @@ Download a STAC [Item](https://github.com/radiantearth/stac-spec/blob/master/ite
 Each Asset's href will be updated to point to the local file.
 
 ```python
-import stac_async
+import stac_asset
 
 href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
-await stac_async.download_item_from_href(href, ".")
+await stac_asset.download_item_from_href(href, ".")
 ```
 
 To download an item using the command line:

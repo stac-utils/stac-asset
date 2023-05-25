@@ -23,17 +23,17 @@ This will download the item, with all of its assets, to the directory you specif
 
 .. code-block:: python
 
-   import stac_async
+   import stac_asset
 
    href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
-   await stac_async.download_item_from_href(href, ".")
+   await stac_asset.download_item_from_href(href, ".")
 
 If you'd like to do multiple downloads, it's more efficient to re-use the same client.
 Clients sometimes need to do cleanup after they're done, so they provide an asynchronous context manager interface to handle those cleanups:
 
 .. code-block:: python
 
-   from stac_async import HttpClient
+   from stac_asset import HttpClient
 
    async with await HttpClient.default() as client:
       await client.download_item(item, ".")
