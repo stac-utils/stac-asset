@@ -8,6 +8,7 @@ thanks Tom Augspurger!
 from __future__ import annotations
 
 import datetime
+from asyncio import Lock
 from datetime import timezone
 from types import TracebackType
 from typing import Any, AsyncIterator, Dict, Optional
@@ -51,6 +52,7 @@ class _Token:
 
 class PlanetaryComputerClient(HttpClient):
     _cache: Dict[URL, _Token]
+    _cache_lock: Lock
     token_request_url: URL
 
     def __init__(
@@ -60,6 +62,7 @@ class PlanetaryComputerClient(HttpClient):
     ) -> None:
         super().__init__(session)
         self._cache = dict()
+        self._cache_lock = Lock()
         self.sas_token_endpoint = URL(sas_token_endpoint)
 
     async def open_url(self, url: URL) -> AsyncIterator[bytes]:
@@ -88,12 +91,13 @@ class PlanetaryComputerClient(HttpClient):
 
     async def _get_token(self, account_name: str, container_name: str) -> str:
         url = self.sas_token_endpoint.joinpath(account_name, container_name)
-        token = self._cache.get(url)
-        if token is None or token.ttl() < 60:
-            response = await self.session.get(url)
-            response.raise_for_status()
-            token = _Token.from_dict(await response.json())
-            self._cache[url] = token
+        async with self._cache_lock:
+            token = self._cache.get(url)
+            if token is None or token.ttl() < 60:
+                response = await self.session.get(url)
+                response.raise_for_status()
+                token = _Token.from_dict(await response.json())
+                self._cache[url] = token
         return str(token)
 
     async def __aenter__(self) -> PlanetaryComputerClient:
