@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 import os.path
+import warnings
 from abc import ABC, abstractmethod
-from asyncio import TaskGroup
 from pathlib import Path
 from types import TracebackType
 from typing import AsyncIterator, Optional, TypeVar
@@ -12,6 +13,7 @@ import pystac.utils
 from pystac import Item
 from yarl import URL
 
+from .errors import AssetDownloadException, AssetDownloadWarning
 from .types import PathLikeObject
 
 T = TypeVar("T", bound="Client")
@@ -65,8 +67,8 @@ class Client(ABC):
             href: The input href
             path: The ouput file path
         """
-        async with aiofiles.open(path, mode="wb") as f:
-            async for chunk in self.open_href(href):
+        async for chunk in self.open_href(href):
+            async with aiofiles.open(path, mode="wb") as f:
                 await f.write(chunk)
 
     async def download_item(
@@ -93,17 +95,31 @@ class Client(ABC):
         if item_file_name is None:
             item_file_name = f"{item.id}.json"
         item_path = directory_as_path / item_file_name
-        async with TaskGroup() as task_group:
-            for key, asset in item.assets.items():
-                # TODO allow different layout schemes
-                path = directory_as_path / os.path.basename(asset.href)
-                absolute_href = asset.get_absolute_href()
-                if absolute_href is None:
-                    raise ValueError(f"asset '{key}' does not have an absolute href")
-                task_group.create_task(self.download_href(absolute_href, path))
-                item.assets[key].href = pystac.utils.make_relative_href(
-                    str(path), str(item_path)
-                )
+
+        async def download_asset(key: str, href: str, path: Path) -> None:
+            try:
+                await self.download_href(href, path)
+            except Exception as e:
+                raise AssetDownloadException(key, href, e)
+
+        tasks = list()
+        for key, asset in item.assets.items():
+            # TODO allow different layout schemes
+            path = directory_as_path / os.path.basename(URL(asset.href).path)
+            absolute_href = asset.get_absolute_href()
+            if absolute_href is None:
+                raise ValueError(f"asset '{key}' does not have an absolute href")
+            tasks.append(asyncio.create_task(download_asset(key, absolute_href, path)))
+            item.assets[key].href = pystac.utils.make_relative_href(
+                str(path), str(item_path)
+            )
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for result in results:
+            if isinstance(result, AssetDownloadException):
+                warnings.warn(str(result), AssetDownloadWarning)
+                del item.assets[result.key]
+
         new_links = list()
         for link in item.links:
             link_href = link.get_href(transform_href=False)
@@ -111,6 +127,7 @@ class Client(ABC):
                 link.target = pystac.utils.make_absolute_href(link.href, item.self_href)
                 new_links.append(link)
         item.links = new_links
+
         item.set_self_href(str(item_path))
         item.save_object(include_self_link=include_self_link)
 
