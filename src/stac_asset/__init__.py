@@ -180,6 +180,7 @@ async def guess_client(href: str) -> Client:
 
 
 __all__ = [
+    "Client",
     "FilesystemClient",
     "HttpClient",
     "PlanetaryComputerClient",
