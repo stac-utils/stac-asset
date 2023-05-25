@@ -88,7 +88,7 @@ As determined during a meeting at the Element 84 offices (formerly Azavea office
 Use Github [issues](https://github.com/gadomski/stac-asset/issues) to report bugs and request new features.
 Use Github [pull requests](https://github.com/gadomski/stac-asset/pulls) to fix bugs and propose new features.
 
-### Developing
+## Developing
 
 Clone, install with the dev dependencies, and install **pre-commit**:
 
@@ -99,7 +99,7 @@ pip install '.[dev]'
 pre-commit install
 ```
 
-#### Testing
+### Testing
 
 All network-touching tests are disabled by default, because we can't use [pytest-vcr](https://pytest-vcr.readthedocs.io/en/latest/) (<https://github.com/kevin1024/vcrpy/issues/597>), and repeatedly hitting the network during testing and CI is bad behavior.
 To enable network-touching tests:
@@ -112,7 +112,7 @@ Some tests are client-specific and need your environment to be configured correc
 See [each client's documentation](#clients) for instructions on setting up your environment for each client.
 If your environment is not configured for a certain client, that client's tests are skipped.
 
-#### Docs
+### Docs
 
 Install the documentation dependencies:
 
