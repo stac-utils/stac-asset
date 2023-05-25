@@ -38,7 +38,7 @@ Some clients require some setup before use; they are called out in this table, a
 | Name | Description | Notes |
 | -- | -- | -- |
 | `HttpClient` | Simple HTTP client without any authentication | |
-| `S3Client` | Simple S3 client without any authentication | |
+| `S3Client` | Simple S3 client | Use `requester_pays=True` in the client initializer to enable access to requester pays buckets, e.g. USGS landsat's public AWS archive |
 | `FilesystemClient` | Moves files from place to place on a local filesystem | Mostly used for testing |
 | `PlanetaryComputerClient` | Signs urls with the [Planetary Computer Authentication API](https://planetarycomputer.microsoft.com/docs/reference/sas/) | No additional setup required, works out of the box |
 | `UsgsErosClient` | Uses a token-based authentication workflow to download data, e.g. landsat, from USGS EROS | Requires creation of a personal access token, see section below |
@@ -68,7 +68,7 @@ As determined during a meeting at the Element 84 offices (formerly Azavea office
 - [ ] Protocols:
   - [x] http
   - [x] s3
-    - [ ] requestor pays
+    - [x] requestor pays
     - [ ] custom endpoint
   - [x] custom authentication
     - [x] Planetary Computer

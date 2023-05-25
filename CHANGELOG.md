@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - `stac_asset.download_item_from_href`
+- Requester-pays support to the s3 client
 
 ### Fixed
 

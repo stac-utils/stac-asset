@@ -21,22 +21,38 @@ class S3Client(Client):
     region_name: str
     """The region that all clients will be rooted in."""
 
-    def __init__(self, region_name: str = DEFAULT_REGION_NAME) -> None:
+    requester_pays: bool
+    """If True, add `--request-payer requester` to all requests."""
+
+    def __init__(
+        self, region_name: str = DEFAULT_REGION_NAME, requester_pays: bool = False
+    ) -> None:
         super().__init__()
         self.session = aiobotocore.session.get_session()
         self.region_name = region_name
+        self.requester_pays = requester_pays
 
     async def open_url(self, url: URL) -> AsyncIterator[bytes]:
         if url.scheme != "s3":
             raise ValueError(f"only s3 urls are allowed: {url}")
+        if self.requester_pays:
+            config = Config()
+        else:
+            config = Config(signature_version=UNSIGNED)
         async with self.session.create_client(
             "s3",
             region_name=self.region_name,
-            config=Config(signature_version=UNSIGNED),
+            config=config,
         ) as client:
             bucket = url.host
             key = url.path[1:]
-            response = await client.get_object(Bucket=bucket, Key=key)
+            params = {
+                "Bucket": bucket,
+                "Key": key,
+            }
+            if self.requester_pays:
+                params["RequestPayer"] = "requester"
+            response = await client.get_object(**params)
             async for chunk in response["Body"]:
                 yield chunk
 
