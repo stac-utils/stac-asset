@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - All relative hrefs are made absolute on item download
 
+### Removed
+
+- `open_asset` and `download_asset`
+
 ## [0.0.2] - 2023-05-25
 
 ### Added

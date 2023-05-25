@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import os.path
 from abc import ABC, abstractmethod
 from asyncio import TaskGroup
@@ -10,10 +9,9 @@ from typing import AsyncIterator, Optional, TypeVar
 
 import aiofiles
 import pystac.utils
-from pystac import Asset, Item
+from pystac import Item
 from yarl import URL
 
-from .constants import DEFAULT_ASSET_FILE_NAME
 from .types import PathLikeObject
 
 T = TypeVar("T", bound="Client")
@@ -60,18 +58,6 @@ class Client(ABC):
         async for chunk in self.open_url(URL(href)):
             yield chunk
 
-    async def open_asset(self, asset: Asset) -> AsyncIterator[bytes]:
-        """Opens an asset and yields an iterator over its bytes.
-
-        Args:
-            asset: The input asset
-
-        Yields:
-            AsyncIterator[bytes]: An iterator over chunks of the read file
-        """
-        async for chunk in self.open_href(asset.href):
-            yield chunk
-
     async def download_href(self, href: str, path: PathLikeObject) -> None:
         """Downloads a file to the local filesystem.
 
@@ -82,36 +68,6 @@ class Client(ABC):
         async with aiofiles.open(path, mode="wb") as f:
             async for chunk in self.open_href(href):
                 await f.write(chunk)
-
-    async def download_asset(
-        self,
-        asset: Asset,
-        directory: PathLikeObject,
-        make_directory: bool = False,
-        asset_file_name: str = DEFAULT_ASSET_FILE_NAME,
-    ) -> None:
-        """Downloads a STAC Asset into the given directory.
-
-        The file at the asset's href is downloaded into the directory. The asset is
-        also downloaded into the directory, and its href is updated to point to the
-        local file.
-
-        Args:
-            asset: The Asset to download.
-            directory: The location of the downloaded file and Asset.
-            make_directory: If true, create the directory (with exists_ok=True)
-                before downloading.
-            asset_file_name: The name of the Asset json file in the directory.
-        """
-        directory_as_path = Path(directory)
-        if make_directory:
-            directory_as_path.mkdir(exist_ok=True)
-        path = directory_as_path / os.path.basename(asset.href)
-        await self.download_href(asset.href, path)
-        asset.href = str(path)
-        asset_as_str = json.dumps(asset.to_dict())
-        async with aiofiles.open(directory_as_path / asset_file_name, "w") as f:
-            await f.write(asset_as_str)
 
     async def download_item(
         self,
