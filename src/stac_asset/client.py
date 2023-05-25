@@ -148,10 +148,15 @@ class Client(ABC):
                 item.assets[key].href = pystac.utils.make_relative_href(
                     str(path), str(item_path)
                 )
+        new_links = list()
         for link in item.links:
-            if link.is_hierarchical():
+            link_href = link.get_href(transform_href=False)
+            if link_href and not pystac.utils.is_absolute_href(link_href):
                 link.target = pystac.utils.make_absolute_href(link.href, item.self_href)
-        item.save_object(include_self_link=include_self_link, dest_href=str(item_path))
+                new_links.append(link)
+        item.links = new_links
+        item.set_self_href(str(item_path))
+        item.save_object(include_self_link=include_self_link)
 
     async def __aenter__(self) -> Client:
         return self
