@@ -121,12 +121,6 @@ class Client(ABC):
             item_file_name = f"{item.id}.json"
         item_path = directory_as_path / item_file_name
 
-        async def download_asset(key: str, href: str, path: Path) -> None:
-            try:
-                await self.download_href(href, path)
-            except Exception as e:
-                raise AssetDownloadException(key, href, e)
-
         tasks: list[Task[Any]] = list()
         keys_to_delete = list()
         file_names: dict[str, str] = dict()
@@ -150,7 +144,7 @@ class Client(ABC):
                 keys_to_delete.append(key)
             else:
                 tasks.append(
-                    asyncio.create_task(download_asset(key, absolute_href, path))
+                    asyncio.create_task(self._download_asset(key, absolute_href, path))
                 )
                 item.assets[key].href = pystac.utils.make_relative_href(
                     str(path), str(item_path)
@@ -176,6 +170,12 @@ class Client(ABC):
         item.save_object(include_self_link=include_self_link)
 
         return item
+
+    async def _download_asset(self, key: str, href: str, path: Path) -> None:
+        try:
+            await self.download_href(href, path)
+        except Exception as e:
+            raise AssetDownloadException(key, href, e)
 
     async def __aenter__(self) -> Client:
         return self
