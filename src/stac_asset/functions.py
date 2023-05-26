@@ -46,7 +46,7 @@ async def download_item(
     make_directory: bool = False,
     item_file_name: Optional[str] = None,
     include_self_link: bool = True,
-) -> None:
+) -> Item:
     """Downloads an item to the local filesystem.
 
     Args:
@@ -56,11 +56,14 @@ async def download_item(
         item_file_name: The file name of the output item. If not provided, will
             default to the item's id with a .json extension.
         include_self_link: Whether to include a self link in the output item.
+
+    Returns:
+        Item: The `~pystac.Item`, with the updated asset hrefs.
     """
     if not item.assets:
         raise ValueError("cannot guess a client if an item does not have any assets")
     async with await guess_client(next(iter(item.assets.values())).href) as client:
-        await client.download_item(
+        return await client.download_item(
             item, directory, make_directory, item_file_name, include_self_link
         )
 

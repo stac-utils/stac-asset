@@ -67,8 +67,8 @@ class Client(ABC):
             href: The input href
             path: The ouput file path
         """
-        async for chunk in self.open_href(href):
-            async with aiofiles.open(path, mode="wb") as f:
+        async with aiofiles.open(path, mode="wb") as f:
+            async for chunk in self.open_href(href):
                 await f.write(chunk)
 
     async def download_item(
@@ -78,7 +78,7 @@ class Client(ABC):
         make_directory: bool = False,
         item_file_name: Optional[str] = None,
         include_self_link: bool = True,
-    ) -> None:
+    ) -> Item:
         """Downloads all Assets in an item into the given directory.
 
         Args:
@@ -88,6 +88,9 @@ class Client(ABC):
                 before downloading.
             item_file_name: The name of the Item json file in the directory.
             include_self_link: Whether to include a self link on the item.
+
+        Returns:
+            Item: The `~pystac.Item`, with the updated asset hrefs.
         """
         directory_as_path = Path(directory)
         if make_directory:
@@ -130,6 +133,8 @@ class Client(ABC):
 
         item.set_self_href(str(item_path))
         item.save_object(include_self_link=include_self_link)
+
+        return item
 
     async def __aenter__(self) -> Client:
         return self

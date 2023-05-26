@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Warnings instead of errors if assets are missing
 
+### Changed
+
+- `download_item` returns the modified item
+
 ### Fixed
 
 - All relative hrefs are made absolute on item download
