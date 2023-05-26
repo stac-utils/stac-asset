@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - Warnings instead of errors if assets are missing
+- Ability to save assets with their key as their file name
 
 ### Changed
 

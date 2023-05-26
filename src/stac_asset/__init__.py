@@ -6,7 +6,11 @@ Other clients inherit from :py:class:`Client` to implement any custom behavior.
 
 
 from .client import Client
-from .errors import AssetDownloadException, AssetDownloadWarning
+from .errors import (
+    AssetDownloadException,
+    AssetDownloadWarning,
+    AssetOverwriteException,
+)
 from .filesystem_client import FilesystemClient
 from .functions import (
     download_href,
@@ -19,12 +23,15 @@ from .functions import (
 from .http_client import HttpClient
 from .planetary_computer_client import PlanetaryComputerClient
 from .s3_client import S3Client
+from .strategy import FileNameStrategy
 from .usgs_eros_client import UsgsErosClient
 
 __all__ = [
     "AssetDownloadWarning",
     "AssetDownloadException",
+    "AssetOverwriteException",
     "Client",
+    "FileNameStrategy",
     "FilesystemClient",
     "HttpClient",
     "PlanetaryComputerClient",
