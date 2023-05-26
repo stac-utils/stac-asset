@@ -5,8 +5,12 @@ import pytest
 from stac_asset import EarthdataClient
 
 pytestmark = [
+    pytest.mark.skipif(
+        os.environ.get("EARTHDATA_PAT") is None,
+        reason="EARTHDATA_PAT is not set",
+    ),
     pytest.mark.asyncio,
-    # pytest.mark.network_access,
+    pytest.mark.network_access,
 ]
 
 

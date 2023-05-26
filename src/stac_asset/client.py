@@ -131,6 +131,8 @@ class Client(ABC):
                 file_name = key + Path(asset.href).suffix
             path = directory_as_path / file_name
             if file_name in file_names:
+                for task in tasks:
+                    task.cancel()
                 raise AssetOverwriteException(list(file_names.values()))
             else:
                 file_names[file_name] = str(path)
