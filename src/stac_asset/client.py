@@ -66,16 +66,28 @@ class Client(ABC):
         async for chunk in self.open_url(URL(href)):
             yield chunk
 
-    async def download_href(self, href: str, path: PathLikeObject) -> None:
+    async def download_href(
+        self, href: str, path: PathLikeObject, clean: bool = True
+    ) -> None:
         """Downloads a file to the local filesystem.
 
         Args:
             href: The input href
             path: The ouput file path
+            clean: If an error occurs, delete the output file
         """
-        async with aiofiles.open(path, mode="wb") as f:
-            async for chunk in self.open_href(href):
-                await f.write(chunk)
+        try:
+            async with aiofiles.open(path, mode="wb") as f:
+                async for chunk in self.open_href(href):
+                    await f.write(chunk)
+        except Exception as err:
+            path_as_path = Path(path)
+            if clean and path_as_path.exists():
+                try:
+                    Path(path).unlink()
+                except Exception:
+                    pass
+            raise err
 
     async def download_item(
         self,

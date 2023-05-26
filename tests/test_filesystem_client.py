@@ -38,6 +38,7 @@ async def test_item_download_404(tmp_path: Path, item: Item) -> None:
     async with FilesystemClient() as client:
         with pytest.warns(AssetDownloadWarning):
             await client.download_item(item, tmp_path)
+    assert not (tmp_path / "not-a-file").exists()
 
 
 async def test_item_download_no_directory(tmp_path: Path, item: Item) -> None:

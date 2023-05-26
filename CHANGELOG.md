@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 
 - All relative hrefs are made absolute on item download
+- Clean up local files on download error
 
 ### Removed
 
