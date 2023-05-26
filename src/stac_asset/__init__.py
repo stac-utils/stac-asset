@@ -6,6 +6,7 @@ Other clients inherit from :py:class:`Client` to implement any custom behavior.
 
 
 from .client import Client
+from .earthdata_client import EarthdataClient
 from .errors import (
     AssetDownloadException,
     AssetDownloadWarning,
@@ -31,6 +32,7 @@ __all__ = [
     "AssetDownloadException",
     "AssetOverwriteException",
     "Client",
+    "EarthdataClient",
     "FileNameStrategy",
     "FilesystemClient",
     "HttpClient",

@@ -45,6 +45,7 @@ Some clients require some setup before use; they are called out in this table, a
 | `FilesystemClient` | Moves files from place to place on a local filesystem | Mostly used for testing |
 | `PlanetaryComputerClient` | Signs urls with the [Planetary Computer Authentication API](https://planetarycomputer.microsoft.com/docs/reference/sas/) | No additional setup required, works out of the box |
 | `UsgsErosClient` | Uses a token-based authentication workflow to download data, e.g. landsat, from USGS EROS | Requires creation of a personal access token, see section below |
+| `EarthdataClient` | Uses a token-based authentication to download data, from _some_ Earthdata providers, e.g. DAACs | Requires creation of a personal access token, see section below |
 
 ### S3Client
 
@@ -60,9 +61,19 @@ Here's how to create and use your personal access token with **stac-asset**:
 2. Set two environment variables:
     - `USGS_EROS_USERNAME` to your username (found in the top right of the web UI)
     - `USGS_EROS_PAT` to your personal access token
-3. Use `UsgsErosClient.login()` to create a new client.
+3. Use `UsgsErosClient.default()` to create a new client.
 
-You can also provide your username and password to the `login` method.
+You can also provide your username and password to the `UsgsErosClient.login` method.
+
+#### Earthdata
+
+You'll need a personal access token.
+
+1. Create a new personal access token by going to <https://urs.earthdata.nasa.gov/profile> and then clicking "Generate Token" (you'll need to log in).
+2. Set an enviornment variable named `EARTHDATA_PAT` to your token.
+3. Use `EarthdataClient.default()` to create a new client.
+
+You can also provide your token directly to `EarthdataClient.login()`.
 
 ## Design goals
 
