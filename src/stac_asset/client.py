@@ -84,7 +84,7 @@ class Client(ABC):
             path_as_path = Path(path)
             if clean and path_as_path.exists():
                 try:
-                    Path(path).unlink()
+                    path_as_path.unlink()
                 except Exception:
                     pass
             raise err
