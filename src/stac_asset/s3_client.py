@@ -56,6 +56,9 @@ class S3Client(Client):
             async for chunk in response["Body"]:
                 yield chunk
 
+    async def has_credentials(self) -> bool:
+        return await self.session.get_credentials() is not None
+
     async def __aenter__(self) -> S3Client:
         return self
 

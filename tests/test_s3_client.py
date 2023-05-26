@@ -30,5 +30,7 @@ async def test_download_requester_pays(
     tmp_path: Path, requester_pays_href: str
 ) -> None:
     async with S3Client(requester_pays=True) as client:
+        if not await client.has_credentials():
+            pytest.skip("aws credentials are invalid or not present")
         await client.download_href(requester_pays_href, tmp_path / "out.jpg")
         assert os.path.getsize(tmp_path / "out.jpg") == 6114
