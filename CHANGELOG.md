@@ -6,10 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.0.3] - 2023-05-31
+
 ### Added
 
 - Warnings instead of errors if assets are missing
 - Ability to save assets with their key as their file name
+- Earthdata client
 
 ### Changed
 
@@ -39,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 Initial release.
 
-[unreleased]: https://github.com/gadomski/stac-asset/compare/v0.0.2...HEAD
+[unreleased]: https://github.com/gadomski/stac-asset/compare/v0.0.3...HEAD
+[0.0.3]: https://github.com/gadomski/stac-asset/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/gadomski/stac-asset/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/gadomski/stac-asset/releases/tag/v0.0.1
