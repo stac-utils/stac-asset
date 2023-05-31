@@ -11,7 +11,7 @@ import datetime
 from asyncio import Lock
 from datetime import timezone
 from types import TracebackType
-from typing import Any, AsyncIterator, Dict, Optional
+from typing import Any, AsyncIterator, Dict, Optional, Type
 
 from aiohttp import ClientSession
 from yarl import URL
@@ -26,7 +26,7 @@ class _Token:
     token: str
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> _Token:
+    def from_dict(cls, data: Dict[str, Any]) -> _Token:
         try:
             expiry = datetime.datetime.fromisoformat(data["msft:expiry"])
         except KeyError:
@@ -105,7 +105,7 @@ class PlanetaryComputerClient(HttpClient):
 
     async def __aexit__(
         self,
-        exc_type: Optional[type[BaseException]],
+        exc_type: Optional[Type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:

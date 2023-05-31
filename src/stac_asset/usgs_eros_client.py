@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import os
 from types import TracebackType
-from typing import Optional
+from typing import Optional, Type
 
 from aiohttp import ClientSession
 
@@ -72,7 +72,7 @@ class UsgsErosClient(HttpClient):
 
     async def __aexit__(
         self,
-        exc_type: Optional[type[BaseException]],
+        exc_type: Optional[Type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:

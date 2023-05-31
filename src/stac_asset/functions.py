@@ -1,5 +1,5 @@
 import json
-from typing import AsyncIterator, Optional
+from typing import AsyncIterator, Optional, Type
 
 from pystac import Item
 from yarl import URL
@@ -125,7 +125,7 @@ async def guess_client(href: str) -> Client:
     """
     url = URL(href)
     if not url.host:
-        client_type: type[Client] = FilesystemClient
+        client_type: Type[Client] = FilesystemClient
     elif url.host.endswith("blob.core.windows.net"):
         client_type = PlanetaryComputerClient
     elif url.host == "https://landsatlook.usgs.gov":
