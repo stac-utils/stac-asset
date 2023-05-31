@@ -1,7 +1,14 @@
 from os import PathLike
-from typing import Any, Union
+from typing import TYPE_CHECKING, Union
 
-PathLikeObject = Union[PathLike[Any], str]
+if TYPE_CHECKING:
+    from typing import Any
+
+    _PathLike = PathLike[Any]
+else:
+    _PathLike = PathLike
+
+PathLikeObject = Union[_PathLike, str]
 """An object representing a file system path, except we exclude `bytes` because
 `Path()` doesn't accept `bytes`.
 

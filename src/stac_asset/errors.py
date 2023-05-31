@@ -1,5 +1,8 @@
+from typing import List
+
+
 class AssetOverwriteException(Exception):
-    def __init__(self, hrefs: list[str]) -> None:
+    def __init__(self, hrefs: List[str]) -> None:
         super().__init__(
             f"assets have the same file names and would overwrite each other: {hrefs}"
         )

@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from asyncio import Task
 from pathlib import Path
 from types import TracebackType
-from typing import Any, AsyncIterator, Optional, TypeVar
+from typing import Any, AsyncIterator, Dict, List, Optional, Type, TypeVar
 
 import aiofiles
 import pystac.utils
@@ -29,7 +29,7 @@ class Client(ABC):
     """An abstract base class for all clients."""
 
     @classmethod
-    async def default(cls: type[T]) -> T:
+    async def default(cls: Type[T]) -> T:
         """Creates the default version of this client.
 
         We can't just use the initializer, because some clients need to do
@@ -121,9 +121,9 @@ class Client(ABC):
             item_file_name = f"{item.id}.json"
         item_path = directory_as_path / item_file_name
 
-        tasks: list[Task[Any]] = list()
+        tasks: List[Task[Any]] = list()
         keys_to_delete = list()
-        file_names: dict[str, str] = dict()
+        file_names: Dict[str, str] = dict()
         for key, asset in item.assets.items():
             if asset_file_name_strategy == FileNameStrategy.FILE_NAME:
                 file_name = os.path.basename(URL(asset.href).path)
@@ -184,7 +184,7 @@ class Client(ABC):
 
     async def __aexit__(
         self,
-        exc_type: Optional[type[BaseException]],
+        exc_type: Optional[Type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
