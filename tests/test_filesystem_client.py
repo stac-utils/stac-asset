@@ -6,6 +6,7 @@ from pystac import Asset, Item, ItemCollection
 from stac_asset import (
     AssetDownloadWarning,
     AssetOverwriteException,
+    CantIncludeAndExclude,
     FileNameStrategy,
     FilesystemClient,
 )
@@ -14,13 +15,13 @@ pytestmark = pytest.mark.asyncio
 
 
 @pytest.fixture
-def href() -> str:
+def asset_href() -> str:
     return str(Path(__file__).parent / "data" / "20201211_223832_CS2.jpg")
 
 
-async def test_download(tmp_path: Path, href: str) -> None:
+async def test_download(tmp_path: Path, asset_href: str) -> None:
     async with FilesystemClient() as client:
-        await client.download_href(href, tmp_path / "out.jpg")
+        await client.download_href(asset_href, tmp_path / "out.jpg")
 
     assert os.path.getsize(tmp_path / "out.jpg") == 31367
 
@@ -75,3 +76,24 @@ async def test_item_download_same_file_name(tmp_path: Path, item: Item) -> None:
     async with FilesystemClient() as client:
         with pytest.raises(AssetOverwriteException):
             await client.download_item(item, tmp_path)
+
+
+async def test_include(tmp_path: Path, item: Item) -> None:
+    item.assets["other-data"] = item.assets["data"].clone()
+    async with FilesystemClient() as client:
+        await client.download_item(item, tmp_path, include=["data"])
+
+
+async def test_exclude(tmp_path: Path, item: Item) -> None:
+    item.assets["other-data"] = item.assets["data"].clone()
+    async with FilesystemClient() as client:
+        await client.download_item(item, tmp_path, exclude=["other-data"])
+
+
+async def test_cant_include_and_exclude(tmp_path: Path, item: Item) -> None:
+    item.assets["other-data"] = item.assets["data"].clone()
+    async with FilesystemClient() as client:
+        with pytest.raises(CantIncludeAndExclude):
+            await client.download_item(
+                item, tmp_path, include=["data"], exclude=["other-data"]
+            )

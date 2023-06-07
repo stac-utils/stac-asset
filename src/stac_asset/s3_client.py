@@ -15,6 +15,8 @@ DEFAULT_REGION_NAME = "us-west-2"
 
 
 class S3Client(Client):
+    """A client for interacting with s3 urls."""
+
     session: AioSession
     """The session that will be used for all s3 requests."""
 
@@ -33,6 +35,17 @@ class S3Client(Client):
         self.requester_pays = requester_pays
 
     async def open_url(self, url: URL) -> AsyncIterator[bytes]:
+        """Opens an s3 url and iterates over its bytes.
+
+        Args:
+            url: The url to open
+
+        Yields:
+            AsyncIterator[bytes]: An iterator over the file's bytes
+
+        Raises:
+            ValueError: Raised if the url's scheme is not ``s3``
+        """
         if url.scheme != "s3":
             raise ValueError(f"only s3 urls are allowed: {url}")
         if self.requester_pays:
@@ -57,6 +70,7 @@ class S3Client(Client):
                 yield chunk
 
     async def has_credentials(self) -> bool:
+        """Returns true if the sessions has credentials."""
         return await self.session.get_credentials() is not None
 
     async def __aenter__(self) -> S3Client:

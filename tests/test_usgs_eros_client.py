@@ -16,14 +16,15 @@ pytestmark = [
 
 
 @pytest.fixture
-def href() -> str:
+def asset_href() -> str:
     return (
         "https://landsatlook.usgs.gov/data/collection02/level-2/standard/oli-tirs/2022/004"
         "/004/LC08_L2SP_004004_20220519_20220525_02_T1/LC08_L2SP_004004_20220519_20220525_02_T1_thumb_small.jpeg"
     )
 
 
-async def test_download(tmp_path: Path, href: str) -> None:
+async def test_download(tmp_path: Path, asset_href: str) -> None:
     async with await UsgsErosClient.login() as client:
-        await client.download_href(href, tmp_path / "out.jpg")
-        assert os.path.getsize(tmp_path / "out.jpg") == 18517
+        await client.download_href(asset_href, tmp_path / "out.jpg")
+
+    assert os.path.getsize(tmp_path / "out.jpg") == 18517

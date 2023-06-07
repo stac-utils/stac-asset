@@ -11,11 +11,20 @@ from .http_client import HttpClient
 
 
 class UsgsErosClient(HttpClient):
+    """A client for fetching data from USGS EROS.
+
+    This includes landsat data.
+    """
+
     @classmethod
     async def default(
         cls,
     ) -> UsgsErosClient:
-        """Logs in to the USGS EROS system using your environment variables."""
+        """Logs in to the USGS EROS system using your environment variables.
+
+        Returns:
+            UsgsErosClient: A client that has been logged in to the USGS EROS system
+        """
         return await cls.login()
 
     @classmethod
@@ -24,13 +33,13 @@ class UsgsErosClient(HttpClient):
         username: Optional[str] = None,
         pat: Optional[str] = None,
     ) -> UsgsErosClient:
-        """Retrieves a token from USGS EROS that will be used for all requests.
+        """Logs in to the USGS EROS system and returns a configured client.
 
         Args:
             username: Your USGS EROS username. Will be read from the
-                USGS_EROS_USERNAME environment variable if not provided.
+                ``USGS_EROS_USERNAME`` environment variable if not provided.
             pat: Your USGS EROS personal access token. Will be read from the
-                USGS_EROS_PAT environment variable if not provided.
+                ``USGS_EROS_PAT`` environment variable if not provided.
         """
         if username is None:
             try:

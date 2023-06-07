@@ -1,7 +1,12 @@
-"""Get STAC Assets from various platforms and using different authentication schemes.
+"""Read and download STAC items, item collections, and assets.
 
-The core class is :py:class:`Client`, which defines a common interface.
-Other clients inherit from :py:class:`Client` to implement any custom behavior.
+The core class is :py:class:`Client`, which defines a common interface for
+accessing assets. There are also some free functions, :py:func:`download_item`
+and :py:func:`download_item_collection`, which provide simple one-shot
+interfaces for downloading assets.
+
+Writing items, item collections, and assets is currently unsupported, but is on
+the roadmap.
 """
 
 
@@ -11,15 +16,13 @@ from .errors import (
     AssetDownloadException,
     AssetDownloadWarning,
     AssetOverwriteException,
+    CantIncludeAndExclude,
 )
 from .filesystem_client import FilesystemClient
 from .functions import (
-    download_href,
     download_item,
-    download_item_from_href,
+    download_item_collection,
     guess_client,
-    open_href,
-    read_file,
 )
 from .http_client import HttpClient
 from .planetary_computer_client import PlanetaryComputerClient
@@ -31,6 +34,7 @@ __all__ = [
     "AssetDownloadWarning",
     "AssetDownloadException",
     "AssetOverwriteException",
+    "CantIncludeAndExclude",
     "Client",
     "EarthdataClient",
     "FileNameStrategy",
@@ -39,10 +43,7 @@ __all__ = [
     "PlanetaryComputerClient",
     "S3Client",
     "UsgsErosClient",
-    "download_href",
     "download_item",
-    "download_item_from_href",
+    "download_item_collection",
     "guess_client",
-    "open_href",
-    "read_file",
 ]

@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - `Client.download_item_collection()` ([#20](https://github.com/gadomski/stac-asset/pull/20))
+- Command-line interface ([#22](https://github.com/gadomski/stac-asset/pull/22))
 
 ### Changed
 

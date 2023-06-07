@@ -1,10 +1,3 @@
-"""Open and download assets from Microsoft's Planetary Computer.
-
-Heavily cribbed from
-https://github.com/microsoft/planetary-computer-sdk-for-python/blob/main/planetary_computer/sas.py,
-thanks Tom Augspurger!
-"""
-
 from __future__ import annotations
 
 import datetime
@@ -51,6 +44,13 @@ class _Token:
 
 
 class PlanetaryComputerClient(HttpClient):
+    """Open and download assets from Microsoft's Planetary Computer.
+
+    Heavily cribbed from
+    https://github.com/microsoft/planetary-computer-sdk-for-python/blob/main/planetary_computer/sas.py,
+    thanks Tom Augspurger!
+    """
+
     _cache: Dict[URL, _Token]
     _cache_lock: Lock
     token_request_url: URL
@@ -66,12 +66,25 @@ class PlanetaryComputerClient(HttpClient):
         self.sas_token_endpoint = URL(sas_token_endpoint)
 
     async def open_url(self, url: URL) -> AsyncIterator[bytes]:
-        # We only need to modify the url if:
-        #
-        # - The url is in Azure blob storage
-        # - The url is not in the public thumbnail storage account
-        # - The url hasn't already signed (we check this by seeing if the url
-        #   has SAS-like query parameters)
+        """Opens a url and iterates over its bytes.
+
+        Includes functionality to sign the url with a SAS token fetched from
+        this client's ``sas_token_endpoint``. Tokens are cached on a per-client
+        basis to prevent a large number of requests when fetching many assets.
+
+        Not every URL is modified with a SAS token. We only modify the url if:
+
+        - The url is in Azure blob storage
+        - The url is not in the public thumbnail storage account
+        - The url hasn't already signed (we check this by seeing if the url has
+            SAS-like query parameters)
+
+        Args:
+            url: The url to open
+
+        Yields:
+            AsyncIterator[bytes]: An iterator over the file's bytes
+        """
         if (
             url.host is not None
             and url.host.endswith(".blob.core.windows.net")
