@@ -32,6 +32,17 @@ class HttpClient(Client):
         self.session = session
 
     async def open_url(self, url: URL) -> AsyncIterator[bytes]:
+        """Opens a url with this client's session and iterates over its bytes.
+
+        Args:
+            url: The url to open
+
+        Yields:
+            AsyncIterator[bytes]: An iterator over the file's bytes
+
+        Raises:
+            :py:class:`aiohttp.ClientResponseError`: Raised if the response is not OK
+        """
         async with self.session.get(url) as response:
             response.raise_for_status()
             async for chunk, _ in response.content.iter_chunks():

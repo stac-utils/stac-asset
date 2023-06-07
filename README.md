@@ -12,7 +12,15 @@ Download STAC Assets using a variety of authentication schemes.
 pip install stac-asset
 ```
 
+To use the command-line interface (CLI):
+
+```shell
+pip install 'stac-asset[cli]'
+```
+
 ## Usage
+
+### API
 
 Here's how to download a STAC [Item](https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md) and all of its assets to a local directory using the top-level function.
 The correct [client](#clients) will be guessed from the assets' href.
@@ -25,10 +33,32 @@ href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples
 await stac_asset.download_item_from_href(href, ".")
 ```
 
+### CLI
+
 To download an item using the command line:
 
-```python
-python -m stac_asset https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json .
+```shell
+stac-asset download https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json
+```
+
+To download all assets from the results of a [pystac-client](https://github.com/stac-utils/pystac-client) search, and save the item collection to a file named `item-collection.json`:
+
+```shell
+stac-client search https://planetarycomputer.microsoft.com/api/stac/v1 -c landsat-c2-l2 --max-items 1 | \
+    stac-asset download > item-collection.json
+```
+
+If you'd like to only download certain assets, e.g. a preview image, you can use the include `-i` flag:
+
+```shell
+stac-client search https://planetarycomputer.microsoft.com/api/stac/v1 -c landsat-c2-l2 --max-items 1 | \
+    stac-asset download -i rendered_preview -q
+```
+
+If you do a lot of downloads, you may want an alias:
+
+```shell
+alias stac-download="stac-asset download"
 ```
 
 See [the documentation](https://stac-asset.readthedocs.io/en/stable/index.html) for more examples and complete API documentation.
@@ -92,7 +122,7 @@ As determined during a meeting at the Element 84 offices (formerly Azavea office
   - [x] custom authentication
     - [x] Planetary Computer
     - [x] USGS EROS
-    - [ ] NASA
+    - [x]  NASA
 - [ ] Copy directly from source to destination ("skip local")
 - [ ] Add new assets to an item
 - [ ] Update an existing asset
@@ -100,7 +130,14 @@ As determined during a meeting at the Element 84 offices (formerly Azavea office
 - [ ] Templated paths on download
 - [ ] (possible) Support the file extension's local path
 - [ ] Checksum validation and creation
-- [ ] CLI
+- [x] CLI
+
+## Versioning
+
+This project does its best to adhere to [semantic versioning](https://semver.org/).
+Any module, class, constant, or function that does not begin with a `_` is considered part of our public API for versioning purposes.
+Our command-line interface (CLI) is NOT considered part of our public API, and may change in breaking ways at any time.
+If you need stability promises, use our API.
 
 ## Contributing
 

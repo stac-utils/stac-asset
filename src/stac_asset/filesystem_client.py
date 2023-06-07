@@ -16,6 +16,18 @@ class FilesystemClient(Client):
     """
 
     async def open_url(self, url: URL) -> AsyncIterator[bytes]:
+        """Iterates over data from a local url.
+
+        Args:
+            url: The url to read bytes from
+
+        Yields:
+            AsyncIterator[bytes]: An iterator over the file's bytes.
+
+        Raises:
+            ValueError: Raised if the url has a scheme. This behavior will
+                change if/when we support Windows paths.
+        """
         if url.scheme:
             raise ValueError(
                 "cannot read a file with the filesystem client if it has a url scheme: "

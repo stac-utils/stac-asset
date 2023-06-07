@@ -18,6 +18,7 @@ from .errors import (
     AssetDownloadException,
     AssetDownloadWarning,
     AssetOverwriteException,
+    CantIncludeAndExclude,
 )
 from .strategy import FileNameStrategy
 from .types import PathLikeObject
@@ -32,17 +33,19 @@ class Client(ABC):
     async def default(cls: Type[T]) -> T:
         """Creates the default version of this client.
 
-        We can't just use the initializer, because some clients need to do
-        asynchronous actions during their setup.
+        ``__init__`` isn't enough because some clients need to do asynchronous
+        actions during setup.
 
         Returns:
-            T: The default version of this Client.
+            T: The default version of this Client
         """
         return cls()
 
     @abstractmethod
     async def open_url(self, url: URL) -> AsyncIterator[bytes]:
         """Opens a url and yields an iterator over its bytes.
+
+        This is the core method that all clients must implement.
 
         Args:
             url: The input url
@@ -51,7 +54,7 @@ class Client(ABC):
             AsyncIterator[bytes]: An iterator over chunks of the read file
         """
         # https://github.com/python/mypy/issues/5070
-        if False:
+        if False:  # pragma: no cover
             yield
 
     async def open_href(self, href: str) -> AsyncIterator[bytes]:
@@ -73,8 +76,8 @@ class Client(ABC):
 
         Args:
             href: The input href
-            path: The ouput file path
-            clean: If an error occurs, delete the output file
+            path: The output file path
+            clean: If an error occurs, delete the output file if it exists
         """
         try:
             async with aiofiles.open(path, mode="wb") as f:
@@ -93,33 +96,48 @@ class Client(ABC):
         self,
         item: Item,
         directory: PathLikeObject,
+        *,
         make_directory: bool = False,
+        include: Optional[List[str]] = None,
+        exclude: Optional[List[str]] = None,
         item_file_name: Optional[str] = "item.json",
         include_self_link: bool = True,
         asset_file_name_strategy: FileNameStrategy = FileNameStrategy.FILE_NAME,
     ) -> Item:
-        """Downloads an item and all of its assets into the given directory.
+        """Downloads an item and all of its assets to the given directory.
 
         Args:
-            item: The item to download.
-            directory: The root location of the downloaded files.
-            make_directory: If true, create the output directory before
-                downloading, if it doesn't exist.
+            item: The item to download
+            directory: The root location of the downloaded files
+            make_directory: If true and the directory doesn't exist, create the
+                output directory before downloading
+            include: Asset keys to download. If not provided, all asset keys
+                will be downloaded.
+            exclude: Asset keys to not download. If not provided, all asset keys
+                will be downloaded.
             item_file_name: The name of the item file. If not provided, the item
-                will not be created (only the assets will be downloaded).
+                will not be written to the filesystem (only the assets will be
+                downloaded).
             include_self_link: Whether to include a self link on the item.
                 Unused if ``item_file_name=None``.
-            asset_file_name_strategy: The `FileNameStrategy` to use for naming
-                asset files.
+            asset_file_name_strategy: The :py:class:`FileNameStrategy` to use
+                for naming asset files
 
         Returns:
-            Item: The `~pystac.Item`, with updated asset hrefs.
+            Item: The :py:class:`~pystac.Item`, with updated asset hrefs
+
+        Raises:
+            CantIncludeAndExclude: Raised if both include and exclude are not None.
         """
+        if include is not None and exclude is not None:
+            raise CantIncludeAndExclude()
+
         directory_as_path = Path(directory)
-        if make_directory:
-            directory_as_path.mkdir(exist_ok=True)
-        elif not directory_as_path.exists():
-            raise FileNotFoundError(f"output directory does not exist: {directory}")
+        if not directory_as_path.exists():
+            if make_directory:
+                directory_as_path.mkdir()
+            else:
+                raise FileNotFoundError(f"output directory does not exist: {directory}")
 
         if item_file_name:
             item_path = directory_as_path / item_file_name
@@ -127,9 +145,16 @@ class Client(ABC):
             item_path = None
 
         tasks: List[Task[Any]] = list()
+        # TODO delete behavior should be configurable
         keys_to_delete = list()
         file_names: Dict[str, str] = dict()
-        for key, asset in item.assets.items():
+        for key, asset in (
+            (k, a)
+            for k, a in item.assets.items()
+            if (include is None or k in include)
+            and (exclude is None or k not in exclude)
+        ):
+            # TODO strategy should be auto-guessable
             if asset_file_name_strategy == FileNameStrategy.FILE_NAME:
                 file_name = os.path.basename(URL(asset.href).path)
             elif asset_file_name_strategy == FileNameStrategy.KEY:
@@ -189,28 +214,43 @@ class Client(ABC):
         self,
         item_collection: ItemCollection,
         directory: PathLikeObject,
+        *,
         make_directory: bool = False,
+        include: Optional[List[str]] = None,
+        exclude: Optional[List[str]] = None,
         item_collection_file_name: Optional[str] = "item-collection.json",
         asset_file_name_strategy: FileNameStrategy = FileNameStrategy.FILE_NAME,
     ) -> ItemCollection:
-        """Downloads all assets in an item collection into the given directory.
+        """Downloads an item collection and all of its assets to the given directory.
 
         Args:
-            item_collection: The item collection to download.
-            directory: The root location of the downloaded files.
-            make_directory: If true, create the output directory before
-                downloading, if it does not exist.
+            item_collection: The item collection to download
+            directory: The root location of the downloaded files
+            make_directory: If true and and the directory does not exist, create
+                the output directory before downloading
+            include: Asset keys to download. If not provided, all asset keys
+                will be downloaded.
+            exclude: Asset keys to not download. If not provided, all asset keys
+                will be downloaded.
             item_collection_file_name: The name of the item collection file in the
                 directory. If not provided, the item collection will not be
-                written (only the assets will be downloaded).
-            asset_file_name_strategy: The `FileNameStrategy` to use for naming
-                asset files.
+                written to the filesystem (only the assets will be downloaded).
+            asset_file_name_strategy: The :py:class:`FileNameStrategy` to use
+                for naming asset files
 
         Returns:
-            ItemCollection: The `~pystac.ItemCollection`, with the updated asset hrefs.
+            ItemCollection: The :py:class:`~pystac.ItemCollection`, with the
+                updated asset hrefs
+
+        Raises:
+            CantIncludeAndExclude: Raised if both include and exclude are not None.
         """
         directory_as_path = Path(directory)
-        if make_directory:
+        if not directory_as_path.exists():
+            if make_directory:
+                directory_as_path.mkdir()
+            else:
+                raise FileNotFoundError(f"output directory does not exist: {directory}")
             directory_as_path.mkdir(exist_ok=True)
         tasks: List[Task[Any]] = list()
         for item in item_collection.items:
@@ -222,6 +262,8 @@ class Client(ABC):
                         item=item,
                         directory=item_directory,
                         make_directory=True,
+                        include=include,
+                        exclude=exclude,
                         item_file_name=None,
                         asset_file_name_strategy=asset_file_name_strategy,
                     )

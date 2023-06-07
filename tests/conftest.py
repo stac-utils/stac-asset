@@ -7,19 +7,23 @@ from pytest import Config, Parser
 
 
 @pytest.fixture
-def asset_href() -> str:
-    return (
-        "https://storage.googleapis.com/open-cogs/stac-examples/20201211_223832_CS2.jpg"
-    )
+def asset_path() -> str:
+    return str(Path(__file__).parent / "data" / "20201211_223832_CS2.jpg")
 
 
 @pytest.fixture
-def item() -> Item:
-    return Item.from_file(str(Path(__file__).parent / "data" / "item.json"))
+def item_path() -> Path:
+    return Path(__file__).parent / "data" / "item.json"
+
+
+@pytest.fixture
+def item(item_path: Path) -> Item:
+    return Item.from_file(str(item_path))
 
 
 @pytest.fixture
 def item_collection(item: Item) -> ItemCollection:
+    item.make_asset_hrefs_absolute()
     return ItemCollection([item])
 
 

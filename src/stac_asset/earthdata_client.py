@@ -10,12 +10,29 @@ from .http_client import HttpClient
 
 
 class EarthdataClient(HttpClient):
+    """Access data from https://www.earthdata.nasa.gov/."""
+
     @classmethod
     async def default(cls) -> EarthdataClient:
+        """Logs in to Earthdata and returns the default earthdata client.
+
+        Uses a token stored in the ``EARTHDATA_PAT`` environment variable.
+        """
         return await cls.login()
 
     @classmethod
     async def login(cls, token: Optional[str] = None) -> EarthdataClient:
+        """Logs in to Earthdata and returns a client.
+
+        If token is not provided, it is read from the ``EARTHDATA_PAT``
+        environment variable.
+
+        Args:
+            token: The Earthdata bearer token
+
+        Returns:
+            EarthdataClient: A client configured to use the bearer token
+        """
         if token is None:
             try:
                 token = os.environ["EARTHDATA_PAT"]
