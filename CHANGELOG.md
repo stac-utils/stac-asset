@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `Client.download_item_collection()` ([#20](https://github.com/gadomski/stac-asset/pull/20))
+
+### Changed
+
+- Behavior of the item file name in `Client.download_item()` ([#20](https://github.com/gadomski/stac-asset/pull/20))
+
 ## [0.0.3] - 2023-05-31
 
 ### Added

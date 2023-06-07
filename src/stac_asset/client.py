@@ -11,7 +11,7 @@ from typing import Any, AsyncIterator, Dict, List, Optional, Type, TypeVar
 
 import aiofiles
 import pystac.utils
-from pystac import Item
+from pystac import Item, ItemCollection
 from yarl import URL
 
 from .errors import (
@@ -94,22 +94,26 @@ class Client(ABC):
         item: Item,
         directory: PathLikeObject,
         make_directory: bool = False,
-        item_file_name: Optional[str] = None,
+        item_file_name: Optional[str] = "item.json",
         include_self_link: bool = True,
         asset_file_name_strategy: FileNameStrategy = FileNameStrategy.FILE_NAME,
     ) -> Item:
-        """Downloads all Assets in an item into the given directory.
+        """Downloads an item and all of its assets into the given directory.
 
         Args:
-            item: The Item to download, along with its assets.
-            directory: The location of the downloaded file and Asset.
-            make_directory: If true, create the directory (with exists_ok=True)
-                before downloading.
-            item_file_name: The name of the Item json file in the directory.
+            item: The item to download.
+            directory: The root location of the downloaded files.
+            make_directory: If true, create the output directory before
+                downloading, if it doesn't exist.
+            item_file_name: The name of the item file. If not provided, the item
+                will not be created (only the assets will be downloaded).
             include_self_link: Whether to include a self link on the item.
+                Unused if ``item_file_name=None``.
+            asset_file_name_strategy: The `FileNameStrategy` to use for naming
+                asset files.
 
         Returns:
-            Item: The `~pystac.Item`, with the updated asset hrefs.
+            Item: The `~pystac.Item`, with updated asset hrefs.
         """
         directory_as_path = Path(directory)
         if make_directory:
@@ -117,9 +121,10 @@ class Client(ABC):
         elif not directory_as_path.exists():
             raise FileNotFoundError(f"output directory does not exist: {directory}")
 
-        if item_file_name is None:
-            item_file_name = f"{item.id}.json"
-        item_path = directory_as_path / item_file_name
+        if item_file_name:
+            item_path = directory_as_path / item_file_name
+        else:
+            item_path = None
 
         tasks: List[Task[Any]] = list()
         keys_to_delete = list()
@@ -148,9 +153,13 @@ class Client(ABC):
                 tasks.append(
                     asyncio.create_task(self._download_asset(key, absolute_href, path))
                 )
-                item.assets[key].href = pystac.utils.make_relative_href(
-                    str(path), str(item_path)
-                )
+                if item_path:
+                    item.assets[key].href = pystac.utils.make_relative_href(
+                        str(path), str(item_path)
+                    )
+                else:
+                    item.assets[key].href = str(path.absolute())
+
         for key in keys_to_delete:
             del item.assets[key]
 
@@ -168,10 +177,62 @@ class Client(ABC):
                 new_links.append(link)
         item.links = new_links
 
-        item.set_self_href(str(item_path))
-        item.save_object(include_self_link=include_self_link)
+        if item_path:
+            item.set_self_href(str(item_path))
+            item.save_object(include_self_link=include_self_link)
+        else:
+            item.set_self_href(None)
 
         return item
+
+    async def download_item_collection(
+        self,
+        item_collection: ItemCollection,
+        directory: PathLikeObject,
+        make_directory: bool = False,
+        item_collection_file_name: Optional[str] = "item-collection.json",
+        asset_file_name_strategy: FileNameStrategy = FileNameStrategy.FILE_NAME,
+    ) -> ItemCollection:
+        """Downloads all assets in an item collection into the given directory.
+
+        Args:
+            item_collection: The item collection to download.
+            directory: The root location of the downloaded files.
+            make_directory: If true, create the output directory before
+                downloading, if it does not exist.
+            item_collection_file_name: The name of the item collection file in the
+                directory. If not provided, the item collection will not be
+                written (only the assets will be downloaded).
+            asset_file_name_strategy: The `FileNameStrategy` to use for naming
+                asset files.
+
+        Returns:
+            ItemCollection: The `~pystac.ItemCollection`, with the updated asset hrefs.
+        """
+        directory_as_path = Path(directory)
+        if make_directory:
+            directory_as_path.mkdir(exist_ok=True)
+        tasks: List[Task[Any]] = list()
+        for item in item_collection.items:
+            # TODO what happens if items share ids?
+            item_directory = directory_as_path / item.id
+            tasks.append(
+                asyncio.create_task(
+                    self.download_item(
+                        item=item,
+                        directory=item_directory,
+                        make_directory=True,
+                        item_file_name=None,
+                        asset_file_name_strategy=asset_file_name_strategy,
+                    )
+                )
+            )
+        item_collection.items = await asyncio.gather(*tasks)
+        if item_collection_file_name:
+            item_collection.save_object(
+                dest_href=str(directory_as_path / item_collection_file_name)
+            )
+        return item_collection
 
     async def _download_asset(self, key: str, href: str, path: Path) -> None:
         try:

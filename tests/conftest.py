@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from pystac import Item
+from pystac import Item, ItemCollection
 from pytest import Config, Parser
 
 
@@ -16,6 +16,11 @@ def asset_href() -> str:
 @pytest.fixture
 def item() -> Item:
     return Item.from_file(str(Path(__file__).parent / "data" / "item.json"))
+
+
+@pytest.fixture
+def item_collection(item: Item) -> ItemCollection:
+    return ItemCollection([item])
 
 
 def pytest_addoption(parser: Parser) -> None:
