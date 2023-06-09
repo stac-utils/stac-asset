@@ -17,6 +17,11 @@ def item_path() -> Path:
 
 
 @pytest.fixture
+def data_path() -> Path:
+    return Path(__file__).parent / "data"
+
+
+@pytest.fixture
 def item(item_path: Path) -> Item:
     return Item.from_file(str(item_path))
 

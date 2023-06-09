@@ -4,9 +4,10 @@ from pathlib import Path
 import pytest
 from pystac import Asset, Item, ItemCollection
 from stac_asset import (
-    AssetDownloadWarning,
-    AssetOverwriteException,
+    AssetOverwriteError,
     CantIncludeAndExclude,
+    DownloadError,
+    DownloadWarning,
     FileNameStrategy,
     FilesystemClient,
 )
@@ -48,10 +49,22 @@ async def test_download_item_collection(
 async def test_item_download_404(tmp_path: Path, item: Item) -> None:
     item.assets["missing-asset"] = Asset(href=str(Path(__file__).parent / "not-a-file"))
     async with FilesystemClient() as client:
-        with pytest.warns(AssetDownloadWarning):
+        with pytest.raises(DownloadError):
             await client.download_item(item, tmp_path)
 
     assert not (tmp_path / "not-a-file").exists()
+
+
+async def test_item_download_404_warn(tmp_path: Path, item: Item) -> None:
+    item.assets["missing-asset"] = Asset(href=str(Path(__file__).parent / "not-a-file"))
+    async with FilesystemClient() as client:
+        with pytest.warns(DownloadWarning):
+            item = await client.download_item(
+                item, tmp_path, warn_on_download_error=True
+            )
+
+    assert not (tmp_path / "not-a-file").exists()
+    assert "missing-asset" not in item.assets
 
 
 async def test_item_download_no_directory(tmp_path: Path, item: Item) -> None:
@@ -74,7 +87,7 @@ async def test_item_download_key(tmp_path: Path, item: Item) -> None:
 async def test_item_download_same_file_name(tmp_path: Path, item: Item) -> None:
     item.assets["other-data"] = item.assets["data"].clone()
     async with FilesystemClient() as client:
-        with pytest.raises(AssetOverwriteException):
+        with pytest.raises(AssetOverwriteError):
             await client.download_item(item, tmp_path)
 
 
