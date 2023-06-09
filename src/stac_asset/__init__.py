@@ -13,10 +13,11 @@ the roadmap.
 from .client import Client
 from .earthdata_client import EarthdataClient
 from .errors import (
-    AssetDownloadException,
-    AssetDownloadWarning,
-    AssetOverwriteException,
+    AssetDownloadError,
+    AssetOverwriteError,
     CantIncludeAndExclude,
+    DownloadError,
+    DownloadWarning,
 )
 from .filesystem_client import FilesystemClient
 from .functions import (
@@ -31,11 +32,12 @@ from .strategy import FileNameStrategy
 from .usgs_eros_client import UsgsErosClient
 
 __all__ = [
-    "AssetDownloadWarning",
-    "AssetDownloadException",
-    "AssetOverwriteException",
+    "DownloadWarning",
+    "AssetDownloadError",
+    "AssetOverwriteError",
     "CantIncludeAndExclude",
     "Client",
+    "DownloadError",
     "EarthdataClient",
     "FileNameStrategy",
     "FilesystemClient",

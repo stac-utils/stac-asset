@@ -1,7 +1,10 @@
 import os.path
 from pathlib import Path
+from typing import cast
 
+import pystac
 import pytest
+from pystac import Item
 from stac_asset import S3Client
 
 pytestmark = [
@@ -20,6 +23,16 @@ def requester_pays_asset_href() -> str:
     return "s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2023/092/068/LC09_L2SP_092068_20230522_20230524_02_T2/LC09_L2SP_092068_20230522_20230524_02_T2_thumb_small.jpeg"
 
 
+@pytest.fixture
+def requester_pays_item(data_path: Path) -> Item:
+    return cast(
+        Item,
+        pystac.read_file(
+            str(data_path / "LC09_L2SP_092068_20230607_20230609_02_T1_SR.json")
+        ),
+    )
+
+
 async def test_download(tmp_path: Path, asset_href: str) -> None:
     async with await S3Client.default() as client:
         await client.download_href(asset_href, tmp_path / "out.jpg")
@@ -27,7 +40,7 @@ async def test_download(tmp_path: Path, asset_href: str) -> None:
     assert os.path.getsize(tmp_path / "out.jpg") == 6060
 
 
-async def test_download_requester_pays(
+async def test_download_requester_pays_asset(
     tmp_path: Path, requester_pays_asset_href: str
 ) -> None:
     async with S3Client(requester_pays=True) as client:
@@ -35,3 +48,18 @@ async def test_download_requester_pays(
             pytest.skip("aws credentials are invalid or not present")
         await client.download_href(requester_pays_asset_href, tmp_path / "out.jpg")
         assert os.path.getsize(tmp_path / "out.jpg") == 6114
+
+
+async def test_download_requester_pays_item(
+    tmp_path: Path, requester_pays_item: Item
+) -> None:
+    async with S3Client(requester_pays=True) as client:
+        if not await client.has_credentials():
+            pytest.skip("aws credentials are invalid or not present")
+        await client.download_item(requester_pays_item, tmp_path, include=["thumbnail"])
+        assert (
+            os.path.getsize(
+                tmp_path / "LC09_L2SP_092068_20230607_20230609_02_T1_thumb_small.jpeg"
+            )
+            == 19554
+        )

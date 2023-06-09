@@ -2,6 +2,7 @@ import json
 import os
 from pathlib import Path
 
+import pytest
 import stac_asset._cli
 from click.testing import CliRunner
 from pystac import Item, ItemCollection
@@ -48,3 +49,20 @@ def test_download_item_collection_stdin_stdout(
         ItemCollection.from_dict(json.loads(result.stdout))
     finally:
         os.chdir(previous_working_directory)
+
+
+@pytest.mark.network_access
+def test_download_item_s3_requester_pays(tmp_path: Path, item_path: Path) -> None:
+    runner = CliRunner()
+    result = runner.invoke(
+        stac_asset._cli.cli,
+        [
+            "download",
+            "https://landsatlook.usgs.gov/stac-server/collections/landsat-c2l2-sr/items/LC09_L2SP_092068_20230607_20230609_02_T1_SR",
+            str(tmp_path),
+            "--s3-requester-pays",
+            "-i",
+            "thumbnail",
+        ],
+    )
+    assert result.exit_code == 0

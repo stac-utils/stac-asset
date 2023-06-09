@@ -38,12 +38,29 @@ def cli() -> None:
     is_flag=True,
     show_default=True,
 )
+@click.option(
+    "--s3-requester-pays",
+    help="If downloading via the s3 client, enable requester pays",
+    default=False,
+    is_flag=True,
+    show_default=True,
+)
+@click.option(
+    "-w",
+    "--warn",
+    help="Warn on download errors, instead of erroring",
+    default=False,
+    is_flag=True,
+    show_default=True,
+)
 def download(
     href: Optional[str],
     directory: Optional[str],
     include: List[str],
     exclude: List[str],
-    quiet: bool = False,
+    quiet: bool,
+    s3_requester_pays: bool,
+    warn: bool,
 ) -> None:
     """Download STAC assets from an item or item collection.
 
@@ -87,6 +104,8 @@ def download(
                 include=include or None,
                 exclude=exclude or None,
                 item_file_name=None,
+                s3_requester_pays=s3_requester_pays,
+                warn_on_download_error=warn,
             )
         )
     elif type_ == "FeatureCollection":
@@ -98,6 +117,8 @@ def download(
                 include=include or None,
                 exclude=exclude or None,
                 item_collection_file_name=None,
+                s3_requester_pays=s3_requester_pays,
+                warn_on_download_error=warn,
             )
         )
     else:

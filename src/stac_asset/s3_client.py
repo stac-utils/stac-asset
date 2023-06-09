@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from types import TracebackType
 from typing import AsyncIterator, Optional, Type
 
@@ -7,9 +8,11 @@ import aiobotocore.session
 from aiobotocore.session import AioSession
 from botocore import UNSIGNED
 from botocore.config import Config
+from pystac import Asset
 from yarl import URL
 
 from .client import Client
+from .errors import AssetDownloadError, SchemeError
 
 DEFAULT_REGION_NAME = "us-west-2"
 
@@ -44,10 +47,10 @@ class S3Client(Client):
             AsyncIterator[bytes]: An iterator over the file's bytes
 
         Raises:
-            ValueError: Raised if the url's scheme is not ``s3``
+            SchemeError: Raised if the url's scheme is not ``s3``
         """
         if url.scheme != "s3":
-            raise ValueError(f"only s3 urls are allowed: {url}")
+            raise SchemeError(f"only s3 urls are allowed: {url}")
         if self.requester_pays:
             config = Config()
         else:
@@ -69,6 +72,26 @@ class S3Client(Client):
             async for chunk in response["Body"]:
                 yield chunk
 
+    async def download_asset(self, key: str, asset: Asset, path: Path) -> None:
+        """Downloads an asset to a location.
+
+        If the initial download fails with a scheme error, the client looks for
+        an alternate href and tries again with that.
+
+        Args:
+            key: The asset key
+            asset: The asset
+            path: The destination path
+        """
+        try:
+            return await super().download_asset(key, asset, path)
+        except AssetDownloadError as err:
+            if isinstance(err.err, SchemeError):
+                maybe_asset = self._asset_with_alternate_href(asset)
+                if maybe_asset:
+                    return await super().download_asset(key, maybe_asset, path)
+            raise err
+
     async def has_credentials(self) -> bool:
         """Returns true if the sessions has credentials."""
         return await self.session.get_credentials() is not None
@@ -82,4 +105,24 @@ class S3Client(Client):
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
+        return None
+
+    def _asset_with_alternate_href(self, asset: Asset) -> Optional[Asset]:
+        # TODO some of this logic could be refactored out to be more common, but
+        # not all (e.g. requester pays)
+        alternate = asset.extra_fields.get("alternate")
+        if alternate and isinstance(alternate, dict):
+            s3 = alternate.get("s3")
+            if s3 and isinstance(s3, dict):
+                requester_pays = s3.get("storage:requester_pays", False)
+                href = s3.get("href")
+                platform = s3.get("storage:platform", "AWS")
+                if platform == "AWS" and href:
+                    if requester_pays and not self.requester_pays:
+                        raise ValueError(
+                            f"alternate href {href} requires requester pays, but "
+                            "requester pays is not enabled on this client"
+                        )
+                    asset.href = href
+                    return asset
         return None

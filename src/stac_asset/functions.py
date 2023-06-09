@@ -1,4 +1,4 @@
-from typing import List, Optional, Type
+from typing import List, Optional
 
 from pystac import Item, ItemCollection
 from yarl import URL
@@ -22,6 +22,8 @@ async def download_item(
     exclude: Optional[List[str]] = None,
     item_file_name: Optional[str] = None,
     include_self_link: bool = True,
+    s3_requester_pays: bool = False,
+    warn_on_download_error: bool = False,
 ) -> Item:
     """Downloads an item to the local filesystem.
 
@@ -36,6 +38,9 @@ async def download_item(
         item_file_name: The file name of the output item. If not provided, will
             default to the item's id with a .json extension.
         include_self_link: Whether to include a self link in the output item.
+        s3_requester_pays: If using the s3 client, enable requester pays
+        warn_on_download_error: Instead of raising any errors encountered while
+            downloading, warn and delete the asset from the item
 
     Returns:
         Item: The `~pystac.Item`, with the updated asset hrefs.
@@ -45,7 +50,9 @@ async def download_item(
     """
     if not item.assets:
         raise ValueError("cannot guess a client if an item does not have any assets")
-    async with await guess_client(next(iter(item.assets.values())).href) as client:
+    async with await guess_client(
+        next(iter(item.assets.values())).href, s3_requester_pays=s3_requester_pays
+    ) as client:
         return await client.download_item(
             item=item,
             directory=directory,
@@ -54,6 +61,7 @@ async def download_item(
             exclude=exclude,
             item_file_name=item_file_name,
             include_self_link=include_self_link,
+            warn_on_download_error=warn_on_download_error,
         )
 
 
@@ -66,6 +74,8 @@ async def download_item_collection(
     exclude: Optional[List[str]] = None,
     item_collection_file_name: Optional[str] = "item-collection.json",
     asset_file_name_strategy: FileNameStrategy = FileNameStrategy.FILE_NAME,
+    s3_requester_pays: bool = False,
+    warn_on_download_error: bool = False,
 ) -> ItemCollection:
     """Downloads an item collection to the local filesystem.
 
@@ -80,6 +90,9 @@ async def download_item_collection(
         item_collection_file_name: The name of the item collection JSON file. If
             None, do not write the item collection, only download the assets.
         asset_file_name_strategy: The strategy to use for the asset file names
+        s3_requester_pays: If using the s3 client, enable requester pays
+        warn_on_download_error: Instead of raising any errors encountered while
+            downloading, warn and delete the asset from the item
 
     Returns:
         ItemCollection: The item collection, with updated asset hrefs
@@ -95,7 +108,8 @@ async def download_item_collection(
             "any assets"
         )
     async with await guess_client(
-        next(iter(item_collection.items[0].assets.values())).href
+        next(iter(item_collection.items[0].assets.values())).href,
+        s3_requester_pays=s3_requester_pays,
     ) as client:
         return await client.download_item_collection(
             item_collection,
@@ -105,29 +119,32 @@ async def download_item_collection(
             make_directory=make_directory,
             item_collection_file_name=item_collection_file_name,
             asset_file_name_strategy=asset_file_name_strategy,
+            warn_on_download_error=warn_on_download_error,
         )
 
 
-async def guess_client(href: str) -> Client:
+async def guess_client(href: str, s3_requester_pays: bool = False) -> Client:
     """Guess which client should be used to open the given href.
 
     Args:
         href: The input href.
+        s3_requester_pays: If there's a URL host, use the s3 client and enable
+        requester pays
 
     Yields:
         Client: The most appropriate client for the href, maybe.
     """
     url = URL(href)
+    # TODO enable matching on domain and protocol
     if not url.host:
-        client_type: Type[Client] = FilesystemClient
+        return await FilesystemClient.default()
+    elif url.scheme == "s3" or s3_requester_pays:
+        return S3Client(requester_pays=s3_requester_pays)
     elif url.host.endswith("blob.core.windows.net"):
-        client_type = PlanetaryComputerClient
+        return await PlanetaryComputerClient.default()
     elif url.host == "https://landsatlook.usgs.gov":
-        client_type = UsgsErosClient
+        return await UsgsErosClient.default()
     elif url.scheme == "http" or url.scheme == "https":
-        client_type = HttpClient
-    elif url.scheme == "s3":
-        client_type = S3Client
+        return await HttpClient.default()
     else:
-        client_type = FilesystemClient
-    return await client_type.default()
+        return await FilesystemClient.default()
