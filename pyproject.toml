@@ -1,17 +1,22 @@
 [project]
 name = "stac-asset"
-version = "0.0.3"
-description = "Read, download, and write STAC assets across platforms and providers"
+version = "0.0.4"
+description = "Read and download STAC assets across platforms and providers"
 authors = [
-    {name = "Pete Gadomski", email = "pete.gadomski@gmail.com"}
+    { name = "Pete Gadomski", email = "pete.gadomski@gmail.com" }
 ]
 readme = "README.md"
 keywords = ["stac", "async"]
 classifiers = [
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Development Status :: 3 - Alpha",
 ]
-license = {text = "Apache-2.0"}
+license = { text = "Apache-2.0" }
 requires-python = ">=3.8"
 dependencies = [
     "aiofiles>=23.1.0",
