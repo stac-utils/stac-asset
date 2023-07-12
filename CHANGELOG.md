@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.1.0] - 2023-07-12
+
+First release at the new location, <https://github.com/stac-utils/stac-asset>.
+Used to be <https://github.com/gadomski/stac-asset>.
+
 ## [0.0.4] - 2023-06-09
 
 ### Added
@@ -53,7 +58,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 Initial release.
 
-[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.0.4...HEAD
+[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/stac-utils/stac-asset/compare/v0.0.4...v0.1.0
 [0.0.4]: https://github.com/stac-utils/stac-asset/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/stac-utils/stac-asset/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/stac-utils/stac-asset/compare/v0.0.1...v0.0.2
