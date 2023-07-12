@@ -80,4 +80,5 @@ For example, you could provide your own session to :py:meth:`~stac_asset.HttpCli
    :maxdepth: 2
    :caption: Contents:
 
+   design-goals
    api
