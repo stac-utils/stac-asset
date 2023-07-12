@@ -1,6 +1,6 @@
 [project]
 name = "stac-asset"
-version = "0.1.0"
+version = "0.1.1"
 description = "Read and download STAC assets across platforms and providers"
 authors = [
     { name = "Pete Gadomski", email = "pete.gadomski@gmail.com" }
