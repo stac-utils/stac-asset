@@ -1,6 +1,6 @@
 # stac-asset
 
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/gadomski/stac-asset/ci.yaml?style=for-the-badge)](https://github.com/gadomski/stac-asset/actions/workflows/ci.yaml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/stac-utils/stac-asset/ci.yaml?style=for-the-badge)](https://github.com/stac-utils/stac-asset/actions/workflows/ci.yaml)
 [![Read the Docs](https://img.shields.io/readthedocs/stac-asset?style=for-the-badge)](https://stac-asset.readthedocs.io/en/stable/)
 [![PyPI](https://img.shields.io/pypi/v/stac-asset?style=for-the-badge)](https://pypi.org/project/stac-asset)
 
@@ -114,15 +114,15 @@ If you need stability promises, use our API.
 
 ## Contributing
 
-Use Github [issues](https://github.com/gadomski/stac-asset/issues) to report bugs and request new features.
-Use Github [pull requests](https://github.com/gadomski/stac-asset/pulls) to fix bugs and propose new features.
+Use Github [issues](https://github.com/stac-utils/stac-asset/issues) to report bugs and request new features.
+Use Github [pull requests](https://github.com/stac-utils/stac-asset/pulls) to fix bugs and propose new features.
 
 ## Developing
 
 Clone, install with the dev dependencies, and install **pre-commit**:
 
 ```shell
-git clone git@github.com:gadomski/stac-asset.git
+git clone git@github.com:stac-utils/stac-asset.git
 cd stac-asset
 pip install '.[dev]'
 pre-commit install
@@ -164,4 +164,4 @@ sphinx-autobuild docs docs/_build/html
 
 ## License
 
-[Apache-2.0](https://github.com/gadomski/stac-asset/blob/main/LICENSE)
+[Apache-2.0](https://github.com/stac-utils/stac-asset/blob/main/LICENSE)

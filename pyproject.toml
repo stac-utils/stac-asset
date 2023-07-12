@@ -49,8 +49,8 @@ docs = [
 stac-asset = "stac_asset._cli:cli"
 
 [project.urls]
-repository = "https://github.com/gadomski/stac-asset"
-changelog = "https://github.com/gadomski/stac-asset/blob/main/CHANGELOG.md"
+repository = "https://github.com/stac-utils/stac-asset"
+changelog = "https://github.com/stac-utils/stac-asset/blob/main/CHANGELOG.md"
 
 [tool.mypy]
 strict = true

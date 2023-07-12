@@ -10,12 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
-- `Client.download_item_collection()` ([#20](https://github.com/gadomski/stac-asset/pull/20))
-- Command-line interface ([#22](https://github.com/gadomski/stac-asset/pull/22), [#23](https://github.com/gadomski/stac-asset/pull/23))
+- `Client.download_item_collection()` ([#20](https://github.com/stac-utils/stac-asset/pull/20))
+- Command-line interface ([#22](https://github.com/stac-utils/stac-asset/pull/22), [#23](https://github.com/stac-utils/stac-asset/pull/23))
 
 ### Changed
 
-- Behavior of the item file name in `Client.download_item()` ([#20](https://github.com/gadomski/stac-asset/pull/20))
+- Behavior of the item file name in `Client.download_item()` ([#20](https://github.com/stac-utils/stac-asset/pull/20))
 
 ## [0.0.3] - 2023-05-31
 
@@ -53,8 +53,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 Initial release.
 
-[unreleased]: https://github.com/gadomski/stac-asset/compare/v0.0.4...HEAD
-[0.0.4]: https://github.com/gadomski/stac-asset/compare/v0.0.3...v0.0.4
-[0.0.3]: https://github.com/gadomski/stac-asset/compare/v0.0.2...v0.0.3
-[0.0.2]: https://github.com/gadomski/stac-asset/compare/v0.0.1...v0.0.2
-[0.0.1]: https://github.com/gadomski/stac-asset/releases/tag/v0.0.1
+[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.0.4...HEAD
+[0.0.4]: https://github.com/stac-utils/stac-asset/compare/v0.0.3...v0.0.4
+[0.0.3]: https://github.com/stac-utils/stac-asset/compare/v0.0.2...v0.0.3
+[0.0.2]: https://github.com/stac-utils/stac-asset/compare/v0.0.1...v0.0.2
+[0.0.1]: https://github.com/stac-utils/stac-asset/releases/tag/v0.0.1
