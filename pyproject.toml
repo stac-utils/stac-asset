@@ -1,6 +1,6 @@
 [project]
 name = "stac-asset"
-version = "0.0.4"
+version = "0.1.0"
 description = "Read and download STAC assets across platforms and providers"
 authors = [
     { name = "Pete Gadomski", email = "pete.gadomski@gmail.com" }
@@ -14,7 +14,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
 ]
 license = { text = "Apache-2.0" }
 requires-python = ">=3.8"
