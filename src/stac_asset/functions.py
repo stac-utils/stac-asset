@@ -142,7 +142,7 @@ async def guess_client(href: str, s3_requester_pays: bool = False) -> Client:
         return S3Client(requester_pays=s3_requester_pays)
     elif url.host.endswith("blob.core.windows.net"):
         return await PlanetaryComputerClient.default()
-    elif url.host == "https://landsatlook.usgs.gov":
+    elif url.host == "landsatlook.usgs.gov":
         return await UsgsErosClient.default()
     elif url.scheme == "http" or url.scheme == "https":
         return await HttpClient.default()
