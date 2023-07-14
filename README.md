@@ -76,6 +76,21 @@ Some clients require some setup before use; they are called out in this table, a
 | `PlanetaryComputerClient` | Signs urls with the [Planetary Computer Authentication API](https://planetarycomputer.microsoft.com/docs/reference/sas/) | No additional setup required, works out of the box |
 | `EarthdataClient` | Uses a token-based authentication to download data, from _some_ Earthdata providers, e.g. DAACs | Requires creation of a personal access token, see section below |
 
+#### S3Client
+
+To use the `requester_pays` option, you need to configure your AWS credentials.
+See [the AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) for instructions.
+
+#### Earthdata
+
+You'll need a personal access token.
+
+1. Create a new personal access token by going to <https://urs.earthdata.nasa.gov/profile> and then clicking "Generate Token" (you'll need to log in).
+2. Set an enviornment variable named `EARTHDATA_PAT` to your token.
+3. Use `EarthdataClient.default()` to create a new client.
+
+You can also provide your token directly to `EarthdataClient.login()`.
+
 #### USGS EROS
 
 We used to have a USGS EROS client, but it turns out it was broken, and accessing landsat data via HTTP requires special authorization from USGS.
@@ -91,22 +106,7 @@ stac-client search https://landsatlook.usgs.gov/stac-server \
     | stac-asset download --s3-requester-pays -w > landsat-c2l2-sr.json
 ```
 
-You'll need to set up requester pays, as detailed [below](#s3client).
-
-### S3Client
-
-To use the `requester_pays` option, you need to configure your AWS credentials.
-See [the AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) for instructions.
-
-#### Earthdata
-
-You'll need a personal access token.
-
-1. Create a new personal access token by going to <https://urs.earthdata.nasa.gov/profile> and then clicking "Generate Token" (you'll need to log in).
-2. Set an enviornment variable named `EARTHDATA_PAT` to your token.
-3. Use `EarthdataClient.default()` to create a new client.
-
-You can also provide your token directly to `EarthdataClient.login()`.
+You'll need to set up requester pays, as detailed [above](#s3client).
 
 ## Versioning
 
