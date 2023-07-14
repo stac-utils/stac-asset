@@ -10,7 +10,6 @@ from .planetary_computer_client import PlanetaryComputerClient
 from .s3_client import S3Client
 from .strategy import FileNameStrategy
 from .types import PathLikeObject
-from .usgs_eros_client import UsgsErosClient
 
 
 async def download_item(
@@ -142,8 +141,6 @@ async def guess_client(href: str, s3_requester_pays: bool = False) -> Client:
         return S3Client(requester_pays=s3_requester_pays)
     elif url.host.endswith("blob.core.windows.net"):
         return await PlanetaryComputerClient.default()
-    elif url.host == "landsatlook.usgs.gov":
-        return await UsgsErosClient.default()
     elif url.scheme == "http" or url.scheme == "https":
         return await HttpClient.default()
     else:

@@ -29,7 +29,6 @@ from .http_client import HttpClient
 from .planetary_computer_client import PlanetaryComputerClient
 from .s3_client import S3Client
 from .strategy import FileNameStrategy
-from .usgs_eros_client import UsgsErosClient
 
 __all__ = [
     "DownloadWarning",
@@ -44,7 +43,6 @@ __all__ = [
     "HttpClient",
     "PlanetaryComputerClient",
     "S3Client",
-    "UsgsErosClient",
     "download_item",
     "download_item_collection",
     "guess_client",
