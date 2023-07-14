@@ -28,7 +28,7 @@ dependencies = [
 
 [project.optional-dependencies]
 cli = [
-    "click~=8.1",
+    "click~=8.1.0,<8.1.4",  # typing breaks after v8.1.4, https://github.com/pallets/click/issues/2558 is one example but there's more
 ]
 dev = [
     "black~=23.3",
@@ -54,6 +54,16 @@ changelog = "https://github.com/stac-utils/stac-asset/blob/main/CHANGELOG.md"
 
 [tool.mypy]
 strict = true
+
+[[tool.mypy.overrides]]
+module = [
+    "aiobotocore.session",
+    "aiobotocore",
+    "botocore",
+    "botocore.config"
+]
+ignore_missing_imports = true
+
 
 [tool.ruff]
 select = ["F", "E", "W", "I", "ERA", "RUF", "D"]
