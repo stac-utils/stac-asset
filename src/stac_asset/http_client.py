@@ -43,7 +43,7 @@ class HttpClient(Client):
         Raises:
             :py:class:`aiohttp.ClientResponseError`: Raised if the response is not OK
         """
-        async with self.session.get(url) as response:
+        async with self.session.get(url, allow_redirects=True) as response:
             response.raise_for_status()
             async for chunk, _ in response.content.iter_chunks():
                 yield chunk
