@@ -99,7 +99,7 @@ To access USGS landsat data, you can use `--s3-requester-pays`, e.g.:
 ```shell
 stac-client search https://landsatlook.usgs.gov/stac-server \
         -c landsat-c2l2-sr \
-        --intersects "$(cat longmont.json)" \
+        --intersects '{"type":"Point","coordinates":[-105.1019,40.1672]}' \
         --query "eo:cloud_cover<10" \
         --sortby='-properties.datetime' \
         --max-items 1 \
