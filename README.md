@@ -74,26 +74,29 @@ Some clients require some setup before use; they are called out in this table, a
 | `S3Client` | Simple S3 client | Use `requester_pays=True` in the client initializer to enable access to requester pays buckets, e.g. USGS landsat's public AWS archive |
 | `FilesystemClient` | Moves files from place to place on a local filesystem | Mostly used for testing |
 | `PlanetaryComputerClient` | Signs urls with the [Planetary Computer Authentication API](https://planetarycomputer.microsoft.com/docs/reference/sas/) | No additional setup required, works out of the box |
-| `UsgsErosClient` | Uses a token-based authentication workflow to download data, e.g. landsat, from USGS EROS | Requires creation of a personal access token, see section below |
 | `EarthdataClient` | Uses a token-based authentication to download data, from _some_ Earthdata providers, e.g. DAACs | Requires creation of a personal access token, see section below |
+
+#### USGS EROS
+
+We used to have a USGS EROS client, but it turns out it was broken, and accessing landsat data via HTTP requires special authorization from USGS.
+To access USGS landsat data, you can use `--s3-requester-pays`, e.g.:
+
+```shell
+stac-client search https://landsatlook.usgs.gov/stac-server \
+        -c landsat-c2l2-sr \
+        --intersects "$(cat longmont.json)" \
+        --query "eo:cloud_cover<10" \
+        --sortby='-properties.datetime' \
+        --max-items 1 \
+    | stac-asset download --s3-requester-pays -w > landsat-c2l2-sr.json
+```
+
+You'll need to set up requester pays, as detailed [below](#s3client).
 
 ### S3Client
 
 To use the `requester_pays` option, you need to configure your AWS credentials.
 See [the AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) for instructions.
-
-#### USGS EROS
-
-The USGS EROS system, which hosts landsat data, requires a personal access token to download assets.
-Here's how to create and use your personal access token with **stac-asset**:
-
-1. [Create a new personal access token](https://ers.cr.usgs.gov/password/appgenerate)
-2. Set two environment variables:
-    - `USGS_EROS_USERNAME` to your username (found in the top right of the web UI)
-    - `USGS_EROS_PAT` to your personal access token
-3. Use `UsgsErosClient.default()` to create a new client.
-
-You can also provide your username and password to the `UsgsErosClient.login` method.
 
 #### Earthdata
 

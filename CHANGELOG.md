@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Removed
+
+- USGS EROS client ([#37](https://github.com/stac-utils/stac-asset/pull/37))
+
 ## [0.1.1] - 2023-07-12
 
 ### Fixed
