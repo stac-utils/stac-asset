@@ -28,7 +28,7 @@ dependencies = [
 
 [project.optional-dependencies]
 cli = [
-    "click>=8.1,<8.2",  # typing breaks after v8.1.4, https://github.com/pallets/click/issues/2558 is one example but there's more
+    "click~=8.1.5",
 ]
 dev = [
     "black~=23.3",
