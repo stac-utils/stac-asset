@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Use `Config` instead of standalone arguments ([#45](https://github.com/stac-utils/stac-asset/pull/45))
+- s/CantIncludeAndExclude/CannotIncludeAndExclude/ ([#45](https://github.com/stac-utils/stac-asset/pull/45))
+
 ### Removed
 
 - USGS EROS client ([#37](https://github.com/stac-utils/stac-asset/pull/37))

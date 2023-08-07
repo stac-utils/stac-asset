@@ -3,7 +3,6 @@ import importlib.metadata
 project = "stac-asset"
 copyright = "2023, Pete Gadomski"
 author = "Pete Gadomski"
-release = "v0.0.1"
 version = importlib.metadata.version("stac_asset")
 release = importlib.metadata.version("stac_asset")
 
