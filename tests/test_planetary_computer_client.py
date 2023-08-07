@@ -2,6 +2,8 @@ import os.path
 from pathlib import Path
 
 import pytest
+import stac_asset
+from pystac import Item
 from stac_asset import Config, PlanetaryComputerClient
 
 pytestmark = [
@@ -20,3 +22,12 @@ async def test_download(tmp_path: Path, asset_href: str) -> None:
         await client.download_href(asset_href, tmp_path / "out.tif")
 
     assert os.path.getsize(tmp_path / "out.tif") == 4096
+
+
+async def test_abfs(tmp_path: Path) -> None:
+    href = (
+        "https://planetarycomputer.microsoft.com/api/stac/v1/"
+        "collections/ms-buildings/items/Vatican%20City_2022-07-06"
+    )
+    await stac_asset.download_item(Item.from_file(href), tmp_path)
+    assert os.path.getsize(tmp_path / "Vatican%20City_2022-07-06") == 2260

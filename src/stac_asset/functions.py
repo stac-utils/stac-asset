@@ -62,13 +62,10 @@ async def download_item(
 
     if config.file_name:
         item_path = directory_as_path / config.file_name
+        item.set_self_href(str(item_path))
     else:
-        self_href = item.get_self_href()
-        if self_href:
-            item_path = directory_as_path / os.path.basename(self_href)
-        else:
-            item_path = None
-    item.set_self_href(str(item_path))
+        item_path = None
+        item.set_self_href(None)
 
     file_names: Set[str] = set()
     assets: Dict[str, Tuple[Asset, Path]] = dict()
@@ -222,6 +219,10 @@ def guess_client_class(asset: Asset, config: Config) -> Type[Client]:
                         "invalid alternate asset definition (missing href): "
                         f"{alternate}"
                     )
+    if asset.href.startswith("abfs://") and asset.media_type == "application/x-parquet":
+        storage_account = asset.extra_fields["table:storage_options"]["account_name"]
+        asset.href = f"https://{storage_account}.blob.core.windows.net/{asset.href[7:]}"
+        asset.media_type = None
     return guess_client_class_from_href(asset.href)
 
 
