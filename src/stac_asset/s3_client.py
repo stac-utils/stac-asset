@@ -11,7 +11,12 @@ from yarl import URL
 
 from . import validate
 from .client import Client
-from .config import DEFAULT_S3_REGION_NAME, Config
+from .config import (
+    DEFAULT_S3_MAX_ATTEMPTS,
+    DEFAULT_S3_REGION_NAME,
+    DEFAULT_S3_RETRY_MODE,
+    Config,
+)
 
 
 class S3Client(Client):
@@ -26,6 +31,12 @@ class S3Client(Client):
     requester_pays: bool
     """If True, add `--request-payer requester` to all requests."""
 
+    retry_mode: str
+    """The retry mode."""
+
+    max_attempts: int
+    """The maximum number of attempts."""
+
     @classmethod
     async def from_config(cls, config: Config) -> S3Client:
         """Creates an s3 client from a config.
@@ -37,18 +48,25 @@ class S3Client(Client):
             S3Client: A new s3 client
         """
         return cls(
-            requester_pays=config.s3_requester_pays, region_name=config.s3_region_name
+            requester_pays=config.s3_requester_pays,
+            region_name=config.s3_region_name,
+            retry_mode=config.s3_retry_mode,
+            max_attempts=config.s3_max_attempts,
         )
 
     def __init__(
         self,
         requester_pays: bool = False,
         region_name: str = DEFAULT_S3_REGION_NAME,
+        retry_mode: str = DEFAULT_S3_RETRY_MODE,
+        max_attempts: int = DEFAULT_S3_MAX_ATTEMPTS,
     ) -> None:
         super().__init__()
         self.session = aiobotocore.session.get_session()
         self.region_name = region_name
         self.requester_pays = requester_pays
+        self.retry_mode = retry_mode
+        self.max_attempts = max_attempts
 
     async def open_url(
         self, url: URL, content_type: Optional[str] = None
@@ -65,10 +83,14 @@ class S3Client(Client):
         Raises:
             SchemeError: Raised if the url's scheme is not ``s3``
         """
+        retries = {
+            "max_attempts": self.max_attempts,
+            "mode": self.retry_mode,
+        }
         if self.requester_pays:
-            config = botocore.config.Config()
+            config = botocore.config.Config(retries=retries)
         else:
-            config = botocore.config.Config(signature_version=UNSIGNED)
+            config = botocore.config.Config(signature_version=UNSIGNED, retries=retries)
         async with self.session.create_client(
             "s3",
             region_name=self.region_name,
