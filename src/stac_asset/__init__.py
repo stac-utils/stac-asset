@@ -14,7 +14,6 @@ from .client import Client
 from .config import Config
 from .earthdata_client import EarthdataClient
 from .errors import (
-    AssetDownloadError,
     AssetOverwriteError,
     CannotIncludeAndExclude,
     DownloadError,
@@ -24,7 +23,7 @@ from .filesystem_client import FilesystemClient
 from .functions import (
     download_item,
     download_item_collection,
-    guess_client,
+    guess_client_class,
 )
 from .http_client import HttpClient
 from .planetary_computer_client import PlanetaryComputerClient
@@ -33,7 +32,6 @@ from .strategy import FileNameStrategy
 
 __all__ = [
     "DownloadWarning",
-    "AssetDownloadError",
     "AssetOverwriteError",
     "CannotIncludeAndExclude",
     "Client",
@@ -47,5 +45,5 @@ __all__ = [
     "S3Client",
     "download_item",
     "download_item_collection",
-    "guess_client",
+    "guess_client_class",
 ]

@@ -1,7 +1,5 @@
 from typing import Any, List
 
-from pystac import Asset
-
 
 class AssetOverwriteError(Exception):
     """Raised when an asset would be overwritten during download."""
@@ -10,19 +8,6 @@ class AssetOverwriteError(Exception):
         super().__init__(
             f"assets have the same file names and would overwrite each other: {hrefs}"
         )
-
-
-class AssetDownloadError(Exception):
-    """Raised when an asset was unable to be downloaded."""
-
-    def __init__(self, key: str, asset: Asset, err: Exception) -> None:
-        self.key = key
-        self.asset = asset
-        self.err = err
-        super().__init__(
-            f"error when downloading asset '{key}' with href '{asset.href}': {err}"
-        )
-        self.__cause__ = err
 
 
 class DownloadWarning(Warning):
@@ -47,14 +32,25 @@ class CannotIncludeAndExclude(Exception):
         )
 
 
-class SchemeError(Exception):
-    """Raised if the scheme is inappropriate for the client."""
+class ContentTypeError(Exception):
+    """The expected content type does not match the actual content type."""
+
+    def __init__(self, actual: str, expected: str, *args: Any, **kwargs: Any) -> None:
+        super().__init__(
+            f"the actual content type does not match the expected: actual={actual}, "
+            f"expected={expected}",
+            *args,
+            **kwargs,
+        )
 
 
 class DownloadError(Exception):
     """A collection of exceptions encountered while downloading."""
 
+    exceptions: List[Exception]
+
     def __init__(self, exceptions: List[Exception], *args: Any, **kwargs: Any) -> None:
+        self.exceptions = exceptions
         messages = list()
         for exception in exceptions:
             messages.append(str(exception))

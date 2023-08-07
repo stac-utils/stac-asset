@@ -4,6 +4,7 @@ from typing import cast
 
 import pystac
 import pytest
+import stac_asset
 from pystac import Item
 from stac_asset import Config, S3Client
 
@@ -34,7 +35,7 @@ def requester_pays_item(data_path: Path) -> Item:
 
 
 async def test_download(tmp_path: Path, asset_href: str) -> None:
-    async with await S3Client.default() as client:
+    async with S3Client() as client:
         await client.download_href(asset_href, tmp_path / "out.jpg")
 
     assert os.path.getsize(tmp_path / "out.jpg") == 6060
@@ -53,15 +54,14 @@ async def test_download_requester_pays_asset(
 async def test_download_requester_pays_item(
     tmp_path: Path, requester_pays_item: Item
 ) -> None:
-    async with S3Client(requester_pays=True) as client:
-        if not await client.has_credentials():
-            pytest.skip("aws credentials are invalid or not present")
-        await client.download_item(
-            requester_pays_item, tmp_path, Config(include=["thumbnail"])
+    await stac_asset.download_item(
+        requester_pays_item,
+        tmp_path,
+        Config(include=["thumbnail"], s3_requester_pays=True, alternate_assets=["s3"]),
+    )
+    assert (
+        os.path.getsize(
+            tmp_path / "LC09_L2SP_092068_20230607_20230609_02_T1_thumb_small.jpeg"
         )
-        assert (
-            os.path.getsize(
-                tmp_path / "LC09_L2SP_092068_20230607_20230609_02_T1_thumb_small.jpeg"
-            )
-            == 19554
-        )
+        == 19554
+    )

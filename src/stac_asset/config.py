@@ -7,10 +7,15 @@ from typing import List, Optional
 from .errors import CannotIncludeAndExclude
 from .strategy import FileNameStrategy
 
+DEFAULT_S3_REGION_NAME = "us-west-2"
+
 
 @dataclass
 class Config:
     """Configuration for downloading items and their assets."""
+
+    alternate_assets: List[str] = field(default_factory=list)
+    """Alternate asset keys to prefer, if available."""
 
     asset_file_name_strategy: FileNameStrategy = FileNameStrategy.FILE_NAME
     """The file name strategy to use when downloading assets."""
@@ -41,6 +46,12 @@ class Config:
 
     warn: bool = False
     """When downloading, warn instead of erroring."""
+
+    earthdata_token: Optional[str] = None
+    """A token for logging in to Earthdata."""
+
+    s3_region_name: str = DEFAULT_S3_REGION_NAME
+    """Default s3 region."""
 
     s3_requester_pays: bool = False
     """If using the s3 client, enable requester pays."""

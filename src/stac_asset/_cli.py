@@ -23,6 +23,12 @@ def cli() -> None:
 @cli.command()
 @click.argument("href", required=False)
 @click.argument("directory", required=False)
+@click.option(
+    "-a",
+    "--alternate-assets",
+    help="Alternate asset hrefs to prefer, if available",
+    multiple=True,
+)
 @click.option("-i", "--include", help="Asset keys to include", multiple=True)
 @click.option(
     "-x",
@@ -57,6 +63,7 @@ def cli() -> None:
 def download(
     href: Optional[str],
     directory: Optional[str],
+    alternate_assets: List[str],
     include: List[str],
     exclude: List[str],
     file_name: Optional[str],
@@ -83,20 +90,21 @@ def download(
 
         $ stac-asset download -i asset-key-to-include item.json
     """
-    if href is None or href == "-":
-        input_dict = json.load(sys.stdin)
-    else:
-        input_dict = json.loads(asyncio.run(read_file(href)))
-    if directory is None:
-        directory = os.getcwd()
-
     config = Config(
+        alternate_assets=alternate_assets,
         include=include,
         exclude=exclude,
         file_name=file_name,
         s3_requester_pays=s3_requester_pays,
         warn=warn,
     )
+
+    if href is None or href == "-":
+        input_dict = json.load(sys.stdin)
+    else:
+        input_dict = json.loads(asyncio.run(read_file(href, config)))
+    if directory is None:
+        directory = os.getcwd()
 
     type_ = input_dict.get("type")
     if type_ is None:
@@ -131,10 +139,10 @@ def download(
         json.dump(output.to_dict(transform_hrefs=False), sys.stdout)
 
 
-async def read_file(
-    href: str,
-) -> bytes:
-    async with await functions.guess_client(href) as client:
+async def read_file(href: str, config: Config) -> bytes:
+    async with await functions.guess_client_class_from_href(href).from_config(
+        config
+    ) as client:
         data = b""
         async for chunk in client.open_href(href):
             data += chunk
