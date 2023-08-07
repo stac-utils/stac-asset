@@ -65,7 +65,9 @@ class PlanetaryComputerClient(HttpClient):
         self._cache_lock = Lock()
         self.sas_token_endpoint = URL(sas_token_endpoint)
 
-    async def open_url(self, url: URL) -> AsyncIterator[bytes]:
+    async def open_url(
+        self, url: URL, content_type: Optional[str] = None
+    ) -> AsyncIterator[bytes]:
         """Opens a url and iterates over its bytes.
 
         Includes functionality to sign the url with a SAS token fetched from
@@ -81,6 +83,7 @@ class PlanetaryComputerClient(HttpClient):
 
         Args:
             url: The url to open
+            content_type: The expected content type
 
         Yields:
             AsyncIterator[bytes]: An iterator over the file's bytes
@@ -92,7 +95,7 @@ class PlanetaryComputerClient(HttpClient):
             and not set(url.query) & {"st", "se", "sp"}
         ):
             url = await self._sign(url)
-        async for chunk in super().open_url(url):
+        async for chunk in super().open_url(url, content_type=content_type):
             yield chunk
 
     async def _sign(self, url: URL) -> URL:
@@ -122,5 +125,5 @@ class PlanetaryComputerClient(HttpClient):
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
-        await self.session.close()
+        await self.close()
         return await super().__aexit__(exc_type, exc_val, exc_tb)

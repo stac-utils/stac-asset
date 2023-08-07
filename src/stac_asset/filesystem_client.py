@@ -15,11 +15,15 @@ class FilesystemClient(Client):
     Mostly used for testing, but could be useful in some real-world cases.
     """
 
-    async def open_url(self, url: URL) -> AsyncIterator[bytes]:
+    async def open_url(
+        self, url: URL, content_type: Optional[str] = None
+    ) -> AsyncIterator[bytes]:
         """Iterates over data from a local url.
 
         Args:
             url: The url to read bytes from
+            content_type: The expected content type. Ignored by this client,
+                because filesystems don't have content types.
 
         Yields:
             AsyncIterator[bytes]: An iterator over the file's bytes.

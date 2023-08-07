@@ -6,6 +6,7 @@ from typing import Optional, Type
 
 from aiohttp import ClientSession
 
+from .config import Config
 from .http_client import HttpClient
 
 
@@ -13,12 +14,19 @@ class EarthdataClient(HttpClient):
     """Access data from https://www.earthdata.nasa.gov/."""
 
     @classmethod
-    async def default(cls) -> EarthdataClient:
+    async def from_config(cls, config: Config) -> EarthdataClient:
         """Logs in to Earthdata and returns the default earthdata client.
 
-        Uses a token stored in the ``EARTHDATA_PAT`` environment variable.
+        Uses a token stored in the ``EARTHDATA_PAT`` environment variable, if
+        the token is not provided in the config.
+
+        Args:
+            config: A configuration object.
+
+        Returns:
+            EarthdataClient: A logged-in EarthData client.
         """
-        return await cls.login()
+        return await cls.login(config.earthdata_token)
 
     @classmethod
     async def login(cls, token: Optional[str] = None) -> EarthdataClient:
@@ -53,5 +61,5 @@ class EarthdataClient(HttpClient):
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
-        await self.session.close()
+        await self.close()
         return await super().__aexit__(exc_type, exc_val, exc_tb)

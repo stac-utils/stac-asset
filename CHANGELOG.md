@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Use multiple clients when downloading ([#46](https://github.com/stac-utils/stac-asset/pull/46))
+- `--alternate-assets` option to the CLI ([#46](https://github.com/stac-utils/stac-asset/pull/46))
+- Content-type checking ([#46](https://github.com/stac-utils/stac-asset/pull/46))
+- `Client.from_config` and `Client.close` ([#46](https://github.com/stac-utils/stac-asset/pull/46))
+
 ### Changed
 
 - Use `Config` instead of standalone arguments ([#45](https://github.com/stac-utils/stac-asset/pull/45))
@@ -14,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Removed
 
 - USGS EROS client ([#37](https://github.com/stac-utils/stac-asset/pull/37))
+- `Client.default` ([#46](https://github.com/stac-utils/stac-asset/pull/46))
 
 ## [0.1.1] - 2023-07-12
 

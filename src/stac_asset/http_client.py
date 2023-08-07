@@ -7,6 +7,8 @@ from aiohttp import ClientSession
 from yarl import URL
 
 from .client import Client
+from .config import Config
+from .errors import ContentTypeError
 
 T = TypeVar("T", bound="HttpClient")
 
@@ -22,20 +24,25 @@ class HttpClient(Client):
     """A atiohttp session that will be used for all requests."""
 
     @classmethod
-    async def default(cls: Type[T]) -> T:
+    async def from_config(cls: Type[T], config: Config) -> T:
         """Creates the default http client with a vanilla session object."""
+        # TODO add basic auth
         session = ClientSession()
         return cls(session)
 
-    def __init__(self, session: ClientSession) -> None:
+    def __init__(self, session: ClientSession, check_content_type: bool = True) -> None:
         super().__init__()
         self.session = session
+        self.check_content_type = check_content_type
 
-    async def open_url(self, url: URL) -> AsyncIterator[bytes]:
+    async def open_url(
+        self, url: URL, content_type: Optional[str] = None
+    ) -> AsyncIterator[bytes]:
         """Opens a url with this client's session and iterates over its bytes.
 
         Args:
             url: The url to open
+            content_type: The expected content type
 
         Yields:
             AsyncIterator[bytes]: An iterator over the file's bytes
@@ -45,8 +52,19 @@ class HttpClient(Client):
         """
         async with self.session.get(url, allow_redirects=True) as response:
             response.raise_for_status()
+            if content_type and response.content_type != content_type:
+                raise ContentTypeError(
+                    actual=response.content_type, expected=content_type
+                )
             async for chunk, _ in response.content.iter_chunks():
                 yield chunk
+
+    async def close(self) -> None:
+        """Close this http client.
+
+        Closes the underlying session.
+        """
+        await self.session.close()
 
     async def __aenter__(self) -> HttpClient:
         return self
@@ -57,5 +75,5 @@ class HttpClient(Client):
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
-        await self.session.close()
+        await self.close()
         return await super().__aexit__(exc_type, exc_val, exc_tb)

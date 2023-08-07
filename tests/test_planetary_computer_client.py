@@ -2,7 +2,7 @@ import os.path
 from pathlib import Path
 
 import pytest
-from stac_asset import PlanetaryComputerClient
+from stac_asset import Config, PlanetaryComputerClient
 
 pytestmark = [
     pytest.mark.network_access,
@@ -16,7 +16,7 @@ def asset_href() -> str:
 
 
 async def test_download(tmp_path: Path, asset_href: str) -> None:
-    async with await PlanetaryComputerClient.default() as client:
+    async with await PlanetaryComputerClient.from_config(Config()) as client:
         await client.download_href(asset_href, tmp_path / "out.tif")
 
     assert os.path.getsize(tmp_path / "out.tif") == 4096
