@@ -14,10 +14,10 @@ import pystac.utils
 from pystac import Asset, Item, ItemCollection
 from yarl import URL
 
+from .config import Config
 from .errors import (
     AssetDownloadError,
     AssetOverwriteError,
-    CantIncludeAndExclude,
     DownloadError,
     DownloadWarning,
 )
@@ -123,56 +123,38 @@ class Client(ABC):
         self,
         item: Item,
         directory: PathLikeObject,
-        *,
-        make_directory: bool = False,
-        include: Optional[List[str]] = None,
-        exclude: Optional[List[str]] = None,
-        item_file_name: Optional[str] = "item.json",
-        include_self_link: bool = True,
-        asset_file_name_strategy: FileNameStrategy = FileNameStrategy.FILE_NAME,
-        warn_on_download_error: bool = False,
+        config: Optional[Config] = None,
     ) -> Item:
         """Downloads an item and all of its assets to the given directory.
 
         Args:
             item: The item to download
             directory: The root location of the downloaded files
-            make_directory: If true and the directory doesn't exist, create the
-                output directory before downloading
-            include: Asset keys to download. If not provided, all asset keys
-                will be downloaded.
-            exclude: Asset keys to not download. If not provided, all asset keys
-                will be downloaded.
-            item_file_name: The name of the item file. If not provided, the item
-                will not be written to the filesystem (only the assets will be
-                downloaded).
-            include_self_link: Whether to include a self link on the item.
-                Unused if ``item_file_name=None``.
-            asset_file_name_strategy: The :py:class:`FileNameStrategy` to use
-                for naming asset files
-            warn_on_download_error: Instead of raising any errors encountered
-                while downloading, warn and delete the asset from the item
+            config: Configuration for downloading the item
 
         Returns:
             Item: The :py:class:`~pystac.Item`, with updated asset hrefs
-
-        Raises:
-            CantIncludeAndExclude: Raised if both include and exclude are not None.
         """
-        if include is not None and exclude is not None:
-            raise CantIncludeAndExclude()
+        if config is None:
+            config = Config()
+        else:
+            config.validate()
 
         directory_as_path = Path(directory)
         if not directory_as_path.exists():
-            if make_directory:
+            if config.make_directory:
                 directory_as_path.mkdir()
             else:
                 raise FileNotFoundError(f"output directory does not exist: {directory}")
 
-        if item_file_name:
-            item_path = directory_as_path / item_file_name
+        if config.file_name:
+            item_path = directory_as_path / config.file_name
         else:
-            item_path = None
+            self_href = item.get_self_href()
+            if self_href:
+                item_path = directory_as_path / os.path.basename(self_href)
+            else:
+                item_path = None
 
         tasks: List[Task[Any]] = list()
         file_names: Dict[str, str] = dict()
@@ -180,13 +162,13 @@ class Client(ABC):
         for key, asset in (
             (k, a)
             for k, a in item.assets.items()
-            if (include is None or k in include)
-            and (exclude is None or k not in exclude)
+            if (not config.include or k in config.include)
+            and (not config.exclude or k not in config.exclude)
         ):
             # TODO strategy should be auto-guessable
-            if asset_file_name_strategy == FileNameStrategy.FILE_NAME:
+            if config.asset_file_name_strategy == FileNameStrategy.FILE_NAME:
                 file_name = os.path.basename(URL(asset.href).path)
-            elif asset_file_name_strategy == FileNameStrategy.KEY:
+            elif config.asset_file_name_strategy == FileNameStrategy.KEY:
                 file_name = key + Path(asset.href).suffix
             path = directory_as_path / file_name
             if file_name in file_names:
@@ -212,7 +194,7 @@ class Client(ABC):
             if isinstance(result, Exception):
                 exceptions.append(result)
         if exceptions:
-            if warn_on_download_error:
+            if config.warn:
                 for exception in exceptions:
                     warnings.warn(str(exception), DownloadWarning)
                     if isinstance(exception, AssetDownloadError):
@@ -230,7 +212,7 @@ class Client(ABC):
 
         if item_path:
             item.set_self_href(str(item_path))
-            item.save_object(include_self_link=include_self_link)
+            item.save_object(include_self_link=True)
         else:
             item.set_self_href(None)
 
@@ -240,32 +222,14 @@ class Client(ABC):
         self,
         item_collection: ItemCollection,
         directory: PathLikeObject,
-        *,
-        make_directory: bool = False,
-        include: Optional[List[str]] = None,
-        exclude: Optional[List[str]] = None,
-        item_collection_file_name: Optional[str] = "item-collection.json",
-        asset_file_name_strategy: FileNameStrategy = FileNameStrategy.FILE_NAME,
-        warn_on_download_error: bool = False,
+        config: Optional[Config] = None,
     ) -> ItemCollection:
         """Downloads an item collection and all of its assets to the given directory.
 
         Args:
             item_collection: The item collection to download
             directory: The root location of the downloaded files
-            make_directory: If true and and the directory does not exist, create
-                the output directory before downloading
-            include: Asset keys to download. If not provided, all asset keys
-                will be downloaded.
-            exclude: Asset keys to not download. If not provided, all asset keys
-                will be downloaded.
-            item_collection_file_name: The name of the item collection file in the
-                directory. If not provided, the item collection will not be
-                written to the filesystem (only the assets will be downloaded).
-            asset_file_name_strategy: The :py:class:`FileNameStrategy` to use
-                for naming asset files
-            warn_on_download_error: Instead of raising any errors encountered
-                while downloading, warn and delete the asset from the item
+            config: Configuration for downloading the item
 
         Returns:
             ItemCollection: The :py:class:`~pystac.ItemCollection`, with the
@@ -274,9 +238,13 @@ class Client(ABC):
         Raises:
             CantIncludeAndExclude: Raised if both include and exclude are not None.
         """
+        if config is None:
+            config = Config()
+        # Config validation happens at the download_item level
+
         directory_as_path = Path(directory)
         if not directory_as_path.exists():
-            if make_directory:
+            if config.make_directory:
                 directory_as_path.mkdir()
             else:
                 raise FileNotFoundError(f"output directory does not exist: {directory}")
@@ -285,17 +253,15 @@ class Client(ABC):
         for item in item_collection.items:
             # TODO what happens if items share ids?
             item_directory = directory_as_path / item.id
+            item_config = config.copy()
+            item_config.make_directory = True
+            item_config.file_name = None
             tasks.append(
                 asyncio.create_task(
                     self.download_item(
                         item=item,
                         directory=item_directory,
-                        make_directory=True,
-                        include=include,
-                        exclude=exclude,
-                        item_file_name=None,
-                        asset_file_name_strategy=asset_file_name_strategy,
-                        warn_on_download_error=warn_on_download_error,
+                        config=item_config,
                     )
                 )
             )
@@ -307,9 +273,9 @@ class Client(ABC):
         if exceptions:
             raise DownloadError(exceptions)
         item_collection.items = results
-        if item_collection_file_name:
+        if config.file_name:
             item_collection.save_object(
-                dest_href=str(directory_as_path / item_collection_file_name)
+                dest_href=str(directory_as_path / config.file_name)
             )
         return item_collection
 

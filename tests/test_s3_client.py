@@ -5,7 +5,7 @@ from typing import cast
 import pystac
 import pytest
 from pystac import Item
-from stac_asset import S3Client
+from stac_asset import Config, S3Client
 
 pytestmark = [
     pytest.mark.asyncio,
@@ -56,7 +56,9 @@ async def test_download_requester_pays_item(
     async with S3Client(requester_pays=True) as client:
         if not await client.has_credentials():
             pytest.skip("aws credentials are invalid or not present")
-        await client.download_item(requester_pays_item, tmp_path, include=["thumbnail"])
+        await client.download_item(
+            requester_pays_item, tmp_path, Config(include=["thumbnail"])
+        )
         assert (
             os.path.getsize(
                 tmp_path / "LC09_L2SP_092068_20230607_20230609_02_T1_thumb_small.jpeg"
