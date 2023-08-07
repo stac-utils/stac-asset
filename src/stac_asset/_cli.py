@@ -7,7 +7,7 @@ from typing import List, Optional, Union
 import click
 from pystac import Item, ItemCollection
 
-from . import functions
+from . import Config, functions
 
 
 @click.group()
@@ -30,6 +30,7 @@ def cli() -> None:
     help="Asset keys to exclude (can't be used with include)",
     multiple=True,
 )
+@click.option("-f", "--file-name", help="The output file name")
 @click.option(
     "-q",
     "--quiet",
@@ -58,6 +59,7 @@ def download(
     directory: Optional[str],
     include: List[str],
     exclude: List[str],
+    file_name: Optional[str],
     quiet: bool,
     s3_requester_pays: bool,
     warn: bool,
@@ -88,6 +90,14 @@ def download(
     if directory is None:
         directory = os.getcwd()
 
+    config = Config(
+        include=include,
+        exclude=exclude,
+        file_name=file_name,
+        s3_requester_pays=s3_requester_pays,
+        warn=warn,
+    )
+
     type_ = input_dict.get("type")
     if type_ is None:
         print("ERROR: missing 'type' field on input dictionary", file=sys.stderr)
@@ -101,11 +111,7 @@ def download(
             functions.download_item(
                 item,
                 directory,
-                include=include or None,
-                exclude=exclude or None,
-                item_file_name=None,
-                s3_requester_pays=s3_requester_pays,
-                warn_on_download_error=warn,
+                config=config,
             )
         )
     elif type_ == "FeatureCollection":
@@ -114,11 +120,7 @@ def download(
             functions.download_item_collection(
                 item_collection,
                 directory,
-                include=include or None,
-                exclude=exclude or None,
-                item_collection_file_name=None,
-                s3_requester_pays=s3_requester_pays,
-                warn_on_download_error=warn,
+                config=config,
             )
         )
     else:

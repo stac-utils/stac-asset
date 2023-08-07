@@ -52,7 +52,7 @@ def test_download_item_collection_stdin_stdout(
 
 
 @pytest.mark.network_access
-def test_download_item_s3_requester_pays(tmp_path: Path, item_path: Path) -> None:
+def test_download_item_s3_requester_pays(tmp_path: Path) -> None:
     runner = CliRunner()
     result = runner.invoke(
         stac_asset._cli.cli,

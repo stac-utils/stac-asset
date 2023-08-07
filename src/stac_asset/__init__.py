@@ -11,11 +11,12 @@ the roadmap.
 
 
 from .client import Client
+from .config import Config
 from .earthdata_client import EarthdataClient
 from .errors import (
     AssetDownloadError,
     AssetOverwriteError,
-    CantIncludeAndExclude,
+    CannotIncludeAndExclude,
     DownloadError,
     DownloadWarning,
 )
@@ -34,8 +35,9 @@ __all__ = [
     "DownloadWarning",
     "AssetDownloadError",
     "AssetOverwriteError",
-    "CantIncludeAndExclude",
+    "CannotIncludeAndExclude",
     "Client",
+    "Config",
     "DownloadError",
     "EarthdataClient",
     "FileNameStrategy",
