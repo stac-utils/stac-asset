@@ -102,7 +102,6 @@ class Client(ABC):
             path: The path to which the asset will be downloaded
 
         Raises:
-            ValueError: Raised if the asset does not have an absolute href
             AssetDownloadError: If any exception is raised during the
                 download, it is wrapped in an :py:class:`AssetDownloadError`
         """
