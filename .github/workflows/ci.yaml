@@ -33,7 +33,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
       - name: Install with development dependencies
-        run: pip install .[dev]
+        run: pip install .[cli,dev]
       - name: Check with pre-commit
         run: pre-commit run --all-files
       - name: Test
@@ -49,7 +49,7 @@ jobs:
           python-version: "3.11"
           cache: "pip"
       - name: Install with development dependencies
-        run: pip install .[dev]
+        run: pip install .[cli,dev]
       - name: Install minimum versions of dependencies
         run: scripts/install-min-dependencies
       - name: Check with pre-commit
@@ -67,7 +67,7 @@ jobs:
           python-version: "3.11"
           cache: "pip"
       - name: Install with development dependencies
-        run: pip install .[dev]
+        run: pip install .[cli,dev]
       - name: Test with coverage
         run: pytest --cov=stac_asset
       - name: Upload coverage reports
