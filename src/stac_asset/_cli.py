@@ -8,6 +8,7 @@ import click
 from pystac import Item, ItemCollection
 
 from . import Config, functions
+from .config import DEFAULT_S3_MAX_ATTEMPTS, DEFAULT_S3_RETRY_MODE
 
 
 @click.group()
@@ -53,6 +54,17 @@ def cli() -> None:
     show_default=True,
 )
 @click.option(
+    "--s3-retry-mode",
+    help="If downloading via the s3 client, the retry mode (standard, legacy, and "
+    "adaptive)",
+    default=DEFAULT_S3_RETRY_MODE,
+)
+@click.option(
+    "--s3-max-attempts",
+    help="If downloading via the s3 client, the max number of retries",
+    default=DEFAULT_S3_MAX_ATTEMPTS,
+)
+@click.option(
     "-w",
     "--warn",
     help="Warn on download errors, instead of erroring",
@@ -70,6 +82,8 @@ def download(
     file_name: Optional[str],
     quiet: bool,
     s3_requester_pays: bool,
+    s3_retry_mode: str,
+    s3_max_attempts: int,
     warn: bool,
 ) -> None:
     """Download STAC assets from an item or item collection.
@@ -97,6 +111,8 @@ def download(
         exclude=exclude,
         file_name=file_name,
         s3_requester_pays=s3_requester_pays,
+        s3_retry_mode=s3_retry_mode,
+        s3_max_attempts=s3_max_attempts,
         warn=warn,
     )
 

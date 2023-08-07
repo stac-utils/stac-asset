@@ -8,6 +8,8 @@ from .errors import CannotIncludeAndExclude
 from .strategy import FileNameStrategy
 
 DEFAULT_S3_REGION_NAME = "us-west-2"
+DEFAULT_S3_RETRY_MODE = "adaptive"
+DEFAULT_S3_MAX_ATTEMPTS = 10
 
 
 @dataclass
@@ -55,6 +57,12 @@ class Config:
 
     s3_requester_pays: bool = False
     """If using the s3 client, enable requester pays."""
+
+    s3_retry_mode: str = DEFAULT_S3_RETRY_MODE
+    """The retry mode to use for s3 requests."""
+
+    s3_max_attempts: int = DEFAULT_S3_MAX_ATTEMPTS
+    """The maximum number of attempts when downloading assets from s3."""
 
     def validate(self) -> None:
         """Validates this configuration.
