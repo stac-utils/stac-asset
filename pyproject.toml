@@ -2,9 +2,7 @@
 name = "stac-asset"
 version = "0.1.1"
 description = "Read and download STAC assets across platforms and providers"
-authors = [
-    { name = "Pete Gadomski", email = "pete.gadomski@gmail.com" }
-]
+authors = [{ name = "Pete Gadomski", email = "pete.gadomski@gmail.com" }]
 readme = "README.md"
 keywords = ["stac", "async"]
 classifiers = [
@@ -27,9 +25,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-cli = [
-    "click~=8.1.5",
-]
+cli = ["click~=8.1.5", "click-logging~=1.0.1"]
 dev = [
     "black~=23.3",
     "mypy~=1.3",
@@ -40,10 +36,7 @@ dev = [
     "ruff==0.0.282",
     "types-aiofiles~=23.1",
 ]
-docs = [
-    "pydata-sphinx-theme~=0.13",
-    "sphinx~=7.0",
-]
+docs = ["pydata-sphinx-theme~=0.13", "sphinx~=7.0"]
 
 [project.scripts]
 stac-asset = "stac_asset._cli:cli"
@@ -60,7 +53,8 @@ module = [
     "aiobotocore.session",
     "aiobotocore",
     "botocore",
-    "botocore.config"
+    "botocore.config",
+    "click_logging",
 ]
 ignore_missing_imports = true
 

@@ -1,14 +1,19 @@
 import asyncio
 import json
+import logging
 import os
 import sys
 from typing import List, Optional, Union
 
 import click
+import click_logging
 from pystac import Item, ItemCollection
 
 from . import Config, functions
 from .config import DEFAULT_S3_MAX_ATTEMPTS, DEFAULT_S3_RETRY_MODE
+
+logger = logging.getLogger(__name__)
+click_logging.basic_config(logger)
 
 
 @click.group()
@@ -22,6 +27,7 @@ def cli() -> None:
 
 
 @cli.command()
+@click_logging.simple_verbosity_option(logger)  # type: ignore
 @click.argument("href", required=False)
 @click.argument("directory", required=False)
 @click.option(
