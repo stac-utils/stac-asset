@@ -6,9 +6,9 @@ from typing import AsyncIterator, Optional, Type, TypeVar
 from aiohttp import ClientSession
 from yarl import URL
 
+from . import validate
 from .client import Client
 from .config import Config
-from .errors import ContentTypeError
 
 T = TypeVar("T", bound="HttpClient")
 
@@ -52,8 +52,8 @@ class HttpClient(Client):
         """
         async with self.session.get(url, allow_redirects=True) as response:
             response.raise_for_status()
-            if content_type and response.content_type != content_type:
-                raise ContentTypeError(
+            if self.check_content_type and content_type:
+                validate.content_type(
                     actual=response.content_type, expected=content_type
                 )
             async for chunk, _ in response.content.iter_chunks():
