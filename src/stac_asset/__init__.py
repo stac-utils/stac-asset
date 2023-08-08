@@ -16,6 +16,7 @@ from .earthdata_client import EarthdataClient
 from .errors import (
     AssetOverwriteError,
     CannotIncludeAndExclude,
+    ContentTypeError,
     DownloadError,
     DownloadWarning,
 )
@@ -37,6 +38,7 @@ __all__ = [
     "CannotIncludeAndExclude",
     "Client",
     "Config",
+    "ContentTypeError",
     "DownloadError",
     "EarthdataClient",
     "FileNameStrategy",

@@ -9,9 +9,9 @@ from aiobotocore.session import AioSession
 from botocore import UNSIGNED
 from yarl import URL
 
+from . import validate
 from .client import Client
 from .config import DEFAULT_S3_REGION_NAME, Config
-from .errors import ContentTypeError
 
 
 class S3Client(Client):
@@ -83,11 +83,8 @@ class S3Client(Client):
             if self.requester_pays:
                 params["RequestPayer"] = "requester"
             response = await client.get_object(**params)
-            print(response)
-            if content_type and response["ContentType"] != content_type:
-                raise ContentTypeError(
-                    actual=response["ContentType"], expected=content_type
-                )
+            if content_type:
+                validate.content_type(response["ContentType"], content_type)
             async for chunk in response["Body"]:
                 yield chunk
 
