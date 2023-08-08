@@ -49,6 +49,9 @@ class Config:
     warn: bool = False
     """When downloading, warn instead of erroring."""
 
+    clean: bool = True
+    """If true, clean up the downloaded file if it errors."""
+
     earthdata_token: Optional[str] = None
     """A token for logging in to Earthdata."""
 
