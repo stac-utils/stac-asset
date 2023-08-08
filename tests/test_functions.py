@@ -65,7 +65,7 @@ async def test_item_download_404_warn(tmp_path: Path, item: Item) -> None:
 
 
 async def test_item_download_no_directory(tmp_path: Path, item: Item) -> None:
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(DownloadError):
         await stac_asset.download_item(
             item, tmp_path / "doesnt-exist", Config(make_directory=False)
         )

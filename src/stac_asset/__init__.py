@@ -25,7 +25,6 @@ from .functions import (
     download_collection,
     download_item,
     download_item_collection,
-    guess_client_class,
 )
 from .http_client import HttpClient
 from .planetary_computer_client import PlanetaryComputerClient
@@ -49,5 +48,4 @@ __all__ = [
     "download_collection",
     "download_item",
     "download_item_collection",
-    "guess_client_class",
 ]

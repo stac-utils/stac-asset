@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, List
 
 
 class AssetOverwriteError(Exception):
@@ -47,13 +47,11 @@ class ContentTypeError(Exception):
 class DownloadError(Exception):
     """A collection of exceptions encountered while downloading."""
 
-    exceptions: Dict[str, Exception]
+    exceptions: List[Exception]
 
-    def __init__(
-        self, exceptions: Dict[str, Exception], *args: Any, **kwargs: Any
-    ) -> None:
+    def __init__(self, exceptions: List[Exception], *args: Any, **kwargs: Any) -> None:
         self.exceptions = exceptions
         messages = list()
-        for key, exception in exceptions.items():
-            messages.append(f"{key}: {exception}")
+        for exception in exceptions:
+            messages.append(str(exception))
         super().__init__("\n".join(messages), *args, **kwargs)
