@@ -19,7 +19,7 @@ pytestmark = [
 
 
 async def test_download_item(tmp_path: Path, item: Item) -> None:
-    item = await stac_asset.download_item(item, tmp_path)
+    item = await stac_asset.download_item(item, tmp_path, Config(file_name="item.json"))
     assert Path(tmp_path / "item.json").exists(), item.get_self_href()
     asset = item.assets["data"]
     assert asset.href == "./20201211_223832_CS2.jpg"
@@ -28,11 +28,13 @@ async def test_download_item(tmp_path: Path, item: Item) -> None:
 async def test_download_item_collection(
     tmp_path: Path, item_collection: ItemCollection
 ) -> None:
-    await stac_asset.download_item_collection(
+    item_collection = await stac_asset.download_item_collection(
         item_collection, tmp_path, Config(file_name="item-collection.json")
     )
     assert os.path.exists(tmp_path / "item-collection.json")
     assert os.path.exists(tmp_path / "test-item" / "20201211_223832_CS2.jpg")
+    asset = item_collection.items[0].assets["data"]
+    assert asset.href == "./test-item/20201211_223832_CS2.jpg"
 
 
 async def test_download_collection(tmp_path: Path, collection: Collection) -> None:

@@ -60,6 +60,7 @@ def cli() -> None:
     is_flag=True,
     show_default=True,
 )
+# TODO add option to disable content type checking
 def download(
     href: Optional[str],
     directory: Optional[str],
