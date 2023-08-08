@@ -91,10 +91,12 @@ async def download_item_collection(
             )
         )
     results = await asyncio.gather(*tasks, return_exceptions=True)
-    exceptions = list()
+    exceptions = dict()
     for result in results:
-        if isinstance(result, Exception):
-            exceptions.append(result)
+        if isinstance(result, DownloadError):
+            exceptions.update(result.exceptions)
+        elif isinstance(result, Exception):
+            raise result
     if exceptions:
         raise DownloadError(exceptions)
     item_collection.items = results
@@ -255,7 +257,7 @@ async def _download(stac_object: _T, directory: PathLikeObject, config: Config) 
             stac_object.assets[key].href = str(path.absolute())
 
     # TODO support fast failing
-    exceptions = list()
+    exceptions = dict()
     for key, task in tasks.items():
         try:
             _ = await task
@@ -264,7 +266,7 @@ async def _download(stac_object: _T, directory: PathLikeObject, config: Config) 
                 warnings.warn(str(exception), DownloadWarning)
                 del stac_object.assets[key]
             else:
-                exceptions.append(exception)
+                exceptions[key] = exception
 
     for client in clients.values():
         await client.close()
