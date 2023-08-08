@@ -128,6 +128,7 @@ class Client(ABC):
         key: str,
         asset: Asset,
         path: Path,
+        make_directory: bool = True,
         clean: bool = True,
         queue: Optional[Queue[Any]] = None,
     ) -> Asset:
@@ -137,6 +138,7 @@ class Client(ABC):
             key: The asset key
             asset: The asset
             clean: If an error occurs, delete the output file if it exists
+            make_directory: Make the parent directory if it doesn't exist
             path: The path to which the asset will be downloaded
             queue: An optional queue to use for progress reporting
 
@@ -151,6 +153,13 @@ class Client(ABC):
             raise ValueError(
                 f"asset '{key}' does not have an absolute href: {asset.href}"
             )
+        if not path.parent.exists():
+            if make_directory:
+                path.parent.mkdir(parents=True, exist_ok=True)
+            else:
+                raise FileNotFoundError(
+                    f"output directory does not exist: {path.parent}"
+                )
         if queue:
             if asset.owner:
                 item_id = asset.owner.id
@@ -170,6 +179,9 @@ class Client(ABC):
 
         if queue:
             await queue.put(FinishAssetDownload(key=key, href=href, path=path))
+        if "alternate" not in asset.extra_fields:
+            asset.extra_fields["alternate"] = {}
+        asset.extra_fields["alternate"]["from"] = {"href": asset.href}
         asset.href = str(path)
         return asset
 

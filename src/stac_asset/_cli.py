@@ -12,7 +12,7 @@ import click_logging
 import tqdm
 from pystac import Item, ItemCollection
 
-from . import Config, functions
+from . import Config, _download, functions
 from .config import DEFAULT_S3_MAX_ATTEMPTS, DEFAULT_S3_RETRY_MODE
 from .messages import (
     ErrorAssetDownload,
@@ -230,7 +230,7 @@ async def download_async(
 
 
 async def read_file(href: str, config: Config) -> bytes:
-    async with await functions.guess_client_class_from_href(href).from_config(
+    async with await _download.guess_client_class_from_href(href).from_config(
         config
     ) as client:
         data = b""
