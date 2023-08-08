@@ -108,7 +108,6 @@ stac-client search https://landsatlook.usgs.gov/stac-server \
 ```
 
 You'll need to set up requester pays, as detailed [above](#s3client).
-Alternatively, you could use [Earth Search's Landsat archive](https://earth-search.aws.element84.com/v1/collections/landsat-c2-l2).
 
 ## Versioning
 
