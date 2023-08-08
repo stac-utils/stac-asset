@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import datetime
-from asyncio import Lock
+from asyncio import Lock, Queue
 from datetime import timezone
 from types import TracebackType
 from typing import Any, AsyncIterator, Dict, Optional, Type
 
+import dateutil.parser
 from aiohttp import ClientSession
 from yarl import URL
 
@@ -21,7 +22,7 @@ class _Token:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> _Token:
         try:
-            expiry = datetime.datetime.fromisoformat(data["msft:expiry"])
+            expiry = dateutil.parser.isoparse(data["msft:expiry"])
         except KeyError:
             raise ValueError(f"missing 'msft:expiry' key in dict: {data}")
 
@@ -66,7 +67,10 @@ class PlanetaryComputerClient(HttpClient):
         self.sas_token_endpoint = URL(sas_token_endpoint)
 
     async def open_url(
-        self, url: URL, content_type: Optional[str] = None
+        self,
+        url: URL,
+        content_type: Optional[str] = None,
+        queue: Optional[Queue[Any]] = None,
     ) -> AsyncIterator[bytes]:
         """Opens a url and iterates over its bytes.
 
@@ -84,6 +88,7 @@ class PlanetaryComputerClient(HttpClient):
         Args:
             url: The url to open
             content_type: The expected content type
+            queue: An optional queue to use for progress reporting
 
         Yields:
             AsyncIterator[bytes]: An iterator over the file's bytes
@@ -95,7 +100,9 @@ class PlanetaryComputerClient(HttpClient):
             and not set(url.query) & {"st", "se", "sp"}
         ):
             url = await self._sign(url)
-        async for chunk in super().open_url(url, content_type=content_type):
+        async for chunk in super().open_url(
+            url, content_type=content_type, queue=queue
+        ):
             yield chunk
 
     async def _sign(self, url: URL) -> URL:

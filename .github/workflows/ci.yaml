@@ -32,6 +32,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
+      - name: Update pip
+        run: pip install -U pip
       - name: Install with development dependencies
         run: pip install .[cli,dev]
       - name: Check with pre-commit
@@ -48,6 +50,8 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
+      - name: Update pip
+        run: pip install -U pip
       - name: Install with development dependencies
         run: pip install .[cli,dev]
       - name: Install minimum versions of dependencies
@@ -66,6 +70,8 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
+      - name: Update pip
+        run: pip install -U pip
       - name: Install with development dependencies
         run: pip install .[cli,dev]
       - name: Test with coverage

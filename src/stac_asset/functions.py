@@ -1,8 +1,9 @@
 import asyncio
 import os.path
 import warnings
+from asyncio import Queue
 from pathlib import Path
-from typing import Dict, Optional, Set, Tuple, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple, Type, TypeVar
 
 import pystac.utils
 from pystac import Asset, Collection, Item, ItemCollection, STACError
@@ -22,11 +23,18 @@ from .s3_client import S3Client
 from .strategy import FileNameStrategy
 from .types import PathLikeObject
 
+# Needed until we drop Python 3.8
+if TYPE_CHECKING:
+    AnyQueue = Queue[Any]
+else:
+    AnyQueue = Queue
+
 
 async def download_item(
     item: Item,
     directory: PathLikeObject,
     config: Optional[Config] = None,
+    queue: Optional[AnyQueue] = None,
 ) -> Item:
     """Downloads an item to the local filesystem.
 
@@ -34,6 +42,7 @@ async def download_item(
         item: The :py:class:`pystac.Item`.
         directory: The output directory that will hold the items and assets.
         config: The download configuration
+        queue: An optional queue to use for progress reporting
 
     Returns:
         Item: The `~pystac.Item`, with the updated asset hrefs and self href.
@@ -41,13 +50,14 @@ async def download_item(
     Raises:
         ValueError: Raised if the item doesn't have any assets.
     """
-    return await _download(item, directory, config or Config())
+    return await _download(item, directory, config=config or Config(), queue=queue)
 
 
 async def download_item_collection(
     item_collection: ItemCollection,
     directory: PathLikeObject,
     config: Optional[Config] = None,
+    queue: Optional[AnyQueue] = None,
 ) -> ItemCollection:
     """Downloads an item collection to the local filesystem.
 
@@ -55,6 +65,7 @@ async def download_item_collection(
         item_collection: The item collection to download
         directory: The destination directory
         config: The download configuration
+        queue: An optional queue to use for progress reporting
 
     Returns:
         ItemCollection: The item collection, with updated asset hrefs
@@ -87,6 +98,7 @@ async def download_item_collection(
                     item=item,
                     directory=item_directory,
                     config=item_config,
+                    queue=queue,
                 )
             )
         )
@@ -113,7 +125,10 @@ async def download_item_collection(
 
 
 async def download_collection(
-    collection: Collection, directory: PathLikeObject, config: Optional[Config] = None
+    collection: Collection,
+    directory: PathLikeObject,
+    config: Optional[Config] = None,
+    queue: Optional[AnyQueue] = None,
 ) -> Collection:
     """Downloads a collection to the local filesystem.
 
@@ -124,6 +139,7 @@ async def download_collection(
         collection: A pystac collection
         directory: The destination directory
         config: The download configuration
+        queue: An optional queue to use for progress reporting
 
     Returns:
         Collection: The colleciton, with updated asset hrefs
@@ -131,7 +147,7 @@ async def download_collection(
     Raises:
         CantIncludeAndExclude: Raised if both include and exclude are not None.
     """
-    return await _download(collection, directory, config or Config())
+    return await _download(collection, directory, config or Config(), queue=queue)
 
 
 def guess_client_class(asset: Asset, config: Config) -> Type[Client]:
@@ -190,7 +206,12 @@ def guess_client_class_from_href(href: str) -> Type[Client]:
 _T = TypeVar("_T", Collection, Item)
 
 
-async def _download(stac_object: _T, directory: PathLikeObject, config: Config) -> _T:
+async def _download(
+    stac_object: _T,
+    directory: PathLikeObject,
+    config: Config,
+    queue: Optional[AnyQueue],
+) -> _T:
     config.validate()
 
     if not stac_object.assets:
@@ -246,8 +267,12 @@ async def _download(stac_object: _T, directory: PathLikeObject, config: Config) 
         else:
             client = await client_class.from_config(config)
             clients[client_class] = client
+        cloned_asset = asset.clone()
+        cloned_asset.set_owner(stac_object)
         tasks[key] = asyncio.create_task(
-            client.download_asset(key, asset.clone(), path)
+            client.download_asset(
+                key, cloned_asset, path, clean=config.clean, queue=queue
+            )
         )
         if stac_object.get_self_href():
             stac_object.assets[key].href = pystac.utils.make_relative_href(
