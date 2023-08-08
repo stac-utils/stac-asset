@@ -99,7 +99,13 @@ async def download_item_collection(
         raise DownloadError(exceptions)
     item_collection.items = results
     if config.file_name:
-        item_collection.save_object(dest_href=str(directory_as_path / config.file_name))
+        dest_href = str(directory_as_path / config.file_name)
+        for item in item_collection.items:
+            for asset in item.assets.values():
+                asset.href = pystac.utils.make_relative_href(
+                    asset.href, dest_href, start_is_dir=False
+                )
+        item_collection.save_object(dest_href=dest_href)
 
     return item_collection
 
@@ -203,13 +209,10 @@ async def _download(stac_object: _T, directory: PathLikeObject, config: Config) 
 
     if config.file_name:
         item_path = directory_as_path / config.file_name
+        stac_object.set_self_href(str(item_path))
     else:
-        self_href = stac_object.get_self_href()
-        if self_href:
-            item_path = directory_as_path / os.path.basename(self_href)
-        else:
-            item_path = None
-    stac_object.set_self_href(str(item_path))
+        item_path = None
+        stac_object.set_self_href(item_path)
 
     file_names: Set[str] = set()
     assets: Dict[str, Tuple[Asset, Path]] = dict()
