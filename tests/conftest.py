@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from pystac import Item, ItemCollection
+from pystac import Collection, Item, ItemCollection
 from pytest import Config, Parser
 
 
@@ -24,6 +24,11 @@ def data_path() -> Path:
 @pytest.fixture
 def item(item_path: Path) -> Item:
     return Item.from_file(str(item_path))
+
+
+@pytest.fixture
+def collection() -> Collection:
+    return Collection.from_file(str(Path(__file__).parent / "data" / "collection.json"))
 
 
 @pytest.fixture

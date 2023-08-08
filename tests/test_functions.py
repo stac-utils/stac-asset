@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 import stac_asset
-from pystac import Asset, Item, ItemCollection
+from pystac import Asset, Collection, Item, ItemCollection
 from stac_asset import (
     AssetOverwriteError,
     CannotIncludeAndExclude,
@@ -33,6 +33,16 @@ async def test_download_item_collection(
     )
     assert os.path.exists(tmp_path / "item-collection.json")
     assert os.path.exists(tmp_path / "test-item" / "20201211_223832_CS2.jpg")
+
+
+async def test_download_collection(tmp_path: Path, collection: Collection) -> None:
+    collection = await stac_asset.download_collection(
+        collection, tmp_path, Config(file_name="collection.json")
+    )
+    assert os.path.exists(tmp_path / "collection.json")
+    assert os.path.exists(tmp_path / "20201211_223832_CS2.jpg")
+    asset = collection.assets["data"]
+    assert asset.href == "./20201211_223832_CS2.jpg"
 
 
 async def test_item_download_404(tmp_path: Path, item: Item) -> None:
