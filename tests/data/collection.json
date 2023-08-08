@@ -1,0 +1,33 @@
+{
+    "stac_version": "1.0.0",
+    "type": "Collection",
+    "id": "test-collection",
+    "description": "A simple test collection",
+    "license": "proprietary",
+    "extent": {
+        "spatial": {
+            "bbox": [
+                [
+                    -180,
+                    -90,
+                    180,
+                    90
+                ]
+            ]
+        },
+        "temporal": {
+            "interval": [
+                [
+                    "2023-01-01T00:00:00Z",
+                    null
+                ]
+            ]
+        }
+    },
+    "links": [],
+    "assets": {
+        "data": {
+            "href": "./20201211_223832_CS2.jpg"
+        }
+    }
+}

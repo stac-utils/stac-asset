@@ -2,10 +2,10 @@ import asyncio
 import os.path
 import warnings
 from pathlib import Path
-from typing import Dict, Optional, Set, Tuple, Type
+from typing import Dict, Optional, Set, Tuple, Type, TypeVar
 
 import pystac.utils
-from pystac import Asset, Item, ItemCollection
+from pystac import Asset, Collection, Item, ItemCollection, STACError
 from yarl import URL
 
 from .client import Client
@@ -41,97 +41,7 @@ async def download_item(
     Raises:
         ValueError: Raised if the item doesn't have any assets.
     """
-    if not item.assets:
-        raise ValueError(f"no assets to download for item with id '{item.id}")
-    else:
-        # Will fail if the item doesn't have a self href and there's relative
-        # asset hrefs
-        item.make_asset_hrefs_absolute()
-
-    if config is None:
-        config = Config()
-    else:
-        config.validate()
-
-    directory_as_path = Path(directory)
-    if not directory_as_path.exists():
-        if config.make_directory:
-            directory_as_path.mkdir(parents=True)
-        else:
-            raise FileNotFoundError(f"output directory does not exist: {directory}")
-
-    if config.file_name:
-        item_path = directory_as_path / config.file_name
-    else:
-        self_href = item.get_self_href()
-        if self_href:
-            item_path = directory_as_path / os.path.basename(self_href)
-        else:
-            item_path = None
-    item.set_self_href(str(item_path))
-
-    file_names: Set[str] = set()
-    assets: Dict[str, Tuple[Asset, Path]] = dict()
-    for key, asset in (
-        (k, a)
-        for k, a in item.assets.items()
-        if (not config.include or k in config.include)
-        and (not config.exclude or k not in config.exclude)
-    ):
-        if config.asset_file_name_strategy == FileNameStrategy.FILE_NAME:
-            file_name = os.path.basename(URL(asset.href).path)
-        elif config.asset_file_name_strategy == FileNameStrategy.KEY:
-            file_name = key + Path(asset.href).suffix
-
-        if file_name in file_names:
-            raise AssetOverwriteError(list(file_names))
-        else:
-            file_names.add(file_name)
-
-        path = directory_as_path / file_name
-        assets[key] = (asset, path)
-
-    tasks = dict()
-    clients: Dict[Type[Client], Client] = dict()
-    for key, (asset, path) in assets.items():
-        client_class = guess_client_class(asset, config)
-        if client_class in clients:
-            client = clients[client_class]
-        else:
-            client = await client_class.from_config(config)
-            clients[client_class] = client
-        tasks[key] = asyncio.create_task(
-            client.download_asset(key, asset.clone(), path)
-        )
-        if item.get_self_href():
-            item.assets[key].href = pystac.utils.make_relative_href(
-                str(path), str(item_path)
-            )
-        else:
-            item.assets[key].href = str(path.absolute())
-
-    # TODO support fast failing
-    exceptions = list()
-    for key, task in tasks.items():
-        try:
-            _ = await task
-        except Exception as exception:
-            if config.warn:
-                warnings.warn(str(exception), DownloadWarning)
-                del item.assets[key]
-            else:
-                exceptions.append(exception)
-
-    for client in clients.values():
-        await client.close()
-
-    if exceptions:
-        raise DownloadError(exceptions)
-
-    if item.get_self_href():
-        item.save_object(include_self_link=True)
-
-    return item
+    return await _download(item, directory, config or Config())
 
 
 async def download_item_collection(
@@ -194,6 +104,28 @@ async def download_item_collection(
     return item_collection
 
 
+async def download_collection(
+    collection: Collection, directory: PathLikeObject, config: Optional[Config] = None
+) -> Collection:
+    """Downloads a collection to the local filesystem.
+
+    Does not download the collection's items' assets -- use
+    :py:func:`download_item_collection` to download multiple items.
+
+    Args:
+        collection: A pystac collection
+        directory: The destination directory
+        config: The download configuration
+
+    Returns:
+        Collection: The colleciton, with updated asset hrefs
+
+    Raises:
+        CantIncludeAndExclude: Raised if both include and exclude are not None.
+    """
+    return await _download(collection, directory, config or Config())
+
+
 def guess_client_class(asset: Asset, config: Config) -> Type[Client]:
     """Guess which client should be used to download the given asset.
 
@@ -245,3 +177,115 @@ def guess_client_class_from_href(href: str) -> Type[Client]:
         return HttpClient
     else:
         raise ValueError(f"could not guess client class for href: {href}")
+
+
+_T = TypeVar("_T", Collection, Item)
+
+
+async def _download(stac_object: _T, directory: PathLikeObject, config: Config) -> _T:
+    config.validate()
+
+    if not stac_object.assets:
+        raise ValueError(
+            f"no assets to download for STAC object with id '{stac_object.id}"
+        )
+    else:
+        # Will fail if the stac object doesn't have a self href and there's
+        # relative asset hrefs
+        stac_object = _make_asset_hrefs_absolute(stac_object)
+
+    directory_as_path = Path(directory)
+    if not directory_as_path.exists():
+        if config.make_directory:
+            directory_as_path.mkdir(parents=True)
+        else:
+            raise FileNotFoundError(f"output directory does not exist: {directory}")
+
+    if config.file_name:
+        item_path = directory_as_path / config.file_name
+    else:
+        self_href = stac_object.get_self_href()
+        if self_href:
+            item_path = directory_as_path / os.path.basename(self_href)
+        else:
+            item_path = None
+    stac_object.set_self_href(str(item_path))
+
+    file_names: Set[str] = set()
+    assets: Dict[str, Tuple[Asset, Path]] = dict()
+    for key, asset in (
+        (k, a)
+        for k, a in stac_object.assets.items()
+        if (not config.include or k in config.include)
+        and (not config.exclude or k not in config.exclude)
+    ):
+        if config.asset_file_name_strategy == FileNameStrategy.FILE_NAME:
+            file_name = os.path.basename(URL(asset.href).path)
+        elif config.asset_file_name_strategy == FileNameStrategy.KEY:
+            file_name = key + Path(asset.href).suffix
+
+        if file_name in file_names:
+            raise AssetOverwriteError(list(file_names))
+        else:
+            file_names.add(file_name)
+
+        path = directory_as_path / file_name
+        assets[key] = (asset, path)
+
+    tasks = dict()
+    clients: Dict[Type[Client], Client] = dict()
+    for key, (asset, path) in assets.items():
+        client_class = guess_client_class(asset, config)
+        if client_class in clients:
+            client = clients[client_class]
+        else:
+            client = await client_class.from_config(config)
+            clients[client_class] = client
+        tasks[key] = asyncio.create_task(
+            client.download_asset(key, asset.clone(), path)
+        )
+        if stac_object.get_self_href():
+            stac_object.assets[key].href = pystac.utils.make_relative_href(
+                str(path), str(item_path)
+            )
+        else:
+            stac_object.assets[key].href = str(path.absolute())
+
+    # TODO support fast failing
+    exceptions = list()
+    for key, task in tasks.items():
+        try:
+            _ = await task
+        except Exception as exception:
+            if config.warn:
+                warnings.warn(str(exception), DownloadWarning)
+                del stac_object.assets[key]
+            else:
+                exceptions.append(exception)
+
+    for client in clients.values():
+        await client.close()
+
+    if exceptions:
+        raise DownloadError(exceptions)
+
+    if stac_object.get_self_href():
+        stac_object.save_object(include_self_link=True)
+
+    return stac_object
+
+
+def _make_asset_hrefs_absolute(stac_object: _T) -> _T:
+    # Copied from
+    # https://github.com/stac-utils/pystac/blob/381cf89fc25c15142fb5a187d905e22681de42a2/pystac/item.py#L309C3-L319C1
+    # until a fix for https://github.com/stac-utils/pystac/issues/1199 is
+    # released.
+    self_href = stac_object.get_self_href()
+    for asset in stac_object.assets.values():
+        if not pystac.utils.is_absolute_href(asset.href):
+            if self_href is None:
+                raise STACError(
+                    "Cannot make asset HREFs absolute if no self_href is set."
+                )
+            asset.href = pystac.utils.make_absolute_href(asset.href, self_href)
+    return stac_object
