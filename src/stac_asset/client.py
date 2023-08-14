@@ -179,10 +179,6 @@ class Client(ABC):
 
         if queue:
             await queue.put(FinishAssetDownload(key=key, href=href, path=path))
-        if "alternate" not in asset.extra_fields:
-            asset.extra_fields["alternate"] = {}
-        asset.extra_fields["alternate"]["from"] = {"href": asset.href}
-        asset.href = str(path)
         return asset
 
     async def close(self) -> None:

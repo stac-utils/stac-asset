@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 from .errors import CannotIncludeAndExclude
-from .strategy import FileNameStrategy
+from .strategy import DownloadStrategy, FileNameStrategy
 
 DEFAULT_S3_REGION_NAME = "us-west-2"
 DEFAULT_S3_RETRY_MODE = "adaptive"
@@ -21,6 +21,9 @@ class Config:
 
     asset_file_name_strategy: FileNameStrategy = FileNameStrategy.FILE_NAME
     """The file name strategy to use when downloading assets."""
+
+    download_strategy: DownloadStrategy = DownloadStrategy.ERROR
+    """The strategy to use when errors occur during download."""
 
     exclude: List[str] = field(default_factory=list)
     """Assets to exclude from the download.
@@ -45,9 +48,6 @@ class Config:
 
     If False, and the output directory does not exist, an error will be raised.
     """
-
-    warn: bool = False
-    """When downloading, warn instead of erroring."""
 
     clean: bool = True
     """If true, clean up the downloaded file if it errors."""

@@ -11,6 +11,7 @@ from stac_asset import (
     CannotIncludeAndExclude,
     Config,
     DownloadError,
+    DownloadStrategy,
     DownloadWarning,
     FileNameStrategy,
 )
@@ -21,22 +22,68 @@ pytestmark = [
 
 
 async def test_download_item(tmp_path: Path, item: Item) -> None:
-    item = await stac_asset.download_item(item, tmp_path, Config(file_name="item.json"))
-    assert Path(tmp_path / "item.json").exists(), item.get_self_href()
+    item = await stac_asset.download_item(item, tmp_path)
+    assert os.path.exists(tmp_path / "20201211_223832_CS2.jpg")
     asset = item.assets["data"]
-    assert asset.href == "./20201211_223832_CS2.jpg"
+    assert asset.href == str(tmp_path / "20201211_223832_CS2.jpg")
+
+
+async def test_download_item_with_file_name(tmp_path: Path, item: Item) -> None:
+    await stac_asset.download_item(item, tmp_path, Config(file_name="item.json"))
+    item = Item.from_file(str(tmp_path / "item.json"))
+    assert item.assets["data"].href == "./20201211_223832_CS2.jpg"
+
+
+async def test_download_missing_asset_error(tmp_path: Path, item: Item) -> None:
+    item.assets["does-not-exist"] = Asset("not-a-file.md5")
+    with pytest.raises(DownloadError):
+        await stac_asset.download_item(
+            item, tmp_path, Config(download_strategy=DownloadStrategy.ERROR)
+        )
+
+
+async def test_download_missing_asset_keep(
+    tmp_path: Path, item: Item, data_path: Path
+) -> None:
+    item.assets["does-not-exist"] = Asset("not-a-file.md5")
+    with pytest.warns(DownloadWarning):
+        item = await stac_asset.download_item(
+            item, tmp_path, Config(download_strategy=DownloadStrategy.KEEP)
+        )
+    assert item.assets["does-not-exist"].href == str(data_path / "not-a-file.md5")
+
+
+async def test_download_missing_asset_delete(tmp_path: Path, item: Item) -> None:
+    item.assets["does-not-exist"] = Asset("not-a-file.md5")
+    with pytest.warns(DownloadWarning):
+        item = await stac_asset.download_item(
+            item, tmp_path, Config(download_strategy=DownloadStrategy.DELETE)
+        )
+    assert "does-not-exist" not in item.assets
 
 
 async def test_download_item_collection(
     tmp_path: Path, item_collection: ItemCollection
 ) -> None:
     item_collection = await stac_asset.download_item_collection(
-        item_collection, tmp_path, Config(file_name="item-collection.json")
+        item_collection, tmp_path
     )
-    assert os.path.exists(tmp_path / "item-collection.json")
     assert os.path.exists(tmp_path / "test-item" / "20201211_223832_CS2.jpg")
     asset = item_collection.items[0].assets["data"]
-    assert asset.href == "./test-item/20201211_223832_CS2.jpg"
+    assert asset.href == str(tmp_path / "test-item/20201211_223832_CS2.jpg")
+
+
+async def test_download_item_collection_with_file_name(
+    tmp_path: Path, item_collection: ItemCollection
+) -> None:
+    await stac_asset.download_item_collection(
+        item_collection, tmp_path, Config(file_name="item-collection.json")
+    )
+    item_collection = ItemCollection.from_file(str(tmp_path / "item-collection.json"))
+    assert (
+        item_collection.items[0].assets["data"].href
+        == "./test-item/20201211_223832_CS2.jpg"
+    )
 
 
 async def test_download_collection(tmp_path: Path, collection: Collection) -> None:
@@ -47,21 +94,6 @@ async def test_download_collection(tmp_path: Path, collection: Collection) -> No
     assert os.path.exists(tmp_path / "20201211_223832_CS2.jpg")
     asset = collection.assets["data"]
     assert asset.href == "./20201211_223832_CS2.jpg"
-
-
-async def test_item_download_404(tmp_path: Path, item: Item) -> None:
-    item.assets["missing-asset"] = Asset(href=str(Path(__file__).parent / "not-a-file"))
-    with pytest.raises(DownloadError):
-        await stac_asset.download_item(item, tmp_path)
-    assert not (tmp_path / "not-a-file").exists()
-
-
-async def test_item_download_404_warn(tmp_path: Path, item: Item) -> None:
-    item.assets["missing-asset"] = Asset(href=str(Path(__file__).parent / "not-a-file"))
-    with pytest.warns(DownloadWarning):
-        item = await stac_asset.download_item(item, tmp_path, Config(warn=True))
-    assert not (tmp_path / "not-a-file").exists()
-    assert "missing-asset" not in item.assets
 
 
 async def test_item_download_no_directory(tmp_path: Path, item: Item) -> None:
