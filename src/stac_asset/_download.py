@@ -9,7 +9,8 @@ from pathlib import Path
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Type, Union
 
-from pystac import Asset, Collection, Item, STACObject
+import pystac.utils
+from pystac import Asset, Collection, Item, STACError
 from yarl import URL
 
 from .client import Client
@@ -26,6 +27,15 @@ if TYPE_CHECKING:
     AnyQueue = Queue[Any]
 else:
     AnyQueue = Queue
+
+
+class WrappedError:
+    download: Download
+    error: Exception
+
+    def __init__(self, download: Download, error: Exception) -> None:
+        self.download = download
+        self.error = error
 
 
 @dataclass
@@ -45,13 +55,6 @@ class Download:
             )
         except Exception as error:
             return WrappedError(self, error)
-        if "alternate" not in self.asset.extra_fields:
-            if not has_alternate_assets_extension(self.owner):
-                self.owner.stac_extensions.append(
-                    "https://stac-extensions.github.io/alternate-assets/v1.1.0/schema.json"
-                )
-            self.asset.extra_fields["alternate"] = {}
-        self.asset.extra_fields["alternate"]["from"] = {"href": self.asset.href}
         self.asset.href = str(self.path)
         return self
 
@@ -67,9 +70,28 @@ class Downloads:
         self.downloads = list()
         self.clients = dict()
 
-    async def add(self, stac_object: Union[Item, Collection], root: Path) -> None:
-        file_names: Set[str] = set()
+    async def add(
+        self, stac_object: Union[Item, Collection], root: Path, file_name: Optional[str]
+    ) -> None:
+        links = list()
+        for link in stac_object.links:
+            absolute_href = link.get_absolute_href()
+            if absolute_href:
+                link.target = absolute_href
+                links.append(link)
+        stac_object.links = links
+        # Will fail if the stac object doesn't have a self href and there's
+        # relative asset hrefs
+        stac_object = make_asset_hrefs_absolute(stac_object)
 
+        if file_name:
+            item_path = Path(root) / file_name
+            stac_object.set_self_href(str(item_path))
+        else:
+            item_path = None
+            stac_object.set_self_href(item_path)
+
+        asset_file_names: Set[str] = set()
         for key, asset in (
             (k, a)
             for k, a in stac_object.assets.items()
@@ -77,14 +99,14 @@ class Downloads:
             and (not self.config.exclude or k not in self.config.exclude)
         ):
             if self.config.asset_file_name_strategy == FileNameStrategy.FILE_NAME:
-                file_name = os.path.basename(URL(asset.href).path)
+                asset_file_name = os.path.basename(URL(asset.href).path)
             elif self.config.asset_file_name_strategy == FileNameStrategy.KEY:
-                file_name = key + Path(asset.href).suffix
+                asset_file_name = key + Path(asset.href).suffix
 
-            if file_name in file_names:
-                raise AssetOverwriteError(list(file_names))
+            if asset_file_name in asset_file_names:
+                raise AssetOverwriteError(list(asset_file_names))
             else:
-                file_names.add(file_name)
+                asset_file_names.add(asset_file_name)
 
             client_class = guess_client_class(asset, self.config)
             if client_class in self.clients:
@@ -98,7 +120,7 @@ class Downloads:
                     owner=stac_object,
                     key=key,
                     asset=asset,
-                    path=root / file_name,
+                    path=root / asset_file_name,
                     client=client,
                 )
             )
@@ -116,6 +138,7 @@ class Downloads:
                 )
             )
         results = await asyncio.gather(*tasks)
+
         exceptions = set()
         for result in results:
             if isinstance(result, WrappedError):
@@ -195,17 +218,19 @@ def guess_client_class_from_href(href: str) -> Type[Client]:
         raise ValueError(f"could not guess client class for href: {href}")
 
 
-def has_alternate_assets_extension(stac_object: STACObject) -> bool:
-    return any(
-        extension.startswith("https://stac-extensions.github.io/alternate-assets")
-        for extension in stac_object.stac_extensions
-    )
-
-
-class WrappedError:
-    download: Download
-    error: Exception
-
-    def __init__(self, download: Download, error: Exception) -> None:
-        self.download = download
-        self.error = error
+def make_asset_hrefs_absolute(
+    stac_object: Union[Item, Collection]
+) -> Union[Item, Collection]:
+    # Copied from
+    # https://github.com/stac-utils/pystac/blob/381cf89fc25c15142fb5a187d905e22681de42a2/pystac/item.py#L309C3-L319C1
+    # until a fix for https://github.com/stac-utils/pystac/issues/1199 is
+    # released.
+    self_href = stac_object.get_self_href()
+    for asset in stac_object.assets.values():
+        if not pystac.utils.is_absolute_href(asset.href):
+            if self_href is None:
+                raise STACError(
+                    "Cannot make asset HREFs absolute if no self_href is set."
+                )
+            asset.href = pystac.utils.make_absolute_href(asset.href, self_href)
+    return stac_object
