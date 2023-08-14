@@ -37,12 +37,6 @@ class Config:
     Mutually exclusive with ``exclude``.
     """
 
-    file_name: Optional[str] = None
-    """The file name of the output item.
-
-    If not provided, the output item will not be saved.
-    """
-
     make_directory: bool = True
     """Whether to create the output directory.
 

@@ -57,7 +57,9 @@ async def test_download_requester_pays_item(
     await stac_asset.download_item(
         requester_pays_item,
         tmp_path,
-        Config(include=["thumbnail"], s3_requester_pays=True, alternate_assets=["s3"]),
+        config=Config(
+            include=["thumbnail"], s3_requester_pays=True, alternate_assets=["s3"]
+        ),
     )
     assert (
         os.path.getsize(

@@ -163,7 +163,6 @@ async def download_async(
         alternate_assets=alternate_assets,
         include=include,
         exclude=exclude,
-        file_name=file_name,
         s3_requester_pays=s3_requester_pays,
         s3_retry_mode=s3_retry_mode,
         s3_max_attempts=s3_max_attempts,
@@ -200,6 +199,7 @@ async def download_async(
             return await functions.download_item(
                 item,
                 directory_str,
+                file_name=file_name,
                 config=config,
                 queue=queue,
             )
@@ -211,6 +211,7 @@ async def download_async(
             return await functions.download_item_collection(
                 item_collection,
                 directory_str,
+                file_name=file_name,
                 config=config,
                 queue=queue,
             )
