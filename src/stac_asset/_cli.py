@@ -12,7 +12,7 @@ import click_logging
 import tqdm
 from pystac import Item, ItemCollection
 
-from . import Config, _download, functions
+from . import Config, DownloadStrategy, _download, functions
 from .config import DEFAULT_S3_MAX_ATTEMPTS, DEFAULT_S3_RETRY_MODE
 from .messages import (
     ErrorAssetDownload,
@@ -167,7 +167,8 @@ async def download_async(
         s3_requester_pays=s3_requester_pays,
         s3_retry_mode=s3_retry_mode,
         s3_max_attempts=s3_max_attempts,
-        warn=warn,
+        # TODO allow configuring of download strategy
+        download_strategy=DownloadStrategy.DELETE,
     )
 
     if href is None or href == "-":

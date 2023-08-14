@@ -9,7 +9,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Type, Union
 
-from pystac import Asset, Collection, Item
+from pystac import Asset, Collection, Item, STACObject
 from yarl import URL
 
 from .client import Client
@@ -19,7 +19,7 @@ from .filesystem_client import FilesystemClient
 from .http_client import HttpClient
 from .planetary_computer_client import PlanetaryComputerClient
 from .s3_client import S3Client
-from .strategy import FileNameStrategy
+from .strategy import DownloadStrategy, FileNameStrategy
 
 # Needed until we drop Python 3.8
 if TYPE_CHECKING:
@@ -40,13 +40,20 @@ class Download:
         self, make_directory: bool, clean: bool, queue: Optional[AnyQueue]
     ) -> Union[Download, WrappedError]:
         try:
-            await self.client.download_asset(
+            self.asset = await self.client.download_asset(
                 self.key, self.asset, self.path, make_directory, clean, queue
             )
         except Exception as error:
             return WrappedError(self, error)
-        else:
-            return self
+        if "alternate" not in self.asset.extra_fields:
+            if not has_alternate_assets_extension(self.owner):
+                self.owner.stac_extensions.append(
+                    "https://stac-extensions.github.io/alternate-assets/v1.1.0/schema.json"
+                )
+            self.asset.extra_fields["alternate"] = {}
+        self.asset.extra_fields["alternate"]["from"] = {"href": self.asset.href}
+        self.asset.href = str(self.path)
+        return self
 
 
 class Downloads:
@@ -112,11 +119,12 @@ class Downloads:
         exceptions = set()
         for result in results:
             if isinstance(result, WrappedError):
-                del result.download.owner.assets[result.download.key]
-                if self.config.warn:
-                    warnings.warn(str(result.error), DownloadWarning)
-                else:
+                if self.config.download_strategy == DownloadStrategy.ERROR:
                     exceptions.add(result.error)
+                else:
+                    if self.config.download_strategy == DownloadStrategy.DELETE:
+                        del result.download.owner.assets[result.download.key]
+                    warnings.warn(str(result.error), DownloadWarning)
         if exceptions:
             raise DownloadError(list(exceptions))
 
@@ -185,6 +193,13 @@ def guess_client_class_from_href(href: str) -> Type[Client]:
         return HttpClient
     else:
         raise ValueError(f"could not guess client class for href: {href}")
+
+
+def has_alternate_assets_extension(stac_object: STACObject) -> bool:
+    return any(
+        extension.startswith("https://stac-extensions.github.io/alternate-assets")
+        for extension in stac_object.stac_extensions
+    )
 
 
 class WrappedError:

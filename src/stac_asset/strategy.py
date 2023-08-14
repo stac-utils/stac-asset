@@ -2,7 +2,7 @@ from enum import Enum, auto
 
 
 class FileNameStrategy(Enum):
-    """Strategy to use when downloading assets."""
+    """Strategy to use for naming files."""
 
     FILE_NAME = auto()
     """Save the asset with the file name in its href.
@@ -13,3 +13,16 @@ class FileNameStrategy(Enum):
 
     KEY = auto()
     """Save the asset with its key as its file name."""
+
+
+class DownloadStrategy(Enum):
+    """Strategy to use when encountering errors during download."""
+
+    ERROR = auto()
+    """Throw an error if an asset cannot be downloaded."""
+
+    KEEP = auto()
+    """Warn, but keep the asset on the item."""
+
+    DELETE = auto()
+    """Warn, but delete the asset from the item."""
