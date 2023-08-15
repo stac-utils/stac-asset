@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Use multiple clients when downloading ([#46](https://github.com/stac-utils/stac-asset/pull/46))
 - `--alternate-assets` option to the CLI ([#46](https://github.com/stac-utils/stac-asset/pull/46))
-- Content-type checking ([#46](https://github.com/stac-utils/stac-asset/pull/46))
+- Content-type checking ([#46](https://github.com/stac-utils/stac-asset/pull/46), [#60](https://github.com/stac-utils/stac-asset/issues/60))
 - `Client.from_config` and `Client.close` ([#46](https://github.com/stac-utils/stac-asset/pull/46))
 - Retry configuration for S3 ([#47](https://github.com/stac-utils/stac-asset/pull/47))
 - `Collection` download ([#50](https://github.com/stac-utils/stac-asset/pull/50))

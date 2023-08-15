@@ -3,6 +3,7 @@ from .errors import ContentTypeError
 ALLOWABLE_PAIRS = [
     ("image/tiff", "image/tiff; application=geotiff; profile=cloud-optimized")
 ]
+IGNORED_CONTENT_TYPES = ["binary/octet-stream", "application/octet-stream"]
 
 
 def content_type(actual: str, expected: str) -> None:
@@ -20,6 +21,7 @@ def content_type(actual: str, expected: str) -> None:
     """
     if (
         actual != expected
+        and actual not in IGNORED_CONTENT_TYPES
         and (actual, expected) not in ALLOWABLE_PAIRS
         and (expected, actual) not in ALLOWABLE_PAIRS
     ):
