@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - USGS EROS client ([#37](https://github.com/stac-utils/stac-asset/pull/37))
 - `Client.default` ([#46](https://github.com/stac-utils/stac-asset/pull/46))
+- `Client.download_asset` ([#68](https://github.com/stac-utils/stac-asset/pull/68))
 
 ## [0.1.1] - 2023-07-12
 
