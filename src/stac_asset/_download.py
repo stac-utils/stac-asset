@@ -185,7 +185,6 @@ def guess_client_class(asset: Asset, config: Config) -> Type[Client]:
             if alternate_asset in alternate:
                 try:
                     href = alternate[alternate_asset]["href"]
-                    asset.extra_fields["alternate"]["original"] = {"href": href}
                     asset.href = href
                     return guess_client_class_from_href(href)
                 except KeyError:

@@ -12,3 +12,5 @@ def test_content_type() -> None:
     validate.content_type(
         "image/tiff; application=geotiff; profile=cloud-optimized", "image/tiff"
     )
+    validate.content_type("binary/octet-stream", "doesn't matter")
+    validate.content_type("application/octet-stream", "doesn't matter")
