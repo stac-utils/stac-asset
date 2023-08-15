@@ -96,6 +96,13 @@ def cli() -> None:
     is_flag=True,
     show_default=True,
 )
+@click.option(
+    "--overwrite",
+    help="Overwrite existing files if they exist on the filesystem",
+    default=False,
+    is_flag=True,
+    show_default=True,
+)
 # TODO add option to disable content type checking
 def download(
     href: Optional[str],
@@ -109,6 +116,7 @@ def download(
     s3_retry_mode: str,
     s3_max_attempts: int,
     warn: bool,
+    overwrite: bool,
 ) -> None:
     """Download STAC assets from an item or item collection.
 
@@ -142,6 +150,7 @@ def download(
             s3_retry_mode,
             s3_max_attempts,
             warn,
+            overwrite,
         )
     )
 
@@ -158,7 +167,12 @@ async def download_async(
     s3_retry_mode: str,
     s3_max_attempts: int,
     warn: bool,
+    overwrite: bool,
 ) -> None:
+    if warn:
+        download_strategy = DownloadStrategy.DELETE
+    else:
+        download_strategy = DownloadStrategy.ERROR
     config = Config(
         alternate_assets=alternate_assets,
         include=include,
@@ -166,8 +180,8 @@ async def download_async(
         s3_requester_pays=s3_requester_pays,
         s3_retry_mode=s3_retry_mode,
         s3_max_attempts=s3_max_attempts,
-        # TODO allow configuring of download strategy
-        download_strategy=DownloadStrategy.DELETE,
+        download_strategy=download_strategy,
+        overwrite=overwrite,
     )
 
     if href is None or href == "-":

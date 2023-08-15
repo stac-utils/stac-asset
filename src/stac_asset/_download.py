@@ -45,16 +45,18 @@ class Download:
     asset: Asset
     path: Path
     client: Client
+    overwrite: bool
 
     async def download(
         self, make_directory: bool, clean: bool, queue: Optional[AnyQueue]
     ) -> Union[Download, WrappedError]:
-        try:
-            self.asset = await self.client.download_asset(
-                self.key, self.asset, self.path, make_directory, clean, queue
-            )
-        except Exception as error:
-            return WrappedError(self, error)
+        if not self.overwrite and not os.path.exists(self.path):
+            try:
+                await self.client.download_asset(
+                    self.key, self.asset, self.path, make_directory, clean, queue
+                )
+            except Exception as error:
+                return WrappedError(self, error)
         self.asset.href = str(self.path)
         return self
 
@@ -122,6 +124,7 @@ class Downloads:
                     asset=asset,
                     path=root / asset_file_name,
                     client=client,
+                    overwrite=self.config.overwrite,
                 )
             )
 

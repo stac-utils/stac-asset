@@ -46,6 +46,9 @@ class Config:
     clean: bool = True
     """If true, clean up the downloaded file if it errors."""
 
+    overwrite: bool = False
+    """Download files even if they already exist locally."""
+
     earthdata_token: Optional[str] = None
     """A token for logging in to Earthdata."""
 
