@@ -12,7 +12,8 @@ import click_logging
 import tqdm
 from pystac import Item, ItemCollection
 
-from . import Config, DownloadStrategy, _download, functions
+from . import Config, DownloadStrategy, _functions
+from .client import Clients
 from .config import DEFAULT_S3_MAX_ATTEMPTS, DEFAULT_S3_RETRY_MODE
 from .messages import (
     ErrorAssetDownload,
@@ -210,7 +211,7 @@ async def download_async(
             item.make_asset_hrefs_absolute()
 
         async def download() -> Union[Item, ItemCollection]:
-            return await functions.download_item(
+            return await _functions.download_item(
                 item,
                 directory_str,
                 file_name=file_name,
@@ -222,7 +223,7 @@ async def download_async(
         item_collection = ItemCollection.from_dict(input_dict)
 
         async def download() -> Union[Item, ItemCollection]:
-            return await functions.download_item_collection(
+            return await _functions.download_item_collection(
                 item_collection,
                 directory_str,
                 file_name=file_name,
@@ -246,9 +247,8 @@ async def download_async(
 
 
 async def read_file(href: str, config: Config) -> bytes:
-    async with await _download.guess_client_class_from_href(href).from_config(
-        config
-    ) as client:
+    clients = Clients(config)
+    async with await clients.get_client(href) as client:
         data = b""
         async for chunk in client.open_href(href):
             data += chunk

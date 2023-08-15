@@ -10,6 +10,11 @@ unsupported, but is on the roadmap.
 """
 
 
+from ._functions import (
+    download_collection,
+    download_item,
+    download_item_collection,
+)
 from .client import Client
 from .config import Config
 from .earthdata_client import EarthdataClient
@@ -21,11 +26,6 @@ from .errors import (
     DownloadWarning,
 )
 from .filesystem_client import FilesystemClient
-from .functions import (
-    download_collection,
-    download_item,
-    download_item_collection,
-)
 from .http_client import HttpClient
 from .planetary_computer_client import PlanetaryComputerClient
 from .s3_client import S3Client

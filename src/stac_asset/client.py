@@ -1,20 +1,16 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from asyncio import Queue, QueueFull
+from asyncio import Lock, Queue, QueueFull
 from pathlib import Path
 from types import TracebackType
-from typing import Any, AsyncIterator, Optional, Type, TypeVar
+from typing import Any, AsyncIterator, Dict, Optional, Type, TypeVar
 
 import aiofiles
-from pystac import Asset
 from yarl import URL
 
 from .config import Config
 from .messages import (
-    ErrorAssetDownload,
-    FinishAssetDownload,
-    StartAssetDownload,
     WriteChunk,
 )
 from .types import PathLikeObject
@@ -123,64 +119,6 @@ class Client(ABC):
                     pass
             raise err
 
-    async def download_asset(
-        self,
-        key: str,
-        asset: Asset,
-        path: Path,
-        make_directory: bool = True,
-        clean: bool = True,
-        queue: Optional[Queue[Any]] = None,
-    ) -> Asset:
-        """Downloads an asset.
-
-        Args:
-            key: The asset key
-            asset: The asset
-            clean: If an error occurs, delete the output file if it exists
-            make_directory: Make the parent directory if it doesn't exist
-            path: The path to which the asset will be downloaded
-            queue: An optional queue to use for progress reporting
-
-        Returns:
-            Asset: The asset with an updated href
-
-        Raises:
-            ValueError: Raised if the asset does not have an absolute href
-        """
-        href = asset.get_absolute_href()
-        if href is None:
-            raise ValueError(
-                f"asset '{key}' does not have an absolute href: {asset.href}"
-            )
-        if not path.parent.exists():
-            if make_directory:
-                path.parent.mkdir(parents=True, exist_ok=True)
-            else:
-                raise FileNotFoundError(
-                    f"output directory does not exist: {path.parent}"
-                )
-        if queue:
-            if asset.owner:
-                item_id = asset.owner.id
-            else:
-                item_id = None
-            await queue.put(
-                StartAssetDownload(key=key, href=href, path=path, item_id=item_id)
-            )
-        try:
-            await self.download_href(
-                href, path, clean=clean, content_type=asset.media_type, queue=queue
-            )
-        except Exception as err:
-            if queue:
-                await queue.put(ErrorAssetDownload(key=key, href=href, path=path))
-            raise err
-
-        if queue:
-            await queue.put(FinishAssetDownload(key=key, href=href, path=path))
-        return asset
-
     async def close(self) -> None:
         """Close this client."""
         pass
@@ -195,3 +133,56 @@ class Client(ABC):
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
         return None
+
+
+class Clients:
+    """An async-safe cache of clients."""
+
+    lock: Lock
+    clients: Dict[Type[Client], Client]
+    config: Config
+
+    def __init__(self, config: Config) -> None:
+        self.lock = Lock()
+        self.clients = dict()
+        self.config = config
+
+    async def get_client(self, href: str) -> Client:
+        """Gets a client for the provided href.
+
+        Args:
+            href: The file href to download
+
+        Returns:
+            Client: An instance of that client.
+        """
+        from .filesystem_client import FilesystemClient
+        from .http_client import HttpClient
+        from .planetary_computer_client import PlanetaryComputerClient
+        from .s3_client import S3Client
+
+        url = URL(href)
+        if not url.host:
+            client_class: Type[Client] = FilesystemClient
+        elif url.scheme == "s3":
+            client_class = S3Client
+        elif url.host.endswith("blob.core.windows.net"):
+            client_class = PlanetaryComputerClient
+        elif url.scheme == "http" or url.scheme == "https":
+            client_class = HttpClient
+        else:
+            raise ValueError(f"could not guess client class for href: {href}")
+
+        async with self.lock:
+            if client_class in self.clients:
+                return self.clients[client_class]
+            else:
+                client = await client_class.from_config(self.config)
+                self.clients[client_class] = client
+                return client
+
+    async def close_all(self) -> None:
+        """Close all clients."""
+        async with self.lock:
+            for client in self.clients.values():
+                await client.close()
