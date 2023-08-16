@@ -96,6 +96,7 @@ class Downloads:
             stac_object.set_self_href(None)
 
         asset_file_names: Set[str] = set()
+        assets = dict()
         for key, asset in (
             (k, a)
             for k, a in stac_object.assets.items()
@@ -110,12 +111,11 @@ class Downloads:
                 raise ValueError(
                     f"unexpected file name strategy: {self.config.file_name_strategy}"
                 )
-
             if asset_file_name in asset_file_names:
                 raise AssetOverwriteError(list(asset_file_names))
-            else:
-                asset_file_names.add(asset_file_name)
 
+            asset_file_names.add(asset_file_name)
+            assets[key] = asset
             self.downloads.append(
                 Download(
                     owner=stac_object,
@@ -126,6 +126,7 @@ class Downloads:
                     config=self.config,
                 )
             )
+        stac_object.assets = assets
 
     async def download(self, messages: Optional[AnyQueue]) -> None:
         results: Queue[Union[WrappedError, Download]] = Queue()

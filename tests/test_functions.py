@@ -136,7 +136,10 @@ async def test_item_download_same_file_name(tmp_path: Path, item: Item) -> None:
 
 async def test_include(tmp_path: Path, item: Item) -> None:
     item.assets["other-data"] = item.assets["data"].clone()
-    await stac_asset.download_item(item, tmp_path, config=Config(include=["data"]))
+    item = await stac_asset.download_item(
+        item, tmp_path, config=Config(include=["data"])
+    )
+    assert len(item.assets) == 1
 
 
 async def test_exclude(tmp_path: Path, item: Item) -> None:
