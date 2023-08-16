@@ -334,3 +334,7 @@ class Download:
     href: str
     path: str
     progress_bar: Tqdm
+
+
+if __name__ == "__main__":
+    cli()
