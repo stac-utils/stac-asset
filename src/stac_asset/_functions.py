@@ -4,7 +4,7 @@ import asyncio
 import json
 import os.path
 import warnings
-from asyncio import Queue
+from asyncio import CancelledError, Queue, Task
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
@@ -25,7 +25,12 @@ from yarl import URL
 from .client import Clients
 from .config import Config
 from .errors import AssetOverwriteError, DownloadError, DownloadWarning
-from .messages import ErrorAssetDownload, FinishAssetDownload, StartAssetDownload
+from .messages import (
+    ErrorAssetDownload,
+    FinishAssetDownload,
+    Message,
+    StartAssetDownload,
+)
 from .strategy import ErrorStrategy, FileNameStrategy
 from .types import PathLikeObject
 
@@ -46,8 +51,10 @@ class Download:
     config: Config
 
     async def download(
-        self, queue: Optional[AnyQueue]
-    ) -> Union[Download, WrappedError]:
+        self,
+        results: Queue[Union[WrappedError, Download]],
+        messages: Optional[AnyQueue],
+    ) -> None:
         if not self.config.overwrite and not os.path.exists(self.path):
             try:
                 await download_asset(
@@ -55,13 +62,14 @@ class Download:
                     self.asset,
                     self.path,
                     config=self.config,
-                    queue=queue,
+                    messages=messages,
                     clients=self.clients,
                 )
             except Exception as error:
-                return WrappedError(self, error)
-        self.asset.href = str(self.path)
-        return self
+                await results.put(WrappedError(self, error))
+            else:
+                self.asset.href = str(self.path)
+                await results.put(self)
 
 
 class Downloads:
@@ -119,20 +127,23 @@ class Downloads:
                 )
             )
 
-    async def download(self, queue: Optional[AnyQueue]) -> None:
-        tasks = set()
+    async def download(self, messages: Optional[AnyQueue]) -> None:
+        results: Queue[Union[WrappedError, Download]] = Queue()
+        tasks: Set[Task[None]] = set()
         for download in self.downloads:
-            tasks.add(
-                asyncio.create_task(
-                    download.download(
-                        queue=queue,
-                    )
+            task = asyncio.create_task(
+                download.download(
+                    results=results,
+                    messages=messages,
                 )
             )
-        results = await asyncio.gather(*tasks)
+            tasks.add(task)
+            task.add_done_callback(tasks.discard)
 
-        exceptions = set()
-        for result in results:
+        exceptions = list()
+        completed_tasks = 0
+        while completed_tasks < len(tasks):
+            result = await results.get()
             if isinstance(result, WrappedError):
                 if self.config.error_strategy == ErrorStrategy.DELETE:
                     del result.download.owner.assets[result.download.key]
@@ -140,12 +151,25 @@ class Downloads:
                     # Simple check to make sure we haven't added other
                     # strategies that we're not handling
                     assert self.config.error_strategy == ErrorStrategy.KEEP
+
                 if self.config.warn:
                     warnings.warn(str(result.error), DownloadWarning)
+                elif self.config.fail_fast:
+                    for task in tasks:
+                        if not task.done():
+                            task.cancel()
+                    try:
+                        await asyncio.gather(*tasks)
+                    except CancelledError:
+                        # We cancelled them, so this is ok
+                        pass
+                    raise result.error
                 else:
-                    exceptions.add(result.error)
+                    exceptions.append(result.error)
+
+            completed_tasks += 1
         if exceptions:
-            raise DownloadError(list(exceptions))
+            raise DownloadError(exceptions)
 
     async def __aenter__(self) -> Downloads:
         return self
@@ -291,7 +315,7 @@ async def download_asset(
     asset: Asset,
     path: Path,
     config: Config,
-    queue: Optional[Queue[Any]] = None,
+    messages: Optional[Queue[Message]] = None,
     clients: Optional[Clients] = None,
 ) -> Asset:
     """Downloads an asset.
@@ -301,7 +325,7 @@ async def download_asset(
         asset: The asset
         path: The path to which the asset will be downloaded
         config: The download configuration
-        queue: An optional queue to use for progress reporting
+        messages: An optional queue to use for progress reporting
         clients: A async-safe cache of clients. If not provided, a new one
             will be created.
 
@@ -327,25 +351,29 @@ async def download_asset(
         raise ValueError(f"asset '{key}' does not have an absolute href: {asset.href}")
     client = await clients.get_client(href)
 
-    if queue:
+    if messages:
         if asset.owner:
             item_id = asset.owner.id
         else:
             item_id = None
-        await queue.put(
+        await messages.put(
             StartAssetDownload(key=key, href=href, path=path, item_id=item_id)
         )
     try:
         await client.download_href(
-            href, path, clean=config.clean, content_type=asset.media_type, queue=queue
+            href,
+            path,
+            clean=config.clean,
+            content_type=asset.media_type,
+            messages=messages,
         )
     except Exception as err:
-        if queue:
-            await queue.put(ErrorAssetDownload(key=key, href=href, path=path))
+        if messages:
+            await messages.put(ErrorAssetDownload(key=key, href=href, path=path))
         raise err
 
-    if queue:
-        await queue.put(FinishAssetDownload(key=key, href=href, path=path))
+    if messages:
+        await messages.put(FinishAssetDownload(key=key, href=href, path=path))
     return asset
 
 

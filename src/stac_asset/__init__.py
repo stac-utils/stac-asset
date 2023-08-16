@@ -20,7 +20,7 @@ from .config import Config
 from .earthdata_client import EarthdataClient
 from .errors import (
     AssetOverwriteError,
-    CannotIncludeAndExclude,
+    ConfigError,
     ContentTypeError,
     DownloadError,
     DownloadWarning,
@@ -31,16 +31,17 @@ from .planetary_computer_client import PlanetaryComputerClient
 from .s3_client import S3Client
 from .strategy import ErrorStrategy, FileNameStrategy
 
+# Keep this list sorted
 __all__ = [
-    "DownloadWarning",
     "AssetOverwriteError",
-    "CannotIncludeAndExclude",
     "Client",
     "Config",
+    "ConfigError",
     "ContentTypeError",
     "DownloadError",
-    "ErrorStrategy",
+    "DownloadWarning",
     "EarthdataClient",
+    "ErrorStrategy",
     "FileNameStrategy",
     "FilesystemClient",
     "HttpClient",

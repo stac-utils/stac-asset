@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from asyncio import Queue
 from types import TracebackType
-from typing import Any, AsyncIterator, Optional, Type
+from typing import AsyncIterator, Optional, Type
 
 import aiobotocore.session
 import botocore.config
@@ -18,7 +18,7 @@ from .config import (
     DEFAULT_S3_RETRY_MODE,
     Config,
 )
-from .messages import OpenUrl
+from .messages import Message, OpenUrl
 
 
 class S3Client(Client):
@@ -74,14 +74,14 @@ class S3Client(Client):
         self,
         url: URL,
         content_type: Optional[str] = None,
-        queue: Optional[Queue[Any]] = None,
+        messages: Optional[Queue[Message]] = None,
     ) -> AsyncIterator[bytes]:
         """Opens an s3 url and iterates over its bytes.
 
         Args:
             url: The url to open
             content_type: The expected content type
-            queue: An optional queue to use for progress reporting
+            messages: An optional queue to use for progress reporting
 
         Yields:
             AsyncIterator[bytes]: An iterator over the file's bytes
@@ -113,8 +113,8 @@ class S3Client(Client):
             response = await client.get_object(**params)
             if content_type:
                 validate.content_type(response["ContentType"], content_type)
-            if queue:
-                await queue.put(OpenUrl(url=url, size=response["ContentLength"]))
+            if messages:
+                await messages.put(OpenUrl(url=url, size=response["ContentLength"]))
             async for chunk in response["Body"]:
                 yield chunk
 

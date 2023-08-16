@@ -4,13 +4,14 @@ from abc import ABC, abstractmethod
 from asyncio import Lock, Queue, QueueFull
 from pathlib import Path
 from types import TracebackType
-from typing import Any, AsyncIterator, Dict, Optional, Type, TypeVar
+from typing import AsyncIterator, Dict, Optional, Type, TypeVar
 
 import aiofiles
 from yarl import URL
 
 from .config import Config
 from .messages import (
+    Message,
     WriteChunk,
 )
 from .types import PathLikeObject
@@ -40,7 +41,7 @@ class Client(ABC):
         self,
         url: URL,
         content_type: Optional[str] = None,
-        queue: Optional[Queue[Any]] = None,
+        messages: Optional[Queue[Message]] = None,
     ) -> AsyncIterator[bytes]:
         """Opens a url and yields an iterator over its bytes.
 
@@ -50,7 +51,7 @@ class Client(ABC):
             url: The input url
             content_type: The expected content type, to be checked by the client
                 implementations
-            queue: An optional queue to use for progress reporting
+            messages: An optional queue to use for progress reporting
 
         Yields:
             AsyncIterator[bytes]: An iterator over chunks of the read file
@@ -63,20 +64,20 @@ class Client(ABC):
         self,
         href: str,
         content_type: Optional[str] = None,
-        queue: Optional[Queue[Any]] = None,
+        messages: Optional[Queue[Message]] = None,
     ) -> AsyncIterator[bytes]:
         """Opens a href and yields an iterator over its bytes.
 
         Args:
             href: The input href
             content_type: The expected content type
-            queue: An optional queue to use for progress reporting
+            messages: An optional queue to use for progress reporting
 
         Yields:
             AsyncIterator[bytes]: An iterator over chunks of the read file
         """
         async for chunk in self.open_url(
-            URL(href), content_type=content_type, queue=queue
+            URL(href), content_type=content_type, messages=messages
         ):
             yield chunk
 
@@ -86,7 +87,7 @@ class Client(ABC):
         path: PathLikeObject,
         clean: bool = True,
         content_type: Optional[str] = None,
-        queue: Optional[Queue[Any]] = None,
+        messages: Optional[Queue[Message]] = None,
     ) -> None:
         """Downloads a file to the local filesystem.
 
@@ -95,17 +96,17 @@ class Client(ABC):
             path: The output file path
             clean: If an error occurs, delete the output file if it exists
             content_type: The expected content type
-            queue: An optional queue to use for progress reporting
+            messages: An optional queue to use for progress reporting
         """
         try:
             async with aiofiles.open(path, mode="wb") as f:
                 async for chunk in self.open_href(
-                    href, content_type=content_type, queue=queue
+                    href, content_type=content_type, messages=messages
                 ):
                     await f.write(chunk)
-                    if queue:
+                    if messages:
                         try:
-                            queue.put_nowait(
+                            messages.put_nowait(
                                 WriteChunk(href=href, path=Path(path), size=len(chunk))
                             )
                         except QueueFull:

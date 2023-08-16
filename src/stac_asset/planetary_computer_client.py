@@ -70,7 +70,7 @@ class PlanetaryComputerClient(HttpClient):
         self,
         url: URL,
         content_type: Optional[str] = None,
-        queue: Optional[Queue[Any]] = None,
+        messages: Optional[Queue[Any]] = None,
     ) -> AsyncIterator[bytes]:
         """Opens a url and iterates over its bytes.
 
@@ -88,7 +88,7 @@ class PlanetaryComputerClient(HttpClient):
         Args:
             url: The url to open
             content_type: The expected content type
-            queue: An optional queue to use for progress reporting
+            messages: An optional queue to use for progress reporting
 
         Yields:
             AsyncIterator[bytes]: An iterator over the file's bytes
@@ -101,7 +101,7 @@ class PlanetaryComputerClient(HttpClient):
         ):
             url = await self._sign(url)
         async for chunk in super().open_url(
-            url, content_type=content_type, queue=queue
+            url, content_type=content_type, messages=messages
         ):
             yield chunk
 
