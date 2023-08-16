@@ -54,7 +54,7 @@ class Download:
         self,
         messages: Optional[AnyQueue],
     ) -> Union[Download, WrappedError]:
-        if not self.config.overwrite and not os.path.exists(self.path):
+        if not os.path.exists(self.path) or self.config.overwrite:
             try:
                 await download_asset(
                     self.key,
