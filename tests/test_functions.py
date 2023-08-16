@@ -6,6 +6,7 @@ from typing import Any
 import pytest
 import stac_asset
 from pystac import Asset, Collection, Item, ItemCollection
+from pytest import LogCaptureFixture
 from stac_asset import (
     AssetOverwriteError,
     Config,
@@ -70,7 +71,9 @@ async def test_download_missing_asset_delete(tmp_path: Path, item: Item) -> None
     assert "does-not-exist" not in item.assets
 
 
-async def test_download_missing_asset_fail_fast(tmp_path: Path, item: Item) -> None:
+async def test_download_missing_asset_fail_fast(
+    tmp_path: Path, item: Item, caplog: LogCaptureFixture
+) -> None:
     item.assets["does-not-exist"] = Asset("not-a-file.md5")
     with pytest.raises(FileNotFoundError):
         await stac_asset.download_item(

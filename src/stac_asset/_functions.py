@@ -4,7 +4,7 @@ import asyncio
 import json
 import os.path
 import warnings
-from asyncio import CancelledError, Queue, Task
+from asyncio import Queue, Task
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
@@ -52,9 +52,8 @@ class Download:
 
     async def download(
         self,
-        results: Queue[Union[WrappedError, Download]],
         messages: Optional[AnyQueue],
-    ) -> None:
+    ) -> Union[Download, WrappedError]:
         if not self.config.overwrite and not os.path.exists(self.path):
             try:
                 await download_asset(
@@ -66,10 +65,13 @@ class Download:
                     clients=self.clients,
                 )
             except Exception as error:
-                await results.put(WrappedError(self, error))
-            else:
-                self.asset.href = str(self.path)
-                await results.put(self)
+                if self.config.fail_fast:
+                    raise error
+                else:
+                    return WrappedError(self, error)
+
+        self.asset.href = str(self.path)
+        return self
 
 
 class Downloads:
@@ -129,22 +131,28 @@ class Downloads:
         stac_object.assets = assets
 
     async def download(self, messages: Optional[AnyQueue]) -> None:
-        results: Queue[Union[WrappedError, Download]] = Queue()
-        tasks: Set[Task[None]] = set()
+        tasks: Set[Task[Union[Download, WrappedError]]] = set()
         for download in self.downloads:
             task = asyncio.create_task(
                 download.download(
-                    results=results,
                     messages=messages,
                 )
             )
             tasks.add(task)
             task.add_done_callback(tasks.discard)
 
+        try:
+            results = await asyncio.gather(*tasks)
+        except Exception as error:
+            # We failed fast
+            for task in tasks:
+                if not task.done():
+                    task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            raise error
+
         exceptions = list()
-        completed_tasks = 0
-        while completed_tasks < len(tasks):
-            result = await results.get()
+        for result in results:
             if isinstance(result, WrappedError):
                 if self.config.error_strategy == ErrorStrategy.DELETE:
                     del result.download.owner.assets[result.download.key]
@@ -155,20 +163,8 @@ class Downloads:
 
                 if self.config.warn:
                     warnings.warn(str(result.error), DownloadWarning)
-                elif self.config.fail_fast:
-                    for task in tasks:
-                        if not task.done():
-                            task.cancel()
-                    try:
-                        await asyncio.gather(*tasks)
-                    except CancelledError:
-                        # We cancelled them, so this is ok
-                        pass
-                    raise result.error
                 else:
                     exceptions.append(result.error)
-
-            completed_tasks += 1
         if exceptions:
             raise DownloadError(exceptions)
 
