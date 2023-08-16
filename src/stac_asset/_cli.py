@@ -5,7 +5,7 @@ import os
 import sys
 from asyncio import Queue
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 import click
 import click_logging
@@ -281,49 +281,46 @@ async def read_file(href: str, config: Config) -> bytes:
 async def report_progress(queue: Optional[AnyQueue]) -> None:
     if queue is None:
         return
-    downloads: Dict[str, Download] = dict()
+    progress_bar = tqdm.tqdm(
+        unit="B",
+        unit_scale=True,
+        unit_divisor=1024,
+    )
+    sizes = dict()
+    assets = 0
+    done = 0
+    errors = 0
+    total = 0
+    n = 0
+    progress_bar.set_postfix_str(f"{errors} errors")
     while True:
         message = await queue.get()
         if isinstance(message, StartAssetDownload):
-            progress_bar = tqdm.tqdm(
-                position=len(downloads),
-                unit="B",
-                unit_scale=True,
-                unit_divisor=1024,
-                leave=False,
-            )
-            if message.item_id:
-                description = f"{message.item_id} [{message.key}]"
-            else:
-                description = message.key
-            progress_bar.set_description_str(description)
-            downloads[message.href] = Download(
-                key=message.key,
-                item_id=message.item_id,
-                href=message.href,
-                path=str(message.path),
-                progress_bar=progress_bar,
-            )
+            assets += 1
+            progress_bar.set_description(f"{done}/{assets}")
         elif isinstance(message, OpenUrl):
-            download = downloads.get(str(message.url))
-            if download:
-                if message.size:
-                    download.progress_bar.reset(total=message.size)
+            if message.size:
+                total += message.size
+                sizes[str(message.url)] = message.size
+                progress_bar.reset(total=total)
+                progress_bar.update(n)
         elif isinstance(message, FinishAssetDownload):
-            download = downloads.get(message.href)
-            if download:
-                download.progress_bar.close()
+            done += 1
+            progress_bar.set_description_str(f"{done}/{assets}")
         elif isinstance(message, ErrorAssetDownload):
-            download = downloads.get(message.href)
-            if download:
-                download.progress_bar.close()
+            done += 1
+            errors += 1
+            if message.href in sizes:
+                total -= sizes[message.href]
+                progress_bar.reset(total=total)
+                progress_bar.update(n)
+            progress_bar.set_postfix_str(f"{errors} errors")
+            progress_bar.set_description_str(f"{done}/{assets}")
         elif isinstance(message, WriteChunk):
-            download = downloads.get(message.href)
-            if download:
-                download.progress_bar.update(message.size)
+            n += message.size
+            progress_bar.update(message.size)
         elif message is None:
-            for download in downloads.values():
-                download.progress_bar.close()
+            progress_bar.close()
             return
 
 
