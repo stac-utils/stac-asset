@@ -14,13 +14,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `Client.from_config` and `Client.close` ([#46](https://github.com/stac-utils/stac-asset/pull/46))
 - Retry configuration for S3 ([#47](https://github.com/stac-utils/stac-asset/pull/47))
 - `Collection` download ([#50](https://github.com/stac-utils/stac-asset/pull/50))
-- Progress reporting ([#55](https://github.com/stac-utils/stac-asset/pull/55))
-- `DownloadStrategy` ([#64](https://github.com/stac-utils/stac-asset/pull/64))
+- Progress reporting ([#55](https://github.com/stac-utils/stac-asset/pull/55), [#69](https://github.com/stac-utils/stac-asset/pull/69))
+- `ErrorStrategy` ([#69](https://github.com/stac-utils/stac-asset/pull/69))
+- `fail_fast` ([#69](https://github.com/stac-utils/stac-asset/pull/69))
 
 ### Changed
 
 - Use `Config` instead of standalone arguments ([#45](https://github.com/stac-utils/stac-asset/pull/45), [#67](https://github.com/stac-utils/stac-asset/pull/67))
-- s/CantIncludeAndExclude/CannotIncludeAndExclude/ ([#45](https://github.com/stac-utils/stac-asset/pull/45))
 - Re-use the same client for an entire item collection ([#59](https://github.com/stac-utils/stac-asset/pull/59))
 
 ### Removed
