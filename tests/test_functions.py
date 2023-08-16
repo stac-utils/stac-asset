@@ -11,8 +11,8 @@ from stac_asset import (
     CannotIncludeAndExclude,
     Config,
     DownloadError,
-    DownloadStrategy,
     DownloadWarning,
+    ErrorStrategy,
     FileNameStrategy,
 )
 
@@ -37,9 +37,13 @@ async def test_download_item_with_file_name(tmp_path: Path, item: Item) -> None:
 async def test_download_missing_asset_error(tmp_path: Path, item: Item) -> None:
     item.assets["does-not-exist"] = Asset("not-a-file.md5")
     with pytest.raises(DownloadError):
-        await stac_asset.download_item(
-            item, tmp_path, config=Config(download_strategy=DownloadStrategy.ERROR)
-        )
+        await stac_asset.download_item(item, tmp_path, config=Config(warn=False))
+
+
+async def test_download_missing_asset_warn(tmp_path: Path, item: Item) -> None:
+    item.assets["does-not-exist"] = Asset("not-a-file.md5")
+    with pytest.warns(DownloadWarning):
+        await stac_asset.download_item(item, tmp_path, config=Config(warn=True))
 
 
 async def test_download_missing_asset_keep(
@@ -48,7 +52,9 @@ async def test_download_missing_asset_keep(
     item.assets["does-not-exist"] = Asset("not-a-file.md5")
     with pytest.warns(DownloadWarning):
         item = await stac_asset.download_item(
-            item, tmp_path, config=Config(download_strategy=DownloadStrategy.KEEP)
+            item,
+            tmp_path,
+            config=Config(error_strategy=ErrorStrategy.KEEP, warn=True),
         )
     assert item.assets["does-not-exist"].href == str(data_path / "not-a-file.md5")
 
@@ -57,7 +63,9 @@ async def test_download_missing_asset_delete(tmp_path: Path, item: Item) -> None
     item.assets["does-not-exist"] = Asset("not-a-file.md5")
     with pytest.warns(DownloadWarning):
         item = await stac_asset.download_item(
-            item, tmp_path, config=Config(download_strategy=DownloadStrategy.DELETE)
+            item,
+            tmp_path,
+            config=Config(error_strategy=ErrorStrategy.DELETE, warn=True),
         )
     assert "does-not-exist" not in item.assets
 
@@ -105,7 +113,7 @@ async def test_item_download_no_directory(tmp_path: Path, item: Item) -> None:
 
 async def test_item_download_key(tmp_path: Path, item: Item) -> None:
     await stac_asset.download_item(
-        item, tmp_path, config=Config(asset_file_name_strategy=FileNameStrategy.KEY)
+        item, tmp_path, config=Config(file_name_strategy=FileNameStrategy.KEY)
     )
     assert Path(tmp_path / "data.jpg").exists()
 
@@ -142,7 +150,7 @@ async def test_multiple_clients(tmp_path: Path, item: Item) -> None:
         href="https://storage.googleapis.com/open-cogs/stac-examples/20201211_223832_CS2.jpg",
     )
     item = await stac_asset.download_item(
-        item, tmp_path, config=Config(asset_file_name_strategy=FileNameStrategy.KEY)
+        item, tmp_path, config=Config(file_name_strategy=FileNameStrategy.KEY)
     )
 
 

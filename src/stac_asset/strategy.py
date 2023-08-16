@@ -15,14 +15,11 @@ class FileNameStrategy(Enum):
     """Save the asset with its key as its file name."""
 
 
-class DownloadStrategy(Enum):
+class ErrorStrategy(Enum):
     """Strategy to use when encountering errors during download."""
 
-    ERROR = auto()
-    """Throw an error if an asset cannot be downloaded."""
-
     KEEP = auto()
-    """Warn, but keep the asset on the item."""
+    """Keep the asset on the item with its original href."""
 
     DELETE = auto()
-    """Warn, but delete the asset from the item."""
+    """Delete the asset from the item."""
