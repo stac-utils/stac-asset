@@ -45,8 +45,9 @@ docs = ["pydata-sphinx-theme~=0.13", "sphinx~=7.0"]
 stac-asset = "stac_asset._cli:cli"
 
 [project.urls]
-repository = "https://github.com/stac-utils/stac-asset"
-changelog = "https://github.com/stac-utils/stac-asset/blob/main/CHANGELOG.md"
+Github = "https://github.com/stac-utils/stac-asset"
+CHANGELOG = "https://github.com/stac-utils/stac-asset/blob/main/CHANGELOG.md"
+Issues = "https://github.com/stac-utils/stac-asset/issues"
 
 [tool.mypy]
 strict = true
