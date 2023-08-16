@@ -1,5 +1,5 @@
 import pytest
-from stac_asset import CannotIncludeAndExclude, Config
+from stac_asset import Config, ConfigError
 
 
 def test_validate_default() -> None:
@@ -9,5 +9,11 @@ def test_validate_default() -> None:
 
 def test_validate_include_and_exclude() -> None:
     config = Config(include=["foo"], exclude=["bar"])
-    with pytest.raises(CannotIncludeAndExclude):
+    with pytest.raises(ConfigError):
+        config.validate()
+
+
+def test_warn_and_fail_fast() -> None:
+    config = Config(warn=True, fail_fast=True)
+    with pytest.raises(ConfigError):
         config.validate()

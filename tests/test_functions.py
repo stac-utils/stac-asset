@@ -8,8 +8,8 @@ import stac_asset
 from pystac import Asset, Collection, Item, ItemCollection
 from stac_asset import (
     AssetOverwriteError,
-    CannotIncludeAndExclude,
     Config,
+    ConfigError,
     DownloadError,
     DownloadWarning,
     ErrorStrategy,
@@ -68,6 +68,16 @@ async def test_download_missing_asset_delete(tmp_path: Path, item: Item) -> None
             config=Config(error_strategy=ErrorStrategy.DELETE, warn=True),
         )
     assert "does-not-exist" not in item.assets
+
+
+async def test_download_missing_asset_fail_fast(tmp_path: Path, item: Item) -> None:
+    item.assets["does-not-exist"] = Asset("not-a-file.md5")
+    with pytest.raises(FileNotFoundError):
+        await stac_asset.download_item(
+            item,
+            tmp_path,
+            config=Config(fail_fast=True),
+        )
 
 
 async def test_download_item_collection(
@@ -138,7 +148,7 @@ async def test_exclude(tmp_path: Path, item: Item) -> None:
 
 async def test_cant_include_and_exclude(tmp_path: Path, item: Item) -> None:
     item.assets["other-data"] = item.assets["data"].clone()
-    with pytest.raises(CannotIncludeAndExclude):
+    with pytest.raises(ConfigError):
         await stac_asset.download_item(
             item, tmp_path, config=Config(include=["data"], exclude=["other-data"])
         )

@@ -4,7 +4,7 @@ import copy
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from .errors import CannotIncludeAndExclude
+from .errors import ConfigError
 from .strategy import ErrorStrategy, FileNameStrategy
 
 DEFAULT_S3_REGION_NAME = "us-west-2"
@@ -24,6 +24,13 @@ class Config:
 
     warn: bool = False
     """If an error occurs during download, warn instead of raising the error."""
+
+    fail_fast: bool = False
+    """If an error occurs during download, fail immediately.
+
+    By default, all downloads are completed before raising/warning any errors.
+    Mutually exclusive with ``warn``.
+    """
 
     error_strategy: ErrorStrategy = ErrorStrategy.DELETE
     """The strategy to use when errors occur during download."""
@@ -74,7 +81,12 @@ class Config:
             CannotIncludeAndExclude: ``include`` and ``exclude`` are mutually exclusive
         """
         if self.include and self.exclude:
-            raise CannotIncludeAndExclude(include=self.include, exclude=self.exclude)
+            raise ConfigError(
+                f"cannot provide both include and exclude: include={self.include}, "
+                "exclude={self.exclude}"
+            )
+        if self.warn and self.fail_fast:
+            raise ConfigError("cannot warn and fail fast as the same time")
 
     def copy(self) -> Config:
         """Returns a deep copy of this config.

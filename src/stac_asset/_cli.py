@@ -109,6 +109,14 @@ def cli() -> None:
     show_default=True,
 )
 @click.option(
+    "--fail-fast",
+    help="Fail immediately on download error, instead of waiting until all are "
+    "complete. Mutually exclusive with --warn",
+    default=False,
+    is_flag=True,
+    show_default=True,
+)
+@click.option(
     "--overwrite",
     help="Overwrite existing files if they exist on the filesystem",
     default=False,
@@ -129,6 +137,7 @@ def download(
     s3_max_attempts: int,
     warn: bool,
     keep: bool,
+    fail_fast: bool,
     overwrite: bool,
 ) -> None:
     """Download STAC assets from an item or item collection.
@@ -164,6 +173,7 @@ def download(
             s3_max_attempts,
             warn=warn,
             keep=keep,
+            fail_fast=fail_fast,
             overwrite=overwrite,
         )
     )
@@ -182,6 +192,7 @@ async def download_async(
     s3_max_attempts: int,
     warn: bool,
     keep: bool,
+    fail_fast: bool,
     overwrite: bool,
 ) -> None:
     config = Config(
@@ -193,6 +204,7 @@ async def download_async(
         s3_max_attempts=s3_max_attempts,
         error_strategy=ErrorStrategy.KEEP if keep else ErrorStrategy.DELETE,
         warn=warn,
+        fail_fast=fail_fast,
         overwrite=overwrite,
     )
 

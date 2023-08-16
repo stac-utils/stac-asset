@@ -3,13 +3,13 @@ from __future__ import annotations
 import os.path
 from asyncio import Queue
 from types import TracebackType
-from typing import Any, AsyncIterator, Optional, Type
+from typing import AsyncIterator, Optional, Type
 
 import aiofiles
 from yarl import URL
 
 from .client import Client
-from .messages import OpenUrl
+from .messages import Message, OpenUrl
 
 
 class FilesystemClient(Client):
@@ -22,7 +22,7 @@ class FilesystemClient(Client):
         self,
         url: URL,
         content_type: Optional[str] = None,
-        queue: Optional[Queue[Any]] = None,
+        messages: Optional[Queue[Message]] = None,
     ) -> AsyncIterator[bytes]:
         """Iterates over data from a local url.
 
@@ -30,7 +30,7 @@ class FilesystemClient(Client):
             url: The url to read bytes from
             content_type: The expected content type. Ignored by this client,
                 because filesystems don't have content types.
-            queue: An optional queue to use for progress reporting
+            messages: An optional queue to use for progress reporting
 
         Yields:
             AsyncIterator[bytes]: An iterator over the file's bytes.
@@ -44,8 +44,8 @@ class FilesystemClient(Client):
                 "cannot read a file with the filesystem client if it has a url scheme: "
                 + str(url)
             )
-        if queue:
-            await queue.put(OpenUrl(size=os.path.getsize(url.path), url=url))
+        if messages:
+            await messages.put(OpenUrl(size=os.path.getsize(url.path), url=url))
         async with aiofiles.open(url.path, "rb") as f:
             async for chunk in f:
                 yield chunk

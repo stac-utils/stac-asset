@@ -6,7 +6,12 @@ from yarl import URL
 
 
 @dataclass
-class StartAssetDownload:
+class Message:
+    """A message about downloading."""
+
+
+@dataclass
+class StartAssetDownload(Message):
     """Sent when an asset starts downloading."""
 
     key: str
@@ -23,7 +28,7 @@ class StartAssetDownload:
 
 
 @dataclass
-class ErrorAssetDownload:
+class ErrorAssetDownload(Message):
     """Sent when an asset starts downloading."""
 
     key: str
@@ -37,7 +42,7 @@ class ErrorAssetDownload:
 
 
 @dataclass
-class FinishAssetDownload:
+class FinishAssetDownload(Message):
     """Sent when an asset finishes downloading."""
 
     key: str
@@ -51,7 +56,7 @@ class FinishAssetDownload:
 
 
 @dataclass
-class WriteChunk:
+class WriteChunk(Message):
     """Sent when a chunk is written to disk."""
 
     href: str
@@ -65,7 +70,7 @@ class WriteChunk:
 
 
 @dataclass
-class OpenUrl:
+class OpenUrl(Message):
     """Sent when a url is first opened."""
 
     url: URL

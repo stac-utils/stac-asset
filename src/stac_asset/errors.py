@@ -18,18 +18,8 @@ class DownloadWarning(Warning):
     """
 
 
-class CannotIncludeAndExclude(Exception):
-    """Raised if both include and exclude are passed to download."""
-
-    def __init__(
-        self, include: List[str], exclude: List[str], *args: Any, **kwargs: Any
-    ) -> None:
-        super().__init__(
-            "can't use include and exclude in the same download call: "
-            f"include={include}, exclude={exclude}",
-            *args,
-            **kwargs,
-        )
+class ConfigError(Exception):
+    """Raised if the configuration is not valid."""
 
 
 class ContentTypeError(Exception):
