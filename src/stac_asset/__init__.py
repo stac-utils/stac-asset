@@ -29,7 +29,7 @@ from .filesystem_client import FilesystemClient
 from .http_client import HttpClient
 from .planetary_computer_client import PlanetaryComputerClient
 from .s3_client import S3Client
-from .strategy import DownloadStrategy, FileNameStrategy
+from .strategy import ErrorStrategy, FileNameStrategy
 
 __all__ = [
     "DownloadWarning",
@@ -39,7 +39,7 @@ __all__ = [
     "Config",
     "ContentTypeError",
     "DownloadError",
-    "DownloadStrategy",
+    "ErrorStrategy",
     "EarthdataClient",
     "FileNameStrategy",
     "FilesystemClient",

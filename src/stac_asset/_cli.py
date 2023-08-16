@@ -12,7 +12,7 @@ import click_logging
 import tqdm
 from pystac import Item, ItemCollection
 
-from . import Config, DownloadStrategy, _functions
+from . import Config, ErrorStrategy, _functions
 from .client import Clients
 from .config import DEFAULT_S3_MAX_ATTEMPTS, DEFAULT_S3_RETRY_MODE
 from .messages import (
@@ -98,6 +98,17 @@ def cli() -> None:
     show_default=True,
 )
 @click.option(
+    "-k",
+    "--keep",
+    help=(
+        "If warning on error, keep assets that couldn't be downloaded with their "
+        "original hrefs. If false, delete those assets from the item."
+    ),
+    default=False,
+    is_flag=True,
+    show_default=True,
+)
+@click.option(
     "--overwrite",
     help="Overwrite existing files if they exist on the filesystem",
     default=False,
@@ -117,6 +128,7 @@ def download(
     s3_retry_mode: str,
     s3_max_attempts: int,
     warn: bool,
+    keep: bool,
     overwrite: bool,
 ) -> None:
     """Download STAC assets from an item or item collection.
@@ -150,8 +162,9 @@ def download(
             s3_requester_pays,
             s3_retry_mode,
             s3_max_attempts,
-            warn,
-            overwrite,
+            warn=warn,
+            keep=keep,
+            overwrite=overwrite,
         )
     )
 
@@ -168,12 +181,9 @@ async def download_async(
     s3_retry_mode: str,
     s3_max_attempts: int,
     warn: bool,
+    keep: bool,
     overwrite: bool,
 ) -> None:
-    if warn:
-        download_strategy = DownloadStrategy.DELETE
-    else:
-        download_strategy = DownloadStrategy.ERROR
     config = Config(
         alternate_assets=alternate_assets,
         include=include,
@@ -181,7 +191,8 @@ async def download_async(
         s3_requester_pays=s3_requester_pays,
         s3_retry_mode=s3_retry_mode,
         s3_max_attempts=s3_max_attempts,
-        download_strategy=download_strategy,
+        error_strategy=ErrorStrategy.KEEP if keep else ErrorStrategy.DELETE,
+        warn=warn,
         overwrite=overwrite,
     )
 

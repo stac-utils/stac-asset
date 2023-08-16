@@ -26,7 +26,7 @@ from .client import Clients
 from .config import Config
 from .errors import AssetOverwriteError, DownloadError, DownloadWarning
 from .messages import ErrorAssetDownload, FinishAssetDownload, StartAssetDownload
-from .strategy import DownloadStrategy, FileNameStrategy
+from .strategy import ErrorStrategy, FileNameStrategy
 from .types import PathLikeObject
 
 # Needed until we drop Python 3.8
@@ -78,23 +78,14 @@ class Downloads:
     async def add(
         self, stac_object: Union[Item, Collection], root: Path, file_name: Optional[str]
     ) -> None:
-        links = list()
-        for link in stac_object.links:
-            absolute_href = link.get_absolute_href()
-            if absolute_href:
-                link.target = absolute_href
-                links.append(link)
-        stac_object.links = links
+        stac_object = make_link_hrefs_absolute(stac_object)
         # Will fail if the stac object doesn't have a self href and there's
         # relative asset hrefs
         stac_object = make_asset_hrefs_absolute(stac_object)
-
         if file_name:
-            item_path = Path(root) / file_name
-            stac_object.set_self_href(str(item_path))
+            stac_object.set_self_href(str(Path(root) / file_name))
         else:
-            item_path = None
-            stac_object.set_self_href(item_path)
+            stac_object.set_self_href(None)
 
         asset_file_names: Set[str] = set()
         for key, asset in (
@@ -103,10 +94,14 @@ class Downloads:
             if (not self.config.include or k in self.config.include)
             and (not self.config.exclude or k not in self.config.exclude)
         ):
-            if self.config.asset_file_name_strategy == FileNameStrategy.FILE_NAME:
+            if self.config.file_name_strategy == FileNameStrategy.FILE_NAME:
                 asset_file_name = os.path.basename(URL(asset.href).path)
-            elif self.config.asset_file_name_strategy == FileNameStrategy.KEY:
+            elif self.config.file_name_strategy == FileNameStrategy.KEY:
                 asset_file_name = key + Path(asset.href).suffix
+            else:
+                raise ValueError(
+                    f"unexpected file name strategy: {self.config.file_name_strategy}"
+                )
 
             if asset_file_name in asset_file_names:
                 raise AssetOverwriteError(list(asset_file_names))
@@ -139,12 +134,16 @@ class Downloads:
         exceptions = set()
         for result in results:
             if isinstance(result, WrappedError):
-                if self.config.download_strategy == DownloadStrategy.ERROR:
-                    exceptions.add(result.error)
+                if self.config.error_strategy == ErrorStrategy.DELETE:
+                    del result.download.owner.assets[result.download.key]
                 else:
-                    if self.config.download_strategy == DownloadStrategy.DELETE:
-                        del result.download.owner.assets[result.download.key]
+                    # Simple check to make sure we haven't added other
+                    # strategies that we're not handling
+                    assert self.config.error_strategy == ErrorStrategy.KEEP
+                if self.config.warn:
                     warnings.warn(str(result.error), DownloadWarning)
+                else:
+                    exceptions.add(result.error)
         if exceptions:
             raise DownloadError(list(exceptions))
 
@@ -383,6 +382,22 @@ def make_asset_hrefs_absolute(
                     "Cannot make asset HREFs absolute if no self_href is set."
                 )
             asset.href = pystac.utils.make_absolute_href(asset.href, self_href)
+    return stac_object
+
+
+def make_link_hrefs_absolute(
+    stac_object: Union[Item, Collection], drop: bool = True
+) -> Union[Item, Collection]:
+    # This could be in pystac w/ STACObject as the input+output type
+    links = list()
+    for link in stac_object.links:
+        absolute_href = link.get_absolute_href()
+        if absolute_href:
+            link.target = absolute_href
+            links.append(link)
+        elif not drop:
+            raise ValueError(f"cannot make link's href absolute: {link}")
+    stac_object.links = links
     return stac_object
 
 
