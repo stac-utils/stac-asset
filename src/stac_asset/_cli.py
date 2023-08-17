@@ -15,6 +15,7 @@ from pystac import Item, ItemCollection
 from . import Config, ErrorStrategy, _functions
 from .client import Clients
 from .config import DEFAULT_S3_MAX_ATTEMPTS, DEFAULT_S3_RETRY_MODE
+from .errors import DownloadError
 from .messages import (
     ErrorAssetDownload,
     FinishAssetDownload,
@@ -260,7 +261,11 @@ async def download_async(
         sys.exit(2)
 
     task = asyncio.create_task(report_progress(queue))
-    output = await download()
+    try:
+        output = await download()
+    except DownloadError:
+        sys.exit(1)
+
     if queue:
         await queue.put(None)
     await task
@@ -287,6 +292,7 @@ async def report_progress(queue: Optional[AnyQueue]) -> None:
         unit_divisor=1024,
     )
     sizes = dict()
+    owners = dict()
     assets = 0
     done = 0
     errors = 0
@@ -297,6 +303,8 @@ async def report_progress(queue: Optional[AnyQueue]) -> None:
         message = await queue.get()
         if isinstance(message, StartAssetDownload):
             assets += 1
+            if message.owner_id:
+                owners[message.key] = message.owner_id
             progress_bar.set_description(f"{done}/{assets}")
         elif isinstance(message, OpenUrl):
             if message.size:
@@ -316,6 +324,11 @@ async def report_progress(queue: Optional[AnyQueue]) -> None:
                 progress_bar.update(n)
             progress_bar.set_postfix_str(f"{errors} errors")
             progress_bar.set_description_str(f"{done}/{assets}")
+            if message.key in owners:
+                name = f"{owners[message.key]}[{message.key}]"
+            else:
+                name = f"[{message.key}]"
+            progress_bar.write(f"ERROR: {name} - {message.error}")
         elif isinstance(message, WriteChunk):
             n += message.size
             progress_bar.update(message.size)
