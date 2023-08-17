@@ -33,6 +33,24 @@ def test_download_item_stdin_stdout(tmp_path: Path, item: Item) -> None:
 
 
 def test_download_item_collection_stdin_stdout(
+    tmp_path: Path, item_collection_path: Path
+) -> None:
+    runner = CliRunner()
+    result = runner.invoke(
+        stac_asset._cli.cli,
+        [
+            "download",
+            str(item_collection_path),
+            str(tmp_path),
+            "--file-name",
+            "item-collection.json",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout
+    ItemCollection.from_file(str(tmp_path / "item-collection.json"))
+
+
+def test_download_item_collection_file_name(
     tmp_path: Path, item_collection: ItemCollection
 ) -> None:
     previous_working_directory = os.getcwd()

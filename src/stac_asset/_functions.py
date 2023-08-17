@@ -29,6 +29,7 @@ from .messages import (
     ErrorAssetDownload,
     FinishAssetDownload,
     Message,
+    SkipAssetDownload,
     StartAssetDownload,
 )
 from .strategy import ErrorStrategy, FileNameStrategy
@@ -69,6 +70,9 @@ class Download:
                     raise error
                 else:
                     return WrappedError(self, error)
+        else:
+            if messages:
+                await messages.put(SkipAssetDownload(key=self.key, path=self.path))
 
         self.asset.href = str(self.path)
         return self

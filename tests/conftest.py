@@ -17,6 +17,13 @@ def item_path() -> Path:
 
 
 @pytest.fixture
+def item_collection_path(tmp_path: Path, item: Item) -> Path:
+    item.make_asset_hrefs_absolute()
+    ItemCollection([item]).save_object(str(tmp_path / "item-collection.json"))
+    return tmp_path / "item-collection.json"
+
+
+@pytest.fixture
 def data_path() -> Path:
     return Path(__file__).parent / "data"
 
