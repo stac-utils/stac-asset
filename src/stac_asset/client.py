@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from asyncio import Lock, Queue, QueueFull
 from pathlib import Path
 from types import TracebackType
-from typing import AsyncIterator, Dict, Optional, Type, TypeVar
+from typing import AsyncIterator, Dict, List, Optional, Type, TypeVar
 
 import aiofiles
 from yarl import URL
@@ -143,9 +143,13 @@ class Clients:
     clients: Dict[Type[Client], Client]
     config: Config
 
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: Config, clients: Optional[List[Client]] = None) -> None:
         self.lock = Lock()
         self.clients = dict()
+        if clients:
+            # TODO check for duplicate types in clients list
+            for client in clients:
+                self.clients[type(client)] = client
         self.config = config
 
     async def get_client(self, href: str) -> Client:

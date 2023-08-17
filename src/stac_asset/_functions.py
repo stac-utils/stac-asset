@@ -22,7 +22,7 @@ import pystac.utils
 from pystac import Asset, Collection, Item, ItemCollection, STACError
 from yarl import URL
 
-from .client import Clients
+from .client import Client, Clients
 from .config import Config
 from .errors import AssetOverwriteError, DownloadError, DownloadWarning
 from .messages import (
@@ -79,11 +79,11 @@ class Downloads:
     config: Config
     downloads: List[Download]
 
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: Config, clients: Optional[List[Client]] = None) -> None:
         config.validate()
         self.config = config
         self.downloads = list()
-        self.clients = Clients(config)
+        self.clients = Clients(config, clients)
 
     async def add(
         self, stac_object: Union[Item, Collection], root: Path, file_name: Optional[str]
@@ -196,6 +196,7 @@ async def download_item(
     infer_file_name: bool = True,
     config: Optional[Config] = None,
     queue: Optional[AnyQueue] = None,
+    clients: Optional[List[Client]] = None,
 ) -> Item:
     """Downloads an item to the local filesystem.
 
@@ -208,6 +209,7 @@ async def download_item(
             item's id. This argument is unused if ``file_name`` is not None.
         config: The download configuration
         queue: An optional queue to use for progress reporting
+        clients: Pre-configured clients to use for access
 
     Returns:
         Item: The `~pystac.Item`, with the updated asset hrefs and self href.
@@ -218,7 +220,7 @@ async def download_item(
     if file_name is None and infer_file_name:
         file_name = f"{item.id}.json"
 
-    async with Downloads(config or Config()) as downloads:
+    async with Downloads(config=config or Config(), clients=clients) as downloads:
         await downloads.add(item, Path(directory), file_name)
         await downloads.download(queue)
 
@@ -238,6 +240,7 @@ async def download_collection(
     file_name: Optional[str] = "collection.json",
     config: Optional[Config] = None,
     queue: Optional[AnyQueue] = None,
+    clients: Optional[List[Client]] = None,
 ) -> Collection:
     """Downloads a collection to the local filesystem.
 
@@ -251,6 +254,7 @@ async def download_collection(
             will not be saved.
         config: The download configuration
         queue: An optional queue to use for progress reporting
+        clients: Pre-configured clients to use for access
 
     Returns:
         Collection: The collection, with updated asset hrefs
@@ -258,7 +262,7 @@ async def download_collection(
     Raises:
         CantIncludeAndExclude: Raised if both include and exclude are not None.
     """
-    async with Downloads(config or Config()) as downloads:
+    async with Downloads(config=config or Config(), clients=clients) as downloads:
         await downloads.add(collection, Path(directory), file_name)
         await downloads.download(queue)
 
@@ -278,6 +282,7 @@ async def download_item_collection(
     file_name: Optional[str] = "item-collection.json",
     config: Optional[Config] = None,
     queue: Optional[AnyQueue] = None,
+    clients: Optional[List[Client]] = None,
 ) -> ItemCollection:
     """Downloads an item collection to the local filesystem.
 
@@ -288,6 +293,7 @@ async def download_item_collection(
             provided, will not be saved.
         config: The download configuration
         queue: An optional queue to use for progress reporting
+        clients: Pre-configured clients to use for access
 
     Returns:
         ItemCollection: The item collection, with updated asset hrefs
@@ -295,7 +301,7 @@ async def download_item_collection(
     Raises:
         CantIncludeAndExclude: Raised if both include and exclude are not None.
     """
-    async with Downloads(config or Config()) as downloads:
+    async with Downloads(config=config or Config(), clients=clients) as downloads:
         for item in item_collection.items:
             item.set_self_href(None)
             root = Path(directory) / item.id

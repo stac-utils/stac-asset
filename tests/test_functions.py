@@ -14,6 +14,7 @@ from stac_asset import (
     DownloadWarning,
     ErrorStrategy,
     FileNameStrategy,
+    S3Client,
 )
 
 pytestmark = [
@@ -168,6 +169,15 @@ async def test_multiple_clients(tmp_path: Path, item: Item) -> None:
     item = await stac_asset.download_item(
         item, tmp_path, config=Config(file_name_strategy=FileNameStrategy.KEY)
     )
+
+
+@pytest.mark.network_access
+async def test_preconfigured_clients(tmp_path: Path, item: Item) -> None:
+    item.assets["remote"] = Asset(
+        href="s3://usgs-landsat/collection02/level-2/standard/oli-tirs/2023/092/068/LC09_L2SP_092068_20230522_20230524_02_T2/LC09_L2SP_092068_20230522_20230524_02_T2_thumb_small.jpeg",
+    )
+    s3_client = S3Client(requester_pays=True)
+    item = await stac_asset.download_item(item, tmp_path, clients=[s3_client])
 
 
 async def test_queue(tmp_path: Path, item: Item) -> None:
