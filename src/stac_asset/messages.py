@@ -45,6 +45,17 @@ class ErrorAssetDownload(Message):
 
 
 @dataclass
+class SkipAssetDownload(Message):
+    """Sent when an asset errors while downloading."""
+
+    key: str
+    """The asset key."""
+
+    path: Path
+    """The local path that the asset is being downloaded to."""
+
+
+@dataclass
 class FinishAssetDownload(Message):
     """Sent when an asset finishes downloading."""
 

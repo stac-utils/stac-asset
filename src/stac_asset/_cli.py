@@ -5,6 +5,7 @@ import os
 import sys
 from asyncio import Queue
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 import click
@@ -20,6 +21,7 @@ from .messages import (
     ErrorAssetDownload,
     FinishAssetDownload,
     OpenUrl,
+    SkipAssetDownload,
     StartAssetDownload,
     WriteChunk,
 )
@@ -91,14 +93,6 @@ def cli() -> None:
     default=DEFAULT_S3_MAX_ATTEMPTS,
 )
 @click.option(
-    "-w",
-    "--warn",
-    help="Warn on download errors, instead of erroring",
-    default=False,
-    is_flag=True,
-    show_default=True,
-)
-@click.option(
     "-k",
     "--keep",
     help=(
@@ -112,7 +106,7 @@ def cli() -> None:
 @click.option(
     "--fail-fast",
     help="Fail immediately on download error, instead of waiting until all are "
-    "complete. Mutually exclusive with --warn",
+    "complete.",
     default=False,
     is_flag=True,
     show_default=True,
@@ -136,7 +130,6 @@ def download(
     s3_requester_pays: bool,
     s3_retry_mode: str,
     s3_max_attempts: int,
-    warn: bool,
     keep: bool,
     fail_fast: bool,
     overwrite: bool,
@@ -172,7 +165,6 @@ def download(
             s3_requester_pays,
             s3_retry_mode,
             s3_max_attempts,
-            warn=warn,
             keep=keep,
             fail_fast=fail_fast,
             overwrite=overwrite,
@@ -191,7 +183,6 @@ async def download_async(
     s3_requester_pays: bool,
     s3_retry_mode: str,
     s3_max_attempts: int,
-    warn: bool,
     keep: bool,
     fail_fast: bool,
     overwrite: bool,
@@ -204,7 +195,7 @@ async def download_async(
         s3_retry_mode=s3_retry_mode,
         s3_max_attempts=s3_max_attempts,
         error_strategy=ErrorStrategy.KEEP if keep else ErrorStrategy.DELETE,
-        warn=warn,
+        warn=not fail_fast,
         fail_fast=fail_fast,
         overwrite=overwrite,
     )
@@ -272,7 +263,10 @@ async def download_async(
     await task
 
     if not quiet:
-        json.dump(output.to_dict(transform_hrefs=False), sys.stdout)
+        if file_name:
+            print(f"Output STAC JSON written to {Path(directory_str) / file_name}")
+        else:
+            json.dump(output.to_dict(transform_hrefs=False), sys.stdout)
 
 
 async def read_file(href: str, config: Config) -> bytes:
@@ -297,6 +291,7 @@ async def report_progress(queue: Optional[AnyQueue]) -> None:
     assets = 0
     done = 0
     errors = 0
+    skips = 0
     total = 0
     n = 0
     progress_bar.set_postfix_str(f"{errors} errors")
@@ -313,6 +308,10 @@ async def report_progress(queue: Optional[AnyQueue]) -> None:
                 sizes[str(message.url)] = message.size
                 progress_bar.reset(total=total)
                 progress_bar.update(n)
+        elif isinstance(message, SkipAssetDownload):
+            skips += 1
+            progress_bar.set_description_str(f"{done}/{assets}")
+            progress_bar.set_postfix_str(f"{errors} errors, {skips} skips")
         elif isinstance(message, FinishAssetDownload):
             done += 1
             progress_bar.set_description_str(f"{done}/{assets}")
@@ -323,17 +322,18 @@ async def report_progress(queue: Optional[AnyQueue]) -> None:
                 total -= sizes[message.href]
                 progress_bar.reset(total=total)
                 progress_bar.update(n)
-            progress_bar.set_postfix_str(f"{errors} errors")
+            progress_bar.set_postfix_str(f"{errors} errors, {skips} skips")
             progress_bar.set_description_str(f"{done}/{assets}")
             if message.key in owners:
                 name = f"{owners[message.key]}[{message.key}]"
             else:
                 name = f"[{message.key}]"
-            progress_bar.write(f"ERROR: {name} - {message.error}")
+            progress_bar.write(f"ERROR: {name} - {message.error}", file=sys.stderr)
         elif isinstance(message, WriteChunk):
             n += message.size
             progress_bar.update(message.size)
         elif message is None:
+            progress_bar.write("\n", file=sys.stderr)
             progress_bar.close()
             return
 
