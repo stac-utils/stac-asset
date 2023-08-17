@@ -9,8 +9,11 @@ IGNORED_CONTENT_TYPES = ["binary/octet-stream", "application/octet-stream"]
 def content_type(actual: str, expected: str) -> None:
     """Validates that the actual content type matches the expected.
 
-    This is more complicated than a simple string comparison, because we want to
-    allow TIFF when COG is expected, etc.
+    This is normally a simple string comparison, but has some extra rules:
+
+    * COGs are allowed in place of TIFFs, and vice versa
+    * Responses with ``binary/octet-stream`` and ``application/octet-stream``
+      are always allowed
 
     Args:
         actual: The actual content type

@@ -22,6 +22,13 @@ class HttpClient(Client):
     Configure the session to customize its behavior.
     """
 
+    check_content_type: bool
+    """If true, check the asset's content type against the response from the server.
+
+    See :py:func:`stac_asset.validate.content_type` for more information about
+    hte content type check.
+    """
+
     session: ClientSession
     """A atiohttp session that will be used for all requests."""
 

@@ -6,7 +6,6 @@ from typing import Any
 import pytest
 import stac_asset
 from pystac import Asset, Collection, Item, ItemCollection
-from pytest import LogCaptureFixture
 from stac_asset import (
     AssetOverwriteError,
     Config,
@@ -23,7 +22,7 @@ pytestmark = [
 
 
 async def test_download_item(tmp_path: Path, item: Item) -> None:
-    item = await stac_asset.download_item(item, tmp_path)
+    item = await stac_asset.download_item(item, tmp_path, infer_file_name=False)
     assert os.path.exists(tmp_path / "20201211_223832_CS2.jpg")
     asset = item.assets["data"]
     assert asset.href == str(tmp_path / "20201211_223832_CS2.jpg")
@@ -56,6 +55,7 @@ async def test_download_missing_asset_keep(
             item,
             tmp_path,
             config=Config(error_strategy=ErrorStrategy.KEEP, warn=True),
+            infer_file_name=False,
         )
     assert item.assets["does-not-exist"].href == str(data_path / "not-a-file.md5")
 
@@ -71,9 +71,7 @@ async def test_download_missing_asset_delete(tmp_path: Path, item: Item) -> None
     assert "does-not-exist" not in item.assets
 
 
-async def test_download_missing_asset_fail_fast(
-    tmp_path: Path, item: Item, caplog: LogCaptureFixture
-) -> None:
+async def test_download_missing_asset_fail_fast(tmp_path: Path, item: Item) -> None:
     item.assets["does-not-exist"] = Asset("not-a-file.md5")
     with pytest.raises(FileNotFoundError):
         await stac_asset.download_item(
@@ -87,7 +85,9 @@ async def test_download_item_collection(
     tmp_path: Path, item_collection: ItemCollection
 ) -> None:
     item_collection = await stac_asset.download_item_collection(
-        item_collection, tmp_path
+        item_collection,
+        tmp_path,
+        file_name=None,
     )
     assert os.path.exists(tmp_path / "test-item" / "20201211_223832_CS2.jpg")
     asset = item_collection.items[0].assets["data"]

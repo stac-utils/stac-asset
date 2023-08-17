@@ -239,6 +239,7 @@ async def download_async(
                 item,
                 directory_str,
                 file_name=file_name,
+                infer_file_name=False,
                 config=config,
                 queue=queue,
             )

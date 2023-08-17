@@ -22,7 +22,13 @@ from .messages import Message, OpenUrl
 
 
 class S3Client(Client):
-    """A client for interacting with s3 urls."""
+    """A client for interacting with s3 urls.
+
+    To use the ``requester_pays`` option, you need to configure your AWS
+    credentials. See `the AWS documentation
+    <https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html>`_
+    for instructions.
+    """
 
     session: AioSession
     """The session that will be used for all s3 requests."""
@@ -31,10 +37,16 @@ class S3Client(Client):
     """The region that all clients will be rooted in."""
 
     requester_pays: bool
-    """If True, add `--request-payer requester` to all requests."""
+    """If True, enable access to `requester pays buckets
+    <https://docs.aws.amazon.com/AmazonS3/latest/userguide/RequesterPaysBuckets.html>`_."""
 
     retry_mode: str
-    """The retry mode."""
+    """The retry mode, one of "adaptive", "legacy", or "standard".
+
+    See `the boto3 docs
+    <https://boto3.amazonaws.com/v1/documentation/api/latest/guide/retries.html>`_
+    for more information on the available modes.
+    """
 
     max_attempts: int
     """The maximum number of attempts."""
