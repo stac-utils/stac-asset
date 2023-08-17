@@ -1,16 +1,21 @@
 """Read and download STAC items, item collections, collections, and assets.
 
-The core class is :py:class:`Client`, which defines a common interface for
-accessing assets. There are also some free functions, :py:func:`download_item`
-and :py:func:`download_item_collection`, which provide simple one-shot
-interfaces for downloading assets.
+The main entry points are free functions:
 
-Writing items, item collections, collections, and assets is currently
+* :py:func:`download_item`
+* :py:func:`download_item_collection`
+* :py:func:`download_collection`
+* :py:func:`download_asset`
+
+Use :py:class:`Config` to configure how assets are downloaded.  Every client
+inherits from :py:class:`Client`, which defines a common interface for accessing
+assets.  Writing items, item collections, collections, and assets is currently
 unsupported, but is on the roadmap.
 """
 
 
 from ._functions import (
+    download_asset,
     download_collection,
     download_item,
     download_item_collection,
@@ -47,6 +52,7 @@ __all__ = [
     "HttpClient",
     "PlanetaryComputerClient",
     "S3Client",
+    "download_asset",
     "download_collection",
     "download_item",
     "download_item_collection",

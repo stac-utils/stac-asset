@@ -21,17 +21,21 @@ pip install 'stac-asset[cli]'
 
 ## Usage
 
+We have a Python API and a command-line interface (CLI).
+
 ### API
 
-Here's how to download a STAC [Item](https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md) and all of its assets to a local directory using the top-level function.
+Here's how to download a STAC [Item](https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md) and all of its assets to the current working directory.
 The correct [client](#clients) will be guessed from the assets' href.
 Each asset's href will be updated to point to the local file.
 
 ```python
+import pystac
 import stac_asset
 
 href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
-await stac_asset.download_item_from_href(href, ".")
+item = pystac.from_file(href)
+await stac_asset.download_item(item, ".")
 ```
 
 ### CLI
@@ -56,13 +60,7 @@ stac-client search https://planetarycomputer.microsoft.com/api/stac/v1 -c landsa
     stac-asset download -i rendered_preview -q
 ```
 
-If you do a lot of downloads, you may want an alias:
-
-```shell
-alias stac-download="stac-asset download"
-```
-
-See [the documentation](https://stac-asset.readthedocs.io/en/stable/index.html) for more examples and complete API documentation.
+See [the documentation](https://stac-asset.readthedocs.io/en/latest/index.html) for more examples and complete API and CLI documentation.
 
 ### Clients
 
@@ -77,37 +75,7 @@ Some clients require some setup before use; they are called out in this table, a
 | `PlanetaryComputerClient` | Signs urls with the [Planetary Computer Authentication API](https://planetarycomputer.microsoft.com/docs/reference/sas/) | No additional setup required, works out of the box |
 | `EarthdataClient` | Uses a token-based authentication to download data, from _some_ Earthdata providers, e.g. DAACs | Requires creation of a personal access token, see section below |
 
-#### S3Client
-
-To use the `requester_pays` option, you need to configure your AWS credentials.
-See [the AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) for instructions.
-
-#### Earthdata
-
-You'll need a personal access token.
-
-1. Create a new personal access token by going to <https://urs.earthdata.nasa.gov/profile> and then clicking "Generate Token" (you'll need to log in).
-2. Set an enviornment variable named `EARTHDATA_PAT` to your token.
-3. Use `EarthdataClient.default()` to create a new client.
-
-You can also provide your token directly to `EarthdataClient.login()`.
-
-#### USGS EROS
-
-We used to have a USGS EROS client, but it turns out it was broken, and accessing landsat data via HTTP requires special authorization from USGS.
-To access USGS landsat data, you can use `--s3-requester-pays`, e.g.:
-
-```shell
-stac-client search https://landsatlook.usgs.gov/stac-server \
-        -c landsat-c2l2-sr \
-        --intersects '{"type":"Point","coordinates":[-105.1019,40.1672]}' \
-        --query "eo:cloud_cover<10" \
-        --sortby='-properties.datetime' \
-        --max-items 1 \
-    | stac-asset download --s3-requester-pays -w -a s3 > landsat-c2l2-sr.json
-```
-
-You'll need to set up requester pays, as detailed [above](#s3client).
+For information about configuring each client, see the [API documentation](https://stac-asset.readthedocs.io/en/latest/api.html) for that client.
 
 ## Versioning
 
@@ -143,7 +111,6 @@ pytest --network-access
 
 Some tests are client-specific and need your environment to be configured correctly.
 See [each client's documentation](#clients) for instructions on setting up your environment for each client.
-If your environment is not configured for a certain client, that client's tests are skipped.
 
 ### Docs
 
@@ -163,7 +130,7 @@ It can be handy to use [sphinx-autobuild](https://pypi.org/project/sphinx-autobu
 
 ```shell
 pip install sphinx-autobuild
-sphinx-autobuild docs docs/_build/html
+sphinx-autobuild --watch src docs docs/_build/html
 ```
 
 ## License

@@ -14,67 +14,61 @@ Whether its because of the cost of data egress, requirements around user access,
 Over time, a set of access patterns have emerged around retrieving data from different cloud providers and from different systems.
 This library aims to consolidate those patterns into a single repository and behind a single interface, so they can be used interchangeably and with the minimum amount of user configuration.
 
-Usage
------
+API
+---
 
-Let's say you have a STAC Item that you'd like to download, with its assets, to your local system.
-You can use our top-level function, :py:func:`stac_asset.download_item_from_href` to do that.
-This will download the item, with all of its assets, to the directory you specified, and update the asset hrefs to point to the new item.
+Let's say you have a :py:class:`pystac.Item` that you'd like to download, with its assets, to your local system.
+You can use our top-level function, :py:func:`stac_asset.download_item` to do that.
+This will download the item, with all of its assets, to the directory you specified, and update the asset hrefs to point to their new, downloaded locations.
+
+.. code-block:: python
+
+   import pystac
+   import stac_asset
+
+   href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
+   item = pystac.read_file(href)
+   await stac_asset.download_item(item, ".")
+
+If you have an :py:class:`pystac.ItemCollection`, you can download multiple items at once.
+This can be particularly useful when you're querying a `STAC API <https://github.com/radiantearth/stac-api-spec>`_, e.g. with `pystac-client <https://github.com/stac-utils/pystac-client>`_.
 
 .. code-block:: python
 
    import stac_asset
+   from pystac_client import Client
 
-   href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
-   await stac_asset.download_item_from_href(href, ".")
+   client = Client.open("https://earth-search.aws.element84.com/v1")
+   item_search = client.search(
+      collections=["sentinel-2-l2a"],
+      query="grid:code=MGRS-13TDE",
+      max_items=1
+   )
+   item_collection = item_search.item_collection()
+   await stac_asset.download_item_collection(item_collection, ".")
 
-If you'd like to do multiple downloads, it's more efficient to re-use the same client.
-Clients sometimes need to do cleanup after they're done, so they provide an asynchronous context manager interface to handle those cleanups:
+If you run the above code, you'll probably see some errors.
+That's because some assets in Earth Search's sentinel-2-l2a collections only have ``s3://`` hrefs that require `requester pays buckets <https://docs.aws.amazon.com/AmazonS3/latest/userguide/RequesterPaysBuckets.html>`_.
+**stac-asset** uses the asset's href to guess the correct client to use for each download.
+Each client can have its own configuration variables; see each client's documentation in :doc:`api` for more information.
 
-.. code-block:: python
+See :doc:`api` for each available function and class.
 
-   from stac_asset import HttpClient
+CLI
+---
 
-   async with await HttpClient.default() as client:
-      await client.download_item(item, ".")
+Our :abbr:`Command-Line Interface (CLI)` provides pipe-enabled interface for downloading items and item collections.
+We can use **pystac-client**'s CLI to search, and then pipe those results to our CLI.
 
-We provide a suite of clients that are configured to access different data provides, using different communication protocols.
-We have a :py:class:`~stac_asset.S3Client`:
+.. code-block:: shell
 
-.. code-block:: python
+   stac-client search https://earth-search.aws.element84.com/v1 \    
+        -c sentinel-2-l2a \
+        --query 'grid:code=MGRS-13TDE' \
+        --max-items 1 | \
+    stac-asset download
 
-   from stac_asset import S3Client
-
-   href = "s3://sentinel-cogs/sentinel-s2-l2a-cogs/42/L/TQ/2023/5/S2B_42LTQ_20230524_0_L2A/thumbnail.jpg"
-   async with await S3Client.default() as client:
-      await client.download_item(href, ".")
-
-The :py:class:`~stac_asset.PlanetaryComputerClient` knows how to retrieve and store Shared Access Signatures (SASs) from the `Planetary Computer Authentication API <https://planetarycomputer.microsoft.com/docs/reference/sas/>`_ and use those SASes to access data from their Azure Blob Storage:
-
-.. code-block:: python
-
-   from stac_asset import PlanetaryComputerClient
-
-   href = "https://sentinel2l2a01.blob.core.windows.net/sentinel2-l2/48/X/VR/2023/05/24/S2B_MSIL2A_20230524T084609_N0509_R107_T48XVR_20230524T120352.SAFE/GRANULE/L2A_T48XVR_A032451_20230524T084603/QI_DATA/T48XVR_20230524T084609_PVI.tif"
-   async with await PlanetaryComputerClient.default() as client:
-      await client.download_item(href, ".")
-
-Other clients are provided for specific providers, such as :py:class:`~stac_asset.UsgsErosClient`.
-See the :doc:`api` for information on all of the clients available.
-
-Configuration
-~~~~~~~~~~~~~
-
-If there isn't a client that perfectly suits your needs, take one of the simpler clients and customize its public attributes.
-For example, you could provide your own session to :py:meth:`~stac_asset.HttpClient()`:
-
-.. code-block:: python
-
-   from aiohttp import Session
-
-   session = Session(headers={"foo": "bar")
-   client = HttpClient(session)
-
+See :doc:`cli` for more information on the available subcommands and options.
 
 .. toctree::
    :maxdepth: 2
@@ -82,3 +76,4 @@ For example, you could provide your own session to :py:meth:`~stac_asset.HttpCli
 
    design-goals
    api
+   cli

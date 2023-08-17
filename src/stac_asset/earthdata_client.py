@@ -11,7 +11,18 @@ from .http_client import HttpClient
 
 
 class EarthdataClient(HttpClient):
-    """Access data from https://www.earthdata.nasa.gov/."""
+    """Access data from https://www.earthdata.nasa.gov/.
+
+    To access data, you'll need a personal access token.
+
+    1. Create a new personal access token by going to
+       https://urs.earthdata.nasa.gov/profile and then clicking "Generate Token"
+       (you'll need to log in).
+    2. Set an environment variable named ``EARTHDATA_PAT`` to your token.
+    3. Use :py:meth:`EarthdataClient.from_config()` to create a new client.
+
+    You can also provide your token directly to :py:func:`EarthdataClient.login()`.
+    """
 
     @classmethod
     async def from_config(cls, config: Config) -> EarthdataClient:

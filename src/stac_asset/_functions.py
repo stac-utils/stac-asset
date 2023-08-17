@@ -193,6 +193,7 @@ async def download_item(
     item: Item,
     directory: PathLikeObject,
     file_name: Optional[str] = None,
+    infer_file_name: bool = True,
     config: Optional[Config] = None,
     queue: Optional[AnyQueue] = None,
 ) -> Item:
@@ -203,6 +204,8 @@ async def download_item(
         directory: The output directory that will hold the items and assets.
         file_name: The name of the item file to save. If not provided, will not
             be saved.
+        infer_file_name: If ``file_name`` is None, infer the file name from the
+            item's id. This argument is unused if ``file_name`` is not None.
         config: The download configuration
         queue: An optional queue to use for progress reporting
 
@@ -212,6 +215,9 @@ async def download_item(
     Raises:
         ValueError: Raised if the item doesn't have any assets.
     """
+    if file_name is None and infer_file_name:
+        file_name = f"{item.id}.json"
+
     async with Downloads(config or Config()) as downloads:
         await downloads.add(item, Path(directory), file_name)
         await downloads.download(queue)
@@ -229,7 +235,7 @@ async def download_item(
 async def download_collection(
     collection: Collection,
     directory: PathLikeObject,
-    file_name: Optional[str] = None,
+    file_name: Optional[str] = "collection.json",
     config: Optional[Config] = None,
     queue: Optional[AnyQueue] = None,
 ) -> Collection:
@@ -269,7 +275,7 @@ async def download_collection(
 async def download_item_collection(
     item_collection: ItemCollection,
     directory: PathLikeObject,
-    file_name: Optional[str] = None,
+    file_name: Optional[str] = "item-collection.json",
     config: Optional[Config] = None,
     queue: Optional[AnyQueue] = None,
 ) -> ItemCollection:
