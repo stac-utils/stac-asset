@@ -51,6 +51,14 @@ If you run the above code, you'll probably see some errors.
 That's because some assets in Earth Search's sentinel-2-l2a collections only have ``s3://`` hrefs that require `requester pays buckets <https://docs.aws.amazon.com/AmazonS3/latest/userguide/RequesterPaysBuckets.html>`_.
 **stac-asset** uses the asset's href to guess the correct client to use for each download.
 Each client can have its own configuration variables; see each client's documentation in :doc:`api` for more information.
+To provide a configured client to the API, use ``clients``:
+
+.. code-block:: python
+
+   from stac_asset import S3Client
+
+   s3_client = S3Client(requester_pays=True)
+   await stac_asset.download_item_collection(item_collection, ".", clients=[s3_client])
 
 See :doc:`api` for each available function and class.
 
