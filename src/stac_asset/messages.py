@@ -17,8 +17,8 @@ class StartAssetDownload(Message):
     key: str
     """The asset key."""
 
-    item_id: Optional[str]
-    """The item id."""
+    owner_id: Optional[str]
+    """The owner id."""
 
     href: str
     """The asset href."""
@@ -29,7 +29,7 @@ class StartAssetDownload(Message):
 
 @dataclass
 class ErrorAssetDownload(Message):
-    """Sent when an asset starts downloading."""
+    """Sent when an asset errors while downloading."""
 
     key: str
     """The asset key."""
@@ -39,6 +39,9 @@ class ErrorAssetDownload(Message):
 
     path: Path
     """The local path that the asset is being downloaded to."""
+
+    error: Exception
+    """The error."""
 
 
 @dataclass

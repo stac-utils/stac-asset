@@ -350,11 +350,11 @@ async def download_asset(
 
     if messages:
         if asset.owner:
-            item_id = asset.owner.id
+            owner_id = asset.owner.id
         else:
-            item_id = None
+            owner_id = None
         await messages.put(
-            StartAssetDownload(key=key, href=href, path=path, item_id=item_id)
+            StartAssetDownload(key=key, href=href, path=path, owner_id=owner_id)
         )
     try:
         await client.download_href(
@@ -364,10 +364,12 @@ async def download_asset(
             content_type=asset.media_type,
             messages=messages,
         )
-    except Exception as err:
+    except Exception as error:
         if messages:
-            await messages.put(ErrorAssetDownload(key=key, href=href, path=path))
-        raise err
+            await messages.put(
+                ErrorAssetDownload(key=key, href=href, path=path, error=error)
+            )
+        raise error
 
     if messages:
         await messages.put(FinishAssetDownload(key=key, href=href, path=path))
