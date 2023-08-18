@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from asyncio import Queue
 from types import TracebackType
-from typing import AsyncIterator, Optional, Type
+from typing import Any, AsyncIterator, Dict, Optional, Type
 
 import aiobotocore.session
 import botocore.config
-from aiobotocore.session import AioSession
+from aiobotocore.session import AioSession, ClientCreatorContext
 from botocore import UNSIGNED
 from yarl import URL
 
@@ -101,28 +101,8 @@ class S3Client(Client):
         Raises:
             SchemeError: Raised if the url's scheme is not ``s3``
         """
-        retries = {
-            "max_attempts": self.max_attempts,
-            "mode": self.retry_mode,
-        }
-        if self.requester_pays:
-            config = botocore.config.Config(retries=retries)
-        else:
-            config = botocore.config.Config(signature_version=UNSIGNED, retries=retries)
-        async with self.session.create_client(
-            "s3",
-            region_name=self.region_name,
-            config=config,
-        ) as client:
-            bucket = url.host
-            key = url.path[1:]
-            params = {
-                "Bucket": bucket,
-                "Key": key,
-            }
-            if self.requester_pays:
-                params["RequestPayer"] = "requester"
-            response = await client.get_object(**params)
+        async with self._create_client() as client:
+            response = await client.get_object(**self._params(url))
             if content_type:
                 validate.content_type(response["ContentType"], content_type)
             if messages:
@@ -133,6 +113,43 @@ class S3Client(Client):
     async def has_credentials(self) -> bool:
         """Returns true if the sessions has credentials."""
         return await self.session.get_credentials() is not None
+
+    async def href_exists(self, href: str) -> bool:
+        """Return true if the href exists.
+
+        Uses ``head_object``
+        """
+        async with self._create_client() as client:
+            try:
+                await client.head_object(**self._params(URL(href)))
+            except Exception:
+                return False
+            else:
+                return True
+
+    def _create_client(self) -> ClientCreatorContext:
+        retries = {
+            "max_attempts": self.max_attempts,
+            "mode": self.retry_mode,
+        }
+        if self.requester_pays:
+            config = botocore.config.Config(retries=retries)
+        else:
+            config = botocore.config.Config(signature_version=UNSIGNED, retries=retries)
+        return self.session.create_client(
+            "s3", region_name=self.region_name, config=config
+        )
+
+    def _params(self, url: URL) -> Dict[str, Any]:
+        bucket = url.host
+        key = url.path[1:]
+        params = {
+            "Bucket": bucket,
+            "Key": key,
+        }
+        if self.requester_pays:
+            params["RequestPayer"] = "requester"
+        return params
 
     async def __aenter__(self) -> S3Client:
         return self

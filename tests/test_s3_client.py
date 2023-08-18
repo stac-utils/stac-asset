@@ -41,6 +41,12 @@ async def test_download(tmp_path: Path, asset_href: str) -> None:
     assert os.path.getsize(tmp_path / "out.jpg") == 6060
 
 
+async def test_href_exists(asset_href: str) -> None:
+    async with S3Client() as client:
+        assert await client.href_exists(asset_href)
+        assert not await client.href_exists("s3://does-not-exist/not-a-file")
+
+
 async def test_download_requester_pays_asset(
     tmp_path: Path, requester_pays_asset_href: str
 ) -> None:

@@ -20,3 +20,8 @@ async def test_download(tmp_path: Path, asset_href: str) -> None:
         await client.download_href(asset_href, tmp_path / "out.tif")
 
     assert os.path.getsize(tmp_path / "out.tif") == 4096
+
+
+async def test_href_exists(tmp_path: Path, asset_href: str) -> None:
+    async with await PlanetaryComputerClient.from_config(Config()) as client:
+        assert await client.href_exists(asset_href)

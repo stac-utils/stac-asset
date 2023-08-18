@@ -93,17 +93,21 @@ class PlanetaryComputerClient(HttpClient):
         Yields:
             AsyncIterator[bytes]: An iterator over the file's bytes
         """
-        if (
-            url.host is not None
-            and url.host.endswith(".blob.core.windows.net")
-            and not url.host == "ai4edatasetspublicassets.blob.core.windows.net"
-            and not set(url.query) & {"st", "se", "sp"}
-        ):
-            url = await self._sign(url)
+        url = await self._maybe_sign_url(url)
         async for chunk in super().open_url(
             url, content_type=content_type, messages=messages
         ):
             yield chunk
+
+    async def href_exists(self, href: str) -> bool:
+        """Returns true if the href exists.
+
+        Uses a HEAD request on a signed url.
+        """
+        href = await self._maybe_sign_href(href)
+        async with self.session.head(href) as response:
+            # For some reason, mypy can't see that this is a bool
+            return response.status >= 200 and response.status < 300  # type: ignore
 
     async def _sign(self, url: URL) -> URL:
         assert url.host
@@ -111,6 +115,20 @@ class PlanetaryComputerClient(HttpClient):
         container_name = url.path.split("/", 2)[1]
         token = await self._get_token(account_name, container_name)
         return URL(str(url.with_query(None)) + "?" + token, encoded=False)
+
+    async def _maybe_sign_url(self, url: URL) -> URL:
+        if (
+            url.host is not None
+            and url.host.endswith(".blob.core.windows.net")
+            and not url.host == "ai4edatasetspublicassets.blob.core.windows.net"
+            and not set(url.query) & {"st", "se", "sp"}
+        ):
+            return await self._sign(url)
+        else:
+            return url
+
+    async def _maybe_sign_href(self, href: str) -> str:
+        return str(await self._maybe_sign_url(URL(href)))
 
     async def _get_token(self, account_name: str, container_name: str) -> str:
         url = self.sas_token_endpoint.joinpath(account_name, container_name)

@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Progress reporting ([#55](https://github.com/stac-utils/stac-asset/pull/55), [#69](https://github.com/stac-utils/stac-asset/pull/69))
 - `ErrorStrategy` ([#69](https://github.com/stac-utils/stac-asset/pull/69))
 - `fail_fast` ([#69](https://github.com/stac-utils/stac-asset/pull/69))
+- `asset_exists` and `Client.href_exists` ([#81](https://github.com/stac-utils/stac-asset/pull/81))
 
 ### Changed
 

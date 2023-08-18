@@ -120,6 +120,25 @@ class Client(ABC):
                     pass
             raise err
 
+    async def href_exists(self, href: str) -> bool:
+        """Returns true if the href exists.
+
+        The default implementation naïvely opens the href and reads one chunk.
+        Clients may implement specialized behavior.
+
+        Args:
+            href: The href to open
+
+        Returns:
+            bool: Whether the href exists
+        """
+        try:
+            async for _ in self.open_href(href):
+                break
+        except Exception:
+            return False
+        return True
+
     async def close(self) -> None:
         """Close this client."""
         pass

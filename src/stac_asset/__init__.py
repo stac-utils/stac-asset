@@ -15,6 +15,7 @@ unsupported, but is on the roadmap.
 
 
 from ._functions import (
+    asset_exists,
     download_asset,
     download_collection,
     download_item,
@@ -52,6 +53,7 @@ __all__ = [
     "HttpClient",
     "PlanetaryComputerClient",
     "S3Client",
+    "asset_exists",
     "download_asset",
     "download_collection",
     "download_item",

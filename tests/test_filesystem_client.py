@@ -17,3 +17,8 @@ async def test_download(tmp_path: Path, asset_href: str) -> None:
         await client.download_href(asset_href, tmp_path / "out.jpg")
 
     assert os.path.getsize(tmp_path / "out.jpg") == 31367
+
+
+async def test_href_exists(asset_href: str) -> None:
+    async with FilesystemClient() as client:
+        assert await client.href_exists(asset_href)
