@@ -184,3 +184,8 @@ async def test_queue(tmp_path: Path, item: Item) -> None:
     queue: Queue[Any] = Queue()
     item = await stac_asset.download_item(item, tmp_path, queue=queue)
     assert not queue.empty()
+
+
+async def test_asset_exists(item: Item) -> None:
+    assert await stac_asset.asset_exists(item.assets["data"])
+    assert not await stac_asset.asset_exists(Asset(href="not-a-file"))

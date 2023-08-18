@@ -392,6 +392,32 @@ async def download_asset(
     return asset
 
 
+async def asset_exists(
+    asset: Asset,
+    config: Optional[Config] = None,
+    clients: Optional[List[Client]] = None,
+) -> bool:
+    """Returns true if the asset exists, false if not.
+
+    Args:
+        asset: The asset the check for existence
+        config: The download configuration to use for the existence check
+        clients: Any pre-configured clients to use for the existence check
+
+    Returns:
+        bool: Whether the assets href exists or not
+    """
+    if config is None:
+        config = Config()
+    clients_ = Clients(config, clients=clients)
+    href = get_absolute_asset_href(asset, config.alternate_assets)
+    if href:
+        client = await clients_.get_client(href)
+        return await client.href_exists(href)
+    else:
+        return False
+
+
 def make_asset_hrefs_relative(
     stac_object: Union[Item, Collection]
 ) -> Union[Item, Collection]:
