@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `fail_fast` ([#69](https://github.com/stac-utils/stac-asset/pull/69))
 - `assert_asset_exists`, `asset_exists`, `Client.assert_href_exists`, `Client.href_exists` ([#81](https://github.com/stac-utils/stac-asset/pull/81), [#85](https://github.com/stac-utils/stac-asset/pull/85))
 - Blocking interface ([#86](https://github.com/stac-utils/stac-asset/pull/86))
+- `stac-asset info` CLI subcommand ([#82](https://github.com/stac-utils/stac-asset/pull/83))
 
 ### Changed
 
