@@ -86,3 +86,12 @@ def test_download_item_s3_requester_pays(tmp_path: Path) -> None:
         ],
     )
     assert result.exit_code == 0
+
+
+def test_info(item_path: Path) -> None:
+    runner = CliRunner()
+    result = runner.invoke(
+        stac_asset._cli.cli,
+        ["info", str(item_path)],
+    )
+    assert result.exit_code == 0, result.stdout
