@@ -1,12 +1,12 @@
 stac-asset
 ==========
 
-**stac-asset** is a Python library for opening, downloading, and writing STAC assets across various network protocols, storage systems, and authentication regimes.
+**stac-asset** is a Python library for opening and downloading STAC assets across various network protocols, storage systems, and authentication regimes.
 
 Motivation
 ----------
 
-The `SpatioTemporal Asset Catalog (STAC) <https://stacspec.org>`_ is widely-used to index large holdings of geospatial assets and make them searchable.
+The `SpatioTemporal Asset Catalog (STAC) <https://stacspec.org>`_ specification is widely-used to index large holdings of geospatial assets and make them searchable.
 STAC catalogs and APIs are encouraged to be fully open to the public, and they often are.
 However, providing fully free and open access to the geospatial assets inside of a STAC catalog (e.g. the raster files themselves, not just their metadata) is much less common.
 Whether its because of the cost of data egress, requirements around user access, or something else, many data providers put an authentication layer, or some other access restriction, in front of their data.
