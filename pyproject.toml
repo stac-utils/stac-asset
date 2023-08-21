@@ -39,7 +39,7 @@ dev = [
     "types-python-dateutil~=2.8.19",
     "types-tqdm~=4.66.0",
 ]
-docs = ["pydata-sphinx-theme~=0.13", "sphinx~=7.2.2", "sphinx-click~=4.4"]
+docs = ["pydata-sphinx-theme~=0.13", "sphinx~=7.2.2", "sphinx-click~=5.0"]
 
 [project.scripts]
 stac-asset = "stac_asset._cli:cli"
