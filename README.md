@@ -43,20 +43,25 @@ await stac_asset.download_item(item, ".")
 To download an item using the command line:
 
 ```shell
-stac-asset download https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json
+stac-asset download \
+    https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json
 ```
 
 To download all assets from the results of a [pystac-client](https://github.com/stac-utils/pystac-client) search, and save the item collection to a file named `item-collection.json`:
 
 ```shell
-stac-client search https://planetarycomputer.microsoft.com/api/stac/v1 -c landsat-c2-l2 --max-items 1 | \
+stac-client search https://planetarycomputer.microsoft.com/api/stac/v1 \
+        -c landsat-c2-l2 \
+        --max-items 1 | \
     stac-asset download > item-collection.json
 ```
 
 If you'd like to only download certain assets, e.g. a preview image, you can use the include `-i` flag:
 
 ```shell
-stac-client search https://planetarycomputer.microsoft.com/api/stac/v1 -c landsat-c2-l2 --max-items 1 | \
+stac-client search https://planetarycomputer.microsoft.com/api/stac/v1 \
+        -c landsat-c2-l2 \
+        --max-items 1 | \
     stac-asset download -i rendered_preview -q
 ```
 
