@@ -35,7 +35,16 @@ import stac_asset
 
 href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
 item = pystac.from_file(href)
-await stac_asset.download_item(item, ".")
+item = await stac_asset.download_item(item, ".")
+```
+
+If you're working in a fully synchronous application, you can use our blocking interface:
+
+```python
+import stac_asset.blocking
+href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
+item = pystac.from_file(href)
+item = stac_asset.blocking.download_item(item, ".")
 ```
 
 ### CLI
