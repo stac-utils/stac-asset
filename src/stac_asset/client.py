@@ -133,11 +133,26 @@ class Client(ABC):
             bool: Whether the href exists
         """
         try:
-            async for _ in self.open_href(href):
-                break
+            await self.assert_href_exists(href)
         except Exception:
             return False
-        return True
+        else:
+            return True
+
+    async def assert_href_exists(self, href: str) -> None:
+        """Asserts that a href exists.
+
+        The default implementation naïvely opens the href and reads one chunk.
+        Clients may implement specialized behavior.
+
+        Args:
+            href: The href to open
+
+        Raises:
+            Exception: The underlying error when trying to open the file.
+        """
+        async for _ in self.open_href(href):
+            break
 
     async def close(self) -> None:
         """Close this client."""

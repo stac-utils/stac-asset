@@ -50,6 +50,11 @@ class FilesystemClient(Client):
             async for chunk in f:
                 yield chunk
 
+    async def assert_href_exists(self, href: str) -> None:
+        """Asserts that an href exists."""
+        if not os.path.exists(href):
+            raise ValueError(f"href does not exist on the filesystem: {href}")
+
     async def __aenter__(self) -> FilesystemClient:
         return self
 

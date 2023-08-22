@@ -114,18 +114,13 @@ class S3Client(Client):
         """Returns true if the sessions has credentials."""
         return await self.session.get_credentials() is not None
 
-    async def href_exists(self, href: str) -> bool:
-        """Return true if the href exists.
+    async def assert_href_exists(self, href: str) -> None:
+        """Asserts that the href exists.
 
         Uses ``head_object``
         """
         async with self._create_client() as client:
-            try:
-                await client.head_object(**self._params(URL(href)))
-            except Exception:
-                return False
-            else:
-                return True
+            await client.head_object(**self._params(URL(href)))
 
     def _create_client(self) -> ClientCreatorContext:
         retries = {

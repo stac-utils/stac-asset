@@ -74,17 +74,13 @@ class HttpClient(Client):
             async for chunk, _ in response.content.iter_chunks():
                 yield chunk
 
-    async def href_exists(self, href: str) -> bool:
-        """Returns true if the href exists.
+    async def assert_href_exists(self, href: str) -> None:
+        """Asserts that the href exists.
 
         Uses a HEAD request.
         """
-        try:
-            async with self.session.head(href) as response:
-                # For some reason, mypy can't see that this is a bool
-                return response.status >= 200 and response.status < 300  # type: ignore
-        except Exception:
-            return False
+        async with self.session.head(href) as response:
+            response.raise_for_status()
 
     async def close(self) -> None:
         """Close this http client.

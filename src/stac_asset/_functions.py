@@ -392,20 +392,22 @@ async def download_asset(
     return asset
 
 
-async def asset_exists(
+async def assert_asset_exists(
     asset: Asset,
     config: Optional[Config] = None,
     clients: Optional[List[Client]] = None,
-) -> bool:
-    """Returns true if the asset exists, false if not.
+) -> None:
+    """Asserts that an asset exists.
+
+    Raises the source error if it does not.
 
     Args:
         asset: The asset the check for existence
         config: The download configuration to use for the existence check
         clients: Any pre-configured clients to use for the existence check
 
-    Returns:
-        bool: Whether the assets href exists or not
+    Raises:
+        Exception: An exception from the underlying client.
     """
     if config is None:
         config = Config()
@@ -413,9 +415,32 @@ async def asset_exists(
     href = get_absolute_asset_href(asset, config.alternate_assets)
     if href:
         client = await clients_.get_client(href)
-        return await client.href_exists(href)
+        await client.assert_href_exists(href)
     else:
+        raise ValueError("asset does not have an absolute href")
+
+
+async def asset_exists(
+    asset: Asset,
+    config: Optional[Config] = None,
+    clients: Optional[List[Client]] = None,
+) -> bool:
+    """Returns true if an asset exists.
+
+    Args:
+        asset: The asset the check for existence
+        config: The download configuration to use for the existence check
+        clients: Any pre-configured clients to use for the existence check
+
+    Returns:
+        bool: Whether the asset exists or not
+    """
+    try:
+        await assert_asset_exists(asset, config, clients)
+    except Exception:
         return False
+    else:
+        return True
 
 
 def make_asset_hrefs_relative(

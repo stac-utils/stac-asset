@@ -189,3 +189,9 @@ async def test_queue(tmp_path: Path, item: Item) -> None:
 async def test_asset_exists(item: Item) -> None:
     assert await stac_asset.asset_exists(item.assets["data"])
     assert not await stac_asset.asset_exists(Asset(href="not-a-file"))
+
+
+async def test_asert_asset_exists(item: Item) -> None:
+    await stac_asset.assert_asset_exists(item.assets["data"])
+    with pytest.raises(ValueError):
+        await stac_asset.assert_asset_exists(Asset(href="not-a-file"))

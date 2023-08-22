@@ -99,15 +99,14 @@ class PlanetaryComputerClient(HttpClient):
         ):
             yield chunk
 
-    async def href_exists(self, href: str) -> bool:
-        """Returns true if the href exists.
+    async def assert_href_exists(self, href: str) -> None:
+        """Asserts that the href exists.
 
         Uses a HEAD request on a signed url.
         """
         href = await self._maybe_sign_href(href)
         async with self.session.head(href) as response:
-            # For some reason, mypy can't see that this is a bool
-            return response.status >= 200 and response.status < 300  # type: ignore
+            response.raise_for_status()
 
     async def _sign(self, url: URL) -> URL:
         assert url.host
