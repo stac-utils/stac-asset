@@ -1,7 +1,6 @@
 import os.path
 from asyncio import Queue
 from pathlib import Path
-from typing import Any
 
 import pytest
 import stac_asset
@@ -14,6 +13,7 @@ from stac_asset import (
     DownloadWarning,
     ErrorStrategy,
     FileNameStrategy,
+    Message,
     S3Client,
 )
 
@@ -181,9 +181,9 @@ async def test_preconfigured_clients(tmp_path: Path, item: Item) -> None:
 
 
 async def test_queue(tmp_path: Path, item: Item) -> None:
-    queue: Queue[Any] = Queue()
-    item = await stac_asset.download_item(item, tmp_path, queue=queue)
-    assert not queue.empty()
+    messages: Queue[Message] = Queue()
+    item = await stac_asset.download_item(item, tmp_path, messages=messages)
+    assert not messages.empty()
 
 
 async def test_asset_exists(item: Item) -> None:

@@ -25,16 +25,15 @@ from .messages import (
     StartAssetDownload,
     WriteChunk,
 )
+from .types import MessageQueue
 
 logger = logging.getLogger(__name__)
 click_logging.basic_config(logger)
 
 # Needed until we drop Python 3.8
 if TYPE_CHECKING:
-    AnyQueue = Queue[Any]
     Tqdm = tqdm.tqdm[Any]
 else:
-    AnyQueue = Queue
     Tqdm = tqdm.tqdm
 
 
@@ -210,9 +209,9 @@ async def download_async(
         directory_str = str(directory)
 
     if quiet:
-        queue = None
+        messages = None
     else:
-        queue = Queue()
+        messages = Queue()
 
     type_ = input_dict.get("type")
     if type_ is None:
@@ -232,7 +231,7 @@ async def download_async(
                 file_name=file_name,
                 infer_file_name=False,
                 config=config,
-                queue=queue,
+                messages=messages,
             )
 
     elif type_ == "FeatureCollection":
@@ -244,7 +243,7 @@ async def download_async(
                 directory_str,
                 file_name=file_name,
                 config=config,
-                queue=queue,
+                messages=messages,
             )
 
     else:
@@ -252,14 +251,14 @@ async def download_async(
             print(f"ERROR: unsupported 'type' field: {type_}", file=sys.stderr)
         sys.exit(2)
 
-    task = asyncio.create_task(report_progress(queue))
+    task = asyncio.create_task(report_progress(messages))
     try:
         output = await download()
     except DownloadError:
         sys.exit(1)
 
-    if queue:
-        await queue.put(None)
+    if messages:
+        await messages.put(None)
     await task
 
     if not quiet:
@@ -278,8 +277,8 @@ async def read_file(href: str, config: Config) -> bytes:
         return data
 
 
-async def report_progress(queue: Optional[AnyQueue]) -> None:
-    if queue is None:
+async def report_progress(messages: Optional[MessageQueue]) -> None:
+    if messages is None:
         return
     progress_bar = tqdm.tqdm(
         unit="B",
@@ -296,7 +295,7 @@ async def report_progress(queue: Optional[AnyQueue]) -> None:
     n = 0
     progress_bar.set_postfix_str(f"{errors} errors")
     while True:
-        message = await queue.get()
+        message = await messages.get()
         if isinstance(message, StartAssetDownload):
             assets += 1
             if message.owner_id:

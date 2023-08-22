@@ -34,6 +34,7 @@ from .errors import (
 )
 from .filesystem_client import FilesystemClient
 from .http_client import HttpClient
+from .messages import Message
 from .planetary_computer_client import PlanetaryComputerClient
 from .s3_client import S3Client
 from .strategy import ErrorStrategy, FileNameStrategy
@@ -52,6 +53,7 @@ __all__ = [
     "FileNameStrategy",
     "FilesystemClient",
     "HttpClient",
+    "Message",
     "PlanetaryComputerClient",
     "S3Client",
     "assert_asset_exists",

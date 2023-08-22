@@ -9,8 +9,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
 from typing import (
-    TYPE_CHECKING,
-    Any,
     List,
     Optional,
     Set,
@@ -33,13 +31,7 @@ from .messages import (
     StartAssetDownload,
 )
 from .strategy import ErrorStrategy, FileNameStrategy
-from .types import PathLikeObject
-
-# Needed until we drop Python 3.8
-if TYPE_CHECKING:
-    AnyQueue = Queue[Any]
-else:
-    AnyQueue = Queue
+from .types import MessageQueue, PathLikeObject
 
 
 @dataclass
@@ -53,7 +45,7 @@ class Download:
 
     async def download(
         self,
-        messages: Optional[AnyQueue],
+        messages: Optional[MessageQueue],
     ) -> Union[Download, WrappedError]:
         if not os.path.exists(self.path) or self.config.overwrite:
             try:
@@ -134,7 +126,7 @@ class Downloads:
             )
         stac_object.assets = assets
 
-    async def download(self, messages: Optional[AnyQueue]) -> None:
+    async def download(self, messages: Optional[MessageQueue]) -> None:
         tasks: Set[Task[Union[Download, WrappedError]]] = set()
         for download in self.downloads:
             task = asyncio.create_task(
@@ -199,7 +191,7 @@ async def download_item(
     file_name: Optional[str] = None,
     infer_file_name: bool = True,
     config: Optional[Config] = None,
-    queue: Optional[AnyQueue] = None,
+    messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
 ) -> Item:
     """Downloads an item to the local filesystem.
@@ -212,7 +204,7 @@ async def download_item(
         infer_file_name: If ``file_name`` is None, infer the file name from the
             item's id. This argument is unused if ``file_name`` is not None.
         config: The download configuration
-        queue: An optional queue to use for progress reporting
+        messages: An optional queue to use for progress reporting
         clients: Pre-configured clients to use for access
 
     Returns:
@@ -226,7 +218,7 @@ async def download_item(
 
     async with Downloads(config=config or Config(), clients=clients) as downloads:
         await downloads.add(item, Path(directory), file_name)
-        await downloads.download(queue)
+        await downloads.download(messages)
 
     self_href = item.get_self_href()
     if self_href:
@@ -243,7 +235,7 @@ async def download_collection(
     directory: PathLikeObject,
     file_name: Optional[str] = "collection.json",
     config: Optional[Config] = None,
-    queue: Optional[AnyQueue] = None,
+    messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
 ) -> Collection:
     """Downloads a collection to the local filesystem.
@@ -257,7 +249,7 @@ async def download_collection(
         file_name: The name of the collection file to save. If not provided,
             will not be saved.
         config: The download configuration
-        queue: An optional queue to use for progress reporting
+        messages: An optional queue to use for progress reporting
         clients: Pre-configured clients to use for access
 
     Returns:
@@ -268,7 +260,7 @@ async def download_collection(
     """
     async with Downloads(config=config or Config(), clients=clients) as downloads:
         await downloads.add(collection, Path(directory), file_name)
-        await downloads.download(queue)
+        await downloads.download(messages)
 
     self_href = collection.get_self_href()
     if self_href:
@@ -285,7 +277,7 @@ async def download_item_collection(
     directory: PathLikeObject,
     file_name: Optional[str] = "item-collection.json",
     config: Optional[Config] = None,
-    queue: Optional[AnyQueue] = None,
+    messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
 ) -> ItemCollection:
     """Downloads an item collection to the local filesystem.
@@ -296,7 +288,7 @@ async def download_item_collection(
         file_name: The name of the item collection file to save. If not
             provided, will not be saved.
         config: The download configuration
-        queue: An optional queue to use for progress reporting
+        messages: An optional queue to use for progress reporting
         clients: Pre-configured clients to use for access
 
     Returns:
@@ -310,7 +302,7 @@ async def download_item_collection(
             item.set_self_href(None)
             root = Path(directory) / item.id
             await downloads.add(item, root, None)
-        await downloads.download(queue)
+        await downloads.download(messages)
     if file_name:
         dest_href = Path(directory) / file_name
         for item in item_collection.items:
@@ -387,6 +379,7 @@ async def download_asset(
             )
         raise error
 
+    asset.href = str(path)
     if messages:
         await messages.put(FinishAssetDownload(key=key, href=href, path=path))
     return asset

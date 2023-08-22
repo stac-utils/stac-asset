@@ -1,12 +1,18 @@
+from asyncio import Queue
 from os import PathLike
 from typing import TYPE_CHECKING, Union
+
+from .messages import Message
 
 if TYPE_CHECKING:
     from typing import Any
 
     _PathLike = PathLike[Any]
+    # Needed until we drop Python 3.8
+    MessageQueue = Queue[Message]
 else:
     _PathLike = PathLike
+    MessageQueue = Queue
 
 PathLikeObject = Union[_PathLike, str]
 """An object representing a file system path, except we exclude `bytes` because
