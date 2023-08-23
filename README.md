@@ -34,7 +34,7 @@ import pystac
 import stac_asset
 
 href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
-item = pystac.Item.from_file(href)
+item = pystac.read_file(href)
 item = await stac_asset.download_item(item, ".")
 ```
 
