@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
-- Use absolute paths for item collection downloads ([#96](https://github.com/stac-utils/stac-asset/pull/96))
+- Use absolute paths for item collection downloads ([#96](https://github.com/stac-utils/stac-asset/pull/96), [#97](https://github.com/stac-utils/stac-asset/pull/97))
 
 ## [0.2.0] - 2023-08-23
 

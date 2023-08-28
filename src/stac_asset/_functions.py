@@ -305,6 +305,11 @@ async def download_item_collection(
         await downloads.download(messages)
     if file_name:
         dest_href = Path(directory) / file_name
+        for item in item_collection.items:
+            for asset in item.assets.values():
+                asset.href = pystac.utils.make_absolute_href(
+                    asset.href, start_is_dir=True
+                )
         item_collection.save_object(dest_href=str(dest_href))
 
     return item_collection
