@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 import stac_asset
 from pystac import Asset, Collection, Item, ItemCollection
+from pytest import MonkeyPatch
 from stac_asset import (
     AssetOverwriteError,
     Config,
@@ -100,6 +101,19 @@ async def test_download_item_collection_with_file_name(
 ) -> None:
     await stac_asset.download_item_collection(
         item_collection, tmp_path, file_name="item-collection.json"
+    )
+    item_collection = ItemCollection.from_file(str(tmp_path / "item-collection.json"))
+    assert item_collection.items[0].assets["data"].href == str(
+        tmp_path / "test-item/20201211_223832_CS2.jpg"
+    )
+
+
+async def test_download_item_collection_with_file_name_and_cd(
+    tmp_path: Path, item_collection: ItemCollection, monkeypatch: MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    await stac_asset.download_item_collection(
+        item_collection, ".", file_name="item-collection.json"
     )
     item_collection = ItemCollection.from_file(str(tmp_path / "item-collection.json"))
     assert item_collection.items[0].assets["data"].href == str(
