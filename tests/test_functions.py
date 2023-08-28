@@ -102,9 +102,8 @@ async def test_download_item_collection_with_file_name(
         item_collection, tmp_path, file_name="item-collection.json"
     )
     item_collection = ItemCollection.from_file(str(tmp_path / "item-collection.json"))
-    assert (
-        item_collection.items[0].assets["data"].href
-        == "./test-item/20201211_223832_CS2.jpg"
+    assert item_collection.items[0].assets["data"].href == str(
+        tmp_path / "test-item/20201211_223832_CS2.jpg"
     )
 
 
