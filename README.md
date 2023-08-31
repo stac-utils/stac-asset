@@ -35,10 +35,10 @@ import stac_asset
 import asyncio
 
 async def main():
-  href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
-  item = pystac.read_file(href)
-  item = await stac_asset.download_item(item, ".")
-  return item
+    href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
+    item = pystac.read_file(href)
+    item = await stac_asset.download_item(item, ".")
+    return item
 
 asyncio.run(main())
 ```
