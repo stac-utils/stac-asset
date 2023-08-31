@@ -34,9 +34,13 @@ import pystac
 import stac_asset
 import asyncio
 
-href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
-item = pystac.read_file(href)
-item = asyncio.run(stac_asset.download_item(item, "."))
+async def main():
+    href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
+    item = pystac.read_file(href)
+    item = await stac_asset.download_item(item, ".")
+    return item
+
+asyncio.run(main())
 ```
 
 If you're working in a fully synchronous application, you can use our blocking interface:
