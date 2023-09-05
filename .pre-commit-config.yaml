@@ -16,6 +16,6 @@ repos:
           - types-tabulate
           - types-tqdm
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.0.285"
+    rev: "v0.0.287"
     hooks:
       - id: ruff
