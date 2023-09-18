@@ -1,3 +1,4 @@
+import json
 import os.path
 from asyncio import Queue
 from pathlib import Path
@@ -204,7 +205,12 @@ async def test_asset_exists(item: Item) -> None:
     assert not await stac_asset.asset_exists(Asset(href="not-a-file"))
 
 
-async def test_asert_asset_exists(item: Item) -> None:
+async def test_assert_asset_exists(item: Item) -> None:
     await stac_asset.assert_asset_exists(item.assets["data"])
     with pytest.raises(ValueError):
         await stac_asset.assert_asset_exists(Asset(href="not-a-file"))
+
+
+async def test_read_href(data_path: Path) -> None:
+    text = await stac_asset.read_href(str(data_path / "item.json"))
+    Item.from_dict(json.loads(text))

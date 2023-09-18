@@ -436,6 +436,29 @@ async def asset_exists(
         return True
 
 
+async def read_href(
+    href: str, config: Optional[Config] = None, clients: Optional[List[Client]] = None
+) -> bytes:
+    """Reads an href and returns its bytes.
+
+    Args:
+        href: The href to read
+        config: The download configuration to use
+        clients: Any pre-configured clients to use
+
+    Returns:
+        bytes: The bytes from the href
+    """
+    if config is None:
+        config = Config()
+    clients_ = Clients(config, clients=clients)
+    async with await clients_.get_client(href) as client:
+        data = b""
+        async for chunk in client.open_href(href):
+            data += chunk
+        return data
+
+
 def make_asset_hrefs_relative(
     stac_object: Union[Item, Collection]
 ) -> Union[Item, Collection]:

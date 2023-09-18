@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `read_href` and `blocking.read_href` ([#107](https://github.com/stac-utils/stac-asset/pull/107))
+
 ## [0.2.1] - 2023-09-05
 
 ### Fixed
