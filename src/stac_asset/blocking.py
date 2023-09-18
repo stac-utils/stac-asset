@@ -207,3 +207,19 @@ def asset_exists(
         bool: Whether the asset exists or not
     """
     return asyncio.run(_functions.asset_exists(asset, config, clients))
+
+
+def read_href(
+    href: str, config: Optional[Config] = None, clients: Optional[List[Client]] = None
+) -> bytes:
+    """Reads an href and returns its bytes.
+
+    Args:
+        href: The href to read
+        config: The download configuration to use
+        clients: Any pre-configured clients to use
+
+    Returns:
+        bytes: The bytes from the href
+    """
+    return asyncio.run(_functions.read_href(href, config, clients))

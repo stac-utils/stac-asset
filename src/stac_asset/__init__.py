@@ -21,6 +21,7 @@ from ._functions import (
     download_collection,
     download_item,
     download_item_collection,
+    read_href,
 )
 from .client import Client
 from .config import Config
@@ -62,4 +63,5 @@ __all__ = [
     "download_collection",
     "download_item",
     "download_item_collection",
+    "read_href",
 ]
