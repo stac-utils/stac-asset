@@ -52,6 +52,15 @@ item = pystac.read_file(href)
 item = stac_asset.blocking.download_item(item, ".")
 ```
 
+Note that the above will not work in some environments like Jupyter notebooks which already have their own `asyncio` loop running.
+To get around this, you can use [`nest_asyncio`](https://pypi.org/project/nest-asyncio/).
+Simply run the following before using any functions from `stac_asset.blocking`.
+
+```python
+import nest_asyncio
+nest_asyncio.apply()
+```
+
 ### CLI
 
 To download an item using the command line:
