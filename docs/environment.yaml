@@ -1,7 +1,0 @@
-name: stac-async-docs
-channels:
-  - conda-forge
-dependencies:
-  - pip~=22.3
-  - pip:
-      - ..[cli,docs]
