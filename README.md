@@ -101,7 +101,7 @@ Some clients require some setup before use; they are called out in this table, a
 | `S3Client` | Simple S3 client | Use `requester_pays=True` in the client initializer to enable access to requester pays buckets, e.g. USGS landsat's public AWS archive |
 | `FilesystemClient` | Moves files from place to place on a local filesystem | Mostly used for testing |
 | `PlanetaryComputerClient` | Signs urls with the [Planetary Computer Authentication API](https://planetarycomputer.microsoft.com/docs/reference/sas/) | No additional setup required, works out of the box |
-| `EarthdataClient` | Uses a token-based authentication to download data, from _some_ Earthdata providers, e.g. DAACs | Requires creation of a personal access token, see section below |
+| `EarthdataClient` | Uses a token-based authentication to download data, from _some_ Earthdata providers, e.g. DAACs | Requires creation of a personal access token, see [docs](https://stac-asset.readthedocs.io/en/latest/api.html#stac_asset.EarthdataClient) |
 
 For information about configuring each client, see the [API documentation](https://stac-asset.readthedocs.io/en/latest/api.html) for that client.
 
