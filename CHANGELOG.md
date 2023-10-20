@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `keep_non_downloaded` ([#116](https://github.com/stac-utils/stac-asset/pull/116))
+
 ## [0.2.2] - 2023-09-18
 
 ### Added

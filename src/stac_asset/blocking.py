@@ -24,6 +24,7 @@ def download_item(
     config: Optional[Config] = None,
     messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
+    keep_non_downloaded: bool = False,
 ) -> Item:
     """Downloads an item to the local filesystem, synchronously.
 
@@ -37,6 +38,8 @@ def download_item(
         config: The download configuration
         messages: An optional queue to use for progress reporting
         clients: Pre-configured clients to use for access
+        keep_non_downloaded: Keep all assets on the item, even if they're not
+            downloaded.
 
     Returns:
         Item: The `~pystac.Item`, with the updated asset hrefs and self href.
@@ -53,6 +56,7 @@ def download_item(
             config=config,
             messages=messages,
             clients=clients,
+            keep_non_downloaded=keep_non_downloaded,
         )
     )
 
@@ -64,6 +68,7 @@ def download_collection(
     config: Optional[Config] = None,
     messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
+    keep_non_downloaded: bool = False,
 ) -> Collection:
     """Downloads a collection to the local filesystem, synchronously.
 
@@ -78,6 +83,8 @@ def download_collection(
         config: The download configuration
         messages: An optional queue to use for progress reporting
         clients: Pre-configured clients to use for access
+        keep_non_downloaded: Keep all assets on the item, even if they're not
+            downloaded.
 
     Returns:
         Collection: The collection, with updated asset hrefs
@@ -93,6 +100,7 @@ def download_collection(
             config=config,
             messages=messages,
             clients=clients,
+            keep_non_downloaded=keep_non_downloaded,
         )
     )
 
@@ -104,6 +112,7 @@ def download_item_collection(
     config: Optional[Config] = None,
     messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
+    keep_non_downloaded: bool = False,
 ) -> ItemCollection:
     """Downloads an item collection to the local filesystem, synchronously.
 
@@ -115,6 +124,8 @@ def download_item_collection(
         config: The download configuration
         messages: An optional queue to use for progress reporting
         clients: Pre-configured clients to use for access
+        keep_non_downloaded: Keep all assets on the item, even if they're not
+            downloaded.
 
     Returns:
         ItemCollection: The item collection, with updated asset hrefs
@@ -130,6 +141,7 @@ def download_item_collection(
             config=config,
             messages=messages,
             clients=clients,
+            keep_non_downloaded=keep_non_downloaded,
         )
     )
 

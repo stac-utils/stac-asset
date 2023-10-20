@@ -214,3 +214,11 @@ async def test_assert_asset_exists(item: Item) -> None:
 async def test_read_href(data_path: Path) -> None:
     text = await stac_asset.read_href(str(data_path / "item.json"))
     Item.from_dict(json.loads(text))
+
+
+async def test_keep_non_downloaded(item: Item, tmp_path: Path) -> None:
+    item.assets["other-data"] = item.assets["data"].clone()
+    item = await stac_asset.download_item(
+        item, tmp_path, config=Config(include=["data"]), keep_non_downloaded=True
+    )
+    assert len(item.assets) == 2

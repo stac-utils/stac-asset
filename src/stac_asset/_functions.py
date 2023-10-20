@@ -82,7 +82,11 @@ class Downloads:
         self.clients = Clients(config, clients)
 
     async def add(
-        self, stac_object: Union[Item, Collection], root: Path, file_name: Optional[str]
+        self,
+        stac_object: Union[Item, Collection],
+        root: Path,
+        file_name: Optional[str],
+        keep_non_downloaded: bool,
     ) -> None:
         stac_object = make_link_hrefs_absolute(stac_object)
         # Will fail if the stac object doesn't have a self href and there's
@@ -124,7 +128,10 @@ class Downloads:
                     config=self.config,
                 )
             )
-        stac_object.assets = assets
+        if keep_non_downloaded:
+            stac_object.assets.update(assets)
+        else:
+            stac_object.assets = assets
 
     async def download(self, messages: Optional[MessageQueue]) -> None:
         tasks: Set[Task[Union[Download, WrappedError]]] = set()
@@ -193,6 +200,7 @@ async def download_item(
     config: Optional[Config] = None,
     messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
+    keep_non_downloaded: bool = False,
 ) -> Item:
     """Downloads an item to the local filesystem.
 
@@ -206,6 +214,8 @@ async def download_item(
         config: The download configuration
         messages: An optional queue to use for progress reporting
         clients: Pre-configured clients to use for access
+        keep_non_downloaded: Keep all assets on the item, even if they're not
+            downloaded.
 
     Returns:
         Item: The `~pystac.Item`, with the updated asset hrefs and self href.
@@ -216,8 +226,11 @@ async def download_item(
     if file_name is None and infer_file_name:
         file_name = f"{item.id}.json"
 
-    async with Downloads(config=config or Config(), clients=clients) as downloads:
-        await downloads.add(item, Path(directory), file_name)
+    async with Downloads(
+        config=config or Config(),
+        clients=clients,
+    ) as downloads:
+        await downloads.add(item, Path(directory), file_name, keep_non_downloaded)
         await downloads.download(messages)
 
     self_href = item.get_self_href()
@@ -237,6 +250,7 @@ async def download_collection(
     config: Optional[Config] = None,
     messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
+    keep_non_downloaded: bool = False,
 ) -> Collection:
     """Downloads a collection to the local filesystem.
 
@@ -251,6 +265,8 @@ async def download_collection(
         config: The download configuration
         messages: An optional queue to use for progress reporting
         clients: Pre-configured clients to use for access
+        keep_non_downloaded: Keep all assets on the item, even if they're not
+            downloaded.
 
     Returns:
         Collection: The collection, with updated asset hrefs
@@ -259,7 +275,7 @@ async def download_collection(
         CantIncludeAndExclude: Raised if both include and exclude are not None.
     """
     async with Downloads(config=config or Config(), clients=clients) as downloads:
-        await downloads.add(collection, Path(directory), file_name)
+        await downloads.add(collection, Path(directory), file_name, keep_non_downloaded)
         await downloads.download(messages)
 
     self_href = collection.get_self_href()
@@ -279,6 +295,7 @@ async def download_item_collection(
     config: Optional[Config] = None,
     messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
+    keep_non_downloaded: bool = False,
 ) -> ItemCollection:
     """Downloads an item collection to the local filesystem.
 
@@ -290,6 +307,8 @@ async def download_item_collection(
         config: The download configuration
         messages: An optional queue to use for progress reporting
         clients: Pre-configured clients to use for access
+        keep_non_downloaded: Keep all assets on the item, even if they're not
+            downloaded.
 
     Returns:
         ItemCollection: The item collection, with updated asset hrefs
@@ -301,7 +320,7 @@ async def download_item_collection(
         for item in item_collection.items:
             item.set_self_href(None)
             root = Path(directory) / item.id
-            await downloads.add(item, root, None)
+            await downloads.add(item, root, None, keep_non_downloaded)
         await downloads.download(messages)
     if file_name:
         dest_href = Path(directory) / file_name
