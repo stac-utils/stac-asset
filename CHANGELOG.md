@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.2.3] - 2023-10-20
+
 ### Added
 
 - `keep_non_downloaded` ([#116](https://github.com/stac-utils/stac-asset/pull/116))
@@ -109,7 +111,8 @@ Used to be <https://github.com/gadomski/stac-asset>.
 
 Initial release.
 
-[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.2.2...HEAD
+[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/stac-utils/stac-asset/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/stac-utils/stac-asset/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/stac-utils/stac-asset/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/stac-utils/stac-asset/compare/v0.1.1...v0.2.0
