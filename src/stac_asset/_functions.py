@@ -377,6 +377,7 @@ async def download_asset(
 
     if messages:
         if asset.owner:
+            assert isinstance(asset.owner, (Item, Collection))
             owner_id = asset.owner.id
         else:
             owner_id = None
