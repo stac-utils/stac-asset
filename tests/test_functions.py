@@ -211,6 +211,13 @@ async def test_assert_asset_exists(item: Item) -> None:
         await stac_asset.assert_asset_exists(Asset(href="not-a-file"))
 
 
+async def test_open_href(data_path: Path) -> None:
+    text = b""
+    async for chunk in stac_asset.open_href(str(data_path / "item.json")):
+        text += chunk
+    Item.from_dict(json.loads(text))
+
+
 async def test_read_href(data_path: Path) -> None:
     text = await stac_asset.read_href(str(data_path / "item.json"))
     Item.from_dict(json.loads(text))

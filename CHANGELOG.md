@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `open_href` ([#123](https://github.com/stac-utils/stac-asset/pull/123))
+
 ## [0.2.3] - 2023-10-20
 
 ### Added
