@@ -21,6 +21,7 @@ from ._functions import (
     download_collection,
     download_item,
     download_item_collection,
+    open_href,
     read_href,
 )
 from .client import Client
@@ -63,5 +64,6 @@ __all__ = [
     "download_collection",
     "download_item",
     "download_item_collection",
+    "open_href",
     "read_href",
 ]

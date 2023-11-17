@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
 from typing import (
+    AsyncIterator,
     List,
     Optional,
     Set,
@@ -456,6 +457,27 @@ async def asset_exists(
         return True
 
 
+async def open_href(
+    href: str, config: Optional[Config] = None, clients: Optional[List[Client]] = None
+) -> AsyncIterator[bytes]:
+    """Opens an href and yields byte chunks.
+
+    Args:
+        href: The href to read
+        config: The download configuration to use
+        clients: Any pre-configured clients to use
+
+    Yields:
+        bytes: The bytes from the href
+    """
+    if config is None:
+        config = Config()
+    clients_ = Clients(config, clients=clients)
+    async with await clients_.get_client(href) as client:
+        async for chunk in client.open_href(href):
+            yield chunk
+
+
 async def read_href(
     href: str, config: Optional[Config] = None, clients: Optional[List[Client]] = None
 ) -> bytes:
@@ -469,14 +491,10 @@ async def read_href(
     Returns:
         bytes: The bytes from the href
     """
-    if config is None:
-        config = Config()
-    clients_ = Clients(config, clients=clients)
-    async with await clients_.get_client(href) as client:
-        data = b""
-        async for chunk in client.open_href(href):
-            data += chunk
-        return data
+    data = b""
+    async for chunk in open_href(href, config=config, clients=clients):
+        data += chunk
+    return data
 
 
 def make_asset_hrefs_relative(
