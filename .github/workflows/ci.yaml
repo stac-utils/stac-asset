@@ -77,6 +77,6 @@ jobs:
       - name: Test with coverage
         run: pytest --cov=stac_asset
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
