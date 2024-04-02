@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.2.4] - 2024-04-02
+
 ### Added
 
 - `open_href` ([#123](https://github.com/stac-utils/stac-asset/pull/123))
@@ -115,7 +117,8 @@ Used to be <https://github.com/gadomski/stac-asset>.
 
 Initial release.
 
-[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.2.3...HEAD
+[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.2.4...HEAD
+[0.2.4]: https://github.com/stac-utils/stac-asset/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/stac-utils/stac-asset/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/stac-utils/stac-asset/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/stac-utils/stac-asset/compare/v0.2.0...v0.2.1

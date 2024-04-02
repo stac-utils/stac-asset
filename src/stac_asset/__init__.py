@@ -13,7 +13,6 @@ assets.  Writing items, item collections, collections, and assets is currently
 unsupported, but is on the roadmap.
 """
 
-
 from ._functions import (
     assert_asset_exists,
     asset_exists,
