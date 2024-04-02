@@ -498,7 +498,7 @@ async def read_href(
 
 
 def make_asset_hrefs_relative(
-    stac_object: Union[Item, Collection]
+    stac_object: Union[Item, Collection],
 ) -> Union[Item, Collection]:
     # Copied from
     # https://github.com/stac-utils/pystac/blob/381cf89fc25c15142fb5a187d905e22681de42a2/pystac/item.py#L284C5-L298C20
@@ -516,7 +516,7 @@ def make_asset_hrefs_relative(
 
 
 def make_asset_hrefs_absolute(
-    stac_object: Union[Item, Collection]
+    stac_object: Union[Item, Collection],
 ) -> Union[Item, Collection]:
     # Copied from
     # https://github.com/stac-utils/pystac/blob/381cf89fc25c15142fb5a187d905e22681de42a2/pystac/item.py#L309C3-L319C1
