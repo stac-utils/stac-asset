@@ -238,6 +238,7 @@ async def download_item(
     if self_href:
         make_asset_hrefs_relative(item)
         d = item.to_dict(include_self_link=True, transform_hrefs=False)
+        os.makedirs(os.path.dirname(self_href), exist_ok=True)
         with open(self_href, "w") as f:
             json.dump(d, f)
 
