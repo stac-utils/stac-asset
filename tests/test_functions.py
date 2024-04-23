@@ -74,6 +74,18 @@ async def test_download_missing_asset_delete(tmp_path: Path, item: Item) -> None
     assert "does-not-exist" not in item.assets
 
 
+async def test_download_nonexistent_asset(tmp_path: Path, item: Item) -> None:
+    # this previously had a bug where the code assumed the directory had
+    # been created by downloading the assets when trying to write the item json,
+    # but it hadn't, so a failure occurred
+    await stac_asset.download_item(
+        item,
+        tmp_path / "dir-that-doesnt-exist",
+        file_name="item.json",
+        config=Config(include=["non-existent-asset"]),
+    )
+
+
 async def test_download_missing_asset_fail_fast(tmp_path: Path, item: Item) -> None:
     item.assets["does-not-exist"] = Asset("not-a-file.md5")
     with pytest.raises(FileNotFoundError):
