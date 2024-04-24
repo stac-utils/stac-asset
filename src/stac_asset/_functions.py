@@ -4,7 +4,7 @@ import asyncio
 import json
 import os.path
 import warnings
-from asyncio import Queue, Task
+from asyncio import Task
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
@@ -27,7 +27,6 @@ from .errors import AssetOverwriteError, DownloadError, DownloadWarning
 from .messages import (
     ErrorAssetDownload,
     FinishAssetDownload,
-    Message,
     SkipAssetDownload,
     StartAssetDownload,
 )
@@ -341,7 +340,7 @@ async def download_asset(
     asset: Asset,
     path: Path,
     config: Config,
-    messages: Optional[Queue[Message]] = None,
+    messages: Optional[MessageQueue] = None,
     clients: Optional[Clients] = None,
 ) -> Asset:
     """Downloads an asset.

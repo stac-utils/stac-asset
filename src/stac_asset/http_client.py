@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from asyncio import Queue
 from types import TracebackType
 from typing import AsyncIterator, Optional, Type, TypeVar
 
@@ -10,7 +9,8 @@ from yarl import URL
 from . import validate
 from .client import Client
 from .config import Config
-from .messages import Message, OpenUrl
+from .messages import OpenUrl
+from .types import MessageQueue
 
 T = TypeVar("T", bound="HttpClient")
 
@@ -48,7 +48,7 @@ class HttpClient(Client):
         self,
         url: URL,
         content_type: Optional[str] = None,
-        messages: Optional[Queue[Message]] = None,
+        messages: Optional[MessageQueue] = None,
     ) -> AsyncIterator[bytes]:
         """Opens a url with this client's session and iterates over its bytes.
 

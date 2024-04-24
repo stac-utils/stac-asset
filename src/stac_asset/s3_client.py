@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from asyncio import Queue
 from types import TracebackType
 from typing import Any, AsyncIterator, Dict, Optional, Type
 
@@ -18,7 +17,8 @@ from .config import (
     DEFAULT_S3_RETRY_MODE,
     Config,
 )
-from .messages import Message, OpenUrl
+from .messages import OpenUrl
+from .types import MessageQueue
 
 
 class S3Client(Client):
@@ -86,7 +86,7 @@ class S3Client(Client):
         self,
         url: URL,
         content_type: Optional[str] = None,
-        messages: Optional[Queue[Message]] = None,
+        messages: Optional[MessageQueue] = None,
     ) -> AsyncIterator[bytes]:
         """Opens an s3 url and iterates over its bytes.
 

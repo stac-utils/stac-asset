@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os.path
-from asyncio import Queue
 from types import TracebackType
 from typing import AsyncIterator, Optional, Type
 
@@ -9,7 +8,8 @@ import aiofiles
 from yarl import URL
 
 from .client import Client
-from .messages import Message, OpenUrl
+from .messages import OpenUrl
+from .types import MessageQueue
 
 
 class FilesystemClient(Client):
@@ -22,7 +22,7 @@ class FilesystemClient(Client):
         self,
         url: URL,
         content_type: Optional[str] = None,
-        messages: Optional[Queue[Message]] = None,
+        messages: Optional[MessageQueue] = None,
     ) -> AsyncIterator[bytes]:
         """Iterates over data from a local url.
 

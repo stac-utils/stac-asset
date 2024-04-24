@@ -15,9 +15,9 @@ from stac_asset import (
     DownloadWarning,
     ErrorStrategy,
     FileNameStrategy,
-    Message,
     S3Client,
 )
+from stac_asset.types import MessageQueue
 
 pytestmark = [
     pytest.mark.asyncio,
@@ -207,7 +207,7 @@ async def test_preconfigured_clients(tmp_path: Path, item: Item) -> None:
 
 
 async def test_queue(tmp_path: Path, item: Item) -> None:
-    messages: Queue[Message] = Queue()
+    messages: MessageQueue = Queue()
     item = await stac_asset.download_item(item, tmp_path, messages=messages)
     assert not messages.empty()
 
