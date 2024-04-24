@@ -6,15 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Removed
+
+- Python 3.8 is no longer supported ([#154](https://github.com/stac-utils/stac-asset/pull/154))
+
+### Fixed
+
+- Directory for writing Item JSON is always created ([#152](https://github.com/stac-utils/stac-asset/pull/152))
+
 ## [0.2.4] - 2024-04-02
 
 ### Added
 
 - `open_href` ([#123](https://github.com/stac-utils/stac-asset/pull/123))
 
-### Fixed
-
-- Directory for writing Item JSON is always created ([#152](https://github.com/stac-utils/stac-asset/pull/152))
 
 ## [0.2.3] - 2023-10-20
 

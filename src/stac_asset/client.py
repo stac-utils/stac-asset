@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from asyncio import Lock, Queue, QueueFull
+from asyncio import Lock, QueueFull
 from pathlib import Path
 from types import TracebackType
 from typing import AsyncIterator, Dict, List, Optional, Type, TypeVar
@@ -11,10 +11,9 @@ from yarl import URL
 
 from .config import Config
 from .messages import (
-    Message,
     WriteChunk,
 )
-from .types import PathLikeObject
+from .types import MessageQueue, PathLikeObject
 
 T = TypeVar("T", bound="Client")
 
@@ -41,7 +40,7 @@ class Client(ABC):
         self,
         url: URL,
         content_type: Optional[str] = None,
-        messages: Optional[Queue[Message]] = None,
+        messages: Optional[MessageQueue] = None,
     ) -> AsyncIterator[bytes]:
         """Opens a url and yields an iterator over its bytes.
 
@@ -64,7 +63,7 @@ class Client(ABC):
         self,
         href: str,
         content_type: Optional[str] = None,
-        messages: Optional[Queue[Message]] = None,
+        messages: Optional[MessageQueue] = None,
     ) -> AsyncIterator[bytes]:
         """Opens a href and yields an iterator over its bytes.
 
@@ -87,7 +86,7 @@ class Client(ABC):
         path: PathLikeObject,
         clean: bool = True,
         content_type: Optional[str] = None,
-        messages: Optional[Queue[Message]] = None,
+        messages: Optional[MessageQueue] = None,
     ) -> None:
         """Downloads a file to the local filesystem.
 
