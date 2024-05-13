@@ -10,6 +10,7 @@ from .strategy import ErrorStrategy, FileNameStrategy
 DEFAULT_S3_REGION_NAME = "us-west-2"
 DEFAULT_S3_RETRY_MODE = "adaptive"
 DEFAULT_S3_MAX_ATTEMPTS = 10
+DEFAULT_HTTP_CLIENT_TIMEOUT = 300
 
 
 @dataclass
@@ -58,6 +59,9 @@ class Config:
 
     overwrite: bool = False
     """Download files even if they already exist locally."""
+
+    http_client_timeout: Optional[float] = DEFAULT_HTTP_CLIENT_TIMEOUT
+    """Total number of seconds for the whole request."""
 
     earthdata_token: Optional[str] = None
     """A token for logging in to Earthdata."""
