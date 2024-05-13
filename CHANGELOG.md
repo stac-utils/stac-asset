@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- More information to `DownloadError`'s string representation ([#160](https://github.com/stac-utils/stac-asset/pull/160))
+
 ## [0.3.0] - 2024.04.24
 
 ### Removed
@@ -125,7 +131,7 @@ Used to be <https://github.com/gadomski/stac-asset>.
 
 Initial release.
 
-<!-- [unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.2.4...HEAD -->
+[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.3.0...HEAD
 [0.3.0]: <https://github.com/stac-utils/stac-asset/compare/v0.2.4...v0.3.0>
 [0.2.4]: <https://github.com/stac-utils/stac-asset/compare/v0.2.3...v0.2.4>
 [0.2.3]: <https://github.com/stac-utils/stac-asset/compare/v0.2.2...v0.2.3>

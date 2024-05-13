@@ -43,5 +43,5 @@ class DownloadError(Exception):
         self.exceptions = exceptions
         messages = list()
         for exception in exceptions:
-            messages.append(str(exception))
+            messages.append(f"{type(exception).__name__}: {exception}")
         super().__init__("\n".join(messages), *args, **kwargs)
