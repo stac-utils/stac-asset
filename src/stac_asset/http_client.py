@@ -3,7 +3,7 @@ from __future__ import annotations
 from types import TracebackType
 from typing import AsyncIterator, Optional, Type, TypeVar
 
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientTimeout
 from yarl import URL
 
 from . import validate
@@ -36,7 +36,8 @@ class HttpClient(Client):
     async def from_config(cls: Type[T], config: Config) -> T:
         """Creates the default http client with a vanilla session object."""
         # TODO add basic auth
-        session = ClientSession()
+        timeout = ClientTimeout(total=config.http_client_timeout)
+        session = ClientSession(timeout=timeout)
         return cls(session)
 
     def __init__(self, session: ClientSession, check_content_type: bool = True) -> None:
