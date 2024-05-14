@@ -1,0 +1,148 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding:
+      - identity
+      User-Agent:
+      - aiobotocore/2.12.1 md/Botocore#1.34.51 ua/2.0 os/macos#23.4.0 md/arch#x86_64
+        lang/python#3.11.7 md/pyimpl#CPython cfg/retry-mode#adaptive botocore/1.34.51
+      amz-sdk-invocation-id:
+      - ebc034ad-e4fe-4070-ae27-e018ee92a4ec
+      amz-sdk-request:
+      - attempt=1
+    method: HEAD
+    uri: https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/42/L/TQ/2023/5/S2B_42LTQ_20230524_0_L2A/thumbnail.jpg
+  response:
+    body:
+      string: ''
+    headers:
+      Accept-Ranges:
+      - bytes
+      Content-Length:
+      - '6060'
+      Content-Type:
+      - image/jpeg
+      Date:
+      - Tue, 14 May 2024 18:14:17 GMT
+      Etag:
+      - '"fd5be8ff5885a647387fc9210704950d"'
+      Last-Modified:
+      - Wed, 24 May 2023 10:42:05 GMT
+      Server:
+      - AmazonS3
+      x-amz-id-2:
+      - mEWDTwXCtAkJO3+RxODkn81nWml1tFJMDavR9OIwHo9W3NYjj/+FKoCb8JeTVga9sz+170cr/mg=
+      x-amz-request-id:
+      - M04XGMNZ7RWW262Y
+      x-amz-server-side-encryption:
+      - AES256
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - identity
+      Host:
+      - does-not-exist.s3.us-west-2.amazonaws.com
+      User-Agent:
+      - aiobotocore/2.12.1 md/Botocore#1.34.51 ua/2.0 os/macos#23.4.0 md/arch#x86_64
+        lang/python#3.11.7 md/pyimpl#CPython cfg/retry-mode#adaptive botocore/1.34.51
+      amz-sdk-invocation-id:
+      - 8e695971-ee53-4019-95ed-2566e6c08271
+      amz-sdk-request:
+      - attempt=1
+    method: HEAD
+    uri: https://does-not-exist.s3.us-west-2.amazonaws.com/not-a-file
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Type:
+      - application/xml
+      Date:
+      - Tue, 14 May 2024 18:14:16 GMT
+      Server:
+      - AmazonS3
+      x-amz-bucket-region:
+      - eu-west-1
+      x-amz-id-2:
+      - LykPIu7RSmG/dxQtmQpYIQMM8M4kNSoyj/YSWn+mKLT9uxhW9PKfom47AyHQJ7nLv/7n/klGK6U=
+      x-amz-request-id:
+      - 9N4DTCVGDBGMSY5W
+    status:
+      code: 301
+      message: Moved Permanently
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - identity
+      Host:
+      - does-not-exist.s3.us-west-2.amazonaws.com
+      User-Agent:
+      - aiobotocore/2.12.1 md/Botocore#1.34.51 ua/2.0 os/macos#23.4.0 md/arch#x86_64
+        lang/python#3.11.7 md/pyimpl#CPython cfg/retry-mode#adaptive botocore/1.34.51
+      amz-sdk-invocation-id:
+      - 8e695971-ee53-4019-95ed-2566e6c08271
+      amz-sdk-request:
+      - attempt=1
+    method: HEAD
+    uri: https://does-not-exist.s3.us-west-2.amazonaws.com/not-a-file
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Type:
+      - application/xml
+      Date:
+      - Tue, 14 May 2024 18:14:16 GMT
+      Server:
+      - AmazonS3
+      x-amz-bucket-region:
+      - eu-west-1
+      x-amz-id-2:
+      - LykPIu7RSmG/dxQtmQpYIQMM8M4kNSoyj/YSWn+mKLT9uxhW9PKfom47AyHQJ7nLv/7n/klGK6U=
+      x-amz-request-id:
+      - 9N4DTCVGDBGMSY5W
+    status:
+      code: 301
+      message: Moved Permanently
+- request:
+    body: null
+    headers:
+      Accept-Encoding:
+      - identity
+      User-Agent:
+      - aiobotocore/2.12.1 md/Botocore#1.34.51 ua/2.0 os/macos#23.4.0 md/arch#x86_64
+        lang/python#3.11.7 md/pyimpl#CPython cfg/retry-mode#adaptive botocore/1.34.51
+      amz-sdk-invocation-id:
+      - 8e695971-ee53-4019-95ed-2566e6c08271
+      amz-sdk-request:
+      - ttl=20240514T181516Z; attempt=2; max=11
+    method: HEAD
+    uri: https://does-not-exist.s3.eu-west-1.amazonaws.com/not-a-file
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Type:
+      - application/xml
+      Date:
+      - Tue, 14 May 2024 18:14:17 GMT
+      Server:
+      - AmazonS3
+      x-amz-id-2:
+      - 1yzdcl560VVUPmN0328z2IyMqj4/eiE9rDB8rRp1NbF+II+7lbdVy+kRVpnZOLXcpimhaCIPyS8=
+      x-amz-request-id:
+      - 9N4AH413TFRGCT6Q
+    status:
+      code: 403
+      message: Forbidden
+version: 1

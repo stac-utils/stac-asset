@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **pytest-recording** and vcr marks to a couple tests ([#166](https://github.com/stac-utils/stac-asset/pull/166))
+
 ## [0.3.1] - 2024-05-13
 
 ### Added
