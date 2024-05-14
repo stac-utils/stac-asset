@@ -1,0 +1,82 @@
+interactions:
+- request:
+    body: null
+    headers: {}
+    method: GET
+    uri: https://planetarycomputer.microsoft.com/api/sas/v1/token/sentinel2l2a01/sentinel2-l2
+  response:
+    body:
+      string: '{"msft:expiry":"2024-05-14T19:00:49Z","token":"st=2024-05-13T18%3A15%3A49Z&se=2024-05-14T19%3A00%3A49Z&sp=rl&sv=2021-06-08&sr=c&skoid=957f55e4-97bf-4dce-ae04-ff8389f97c65&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2024-05-14T10%3A18%3A30Z&ske=2024-05-21T10%3A18%3A30Z&sks=b&skv=2021-06-08&sig=1%2BTZYindo7mFjt5oZLcgK97cm5PZ/iKr9Y8UIVJ49AE%3D"}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '347'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 14 May 2024 18:15:49 GMT
+      Request-Context:
+      - appId=cid-v1:75161b1b-6883-4b66-9410-715040c44427
+      Strict-Transport-Security:
+      - max-age=15724800; includeSubDomains
+      X-Cache:
+      - CONFIG_NOCACHE
+      x-azure-ref:
+      - 20240514T181549Z-176fb699484x5zd7zyqyhxvx1n00000000bg0000000013em
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers: {}
+    method: HEAD
+    uri: https://sentinel2l2a01.blob.core.windows.net/sentinel2-l2/48/X/VR/2023/05/24/S2B_MSIL2A_20230524T084609_N0509_R107_T48XVR_20230524T120352.SAFE/GRANULE/L2A_T48XVR_A032451_20230524T084603/QI_DATA/T48XVR_20230524T084609_PVI.tif?st=2024-05-13T18:15:49Z&se=2024-05-14T19:00:49Z&sp=rl&sv=2021-06-08&sr=c&skoid=957f55e4-97bf-4dce-ae04-ff8389f97c65&sktid=72f988bf-86f1-41af-91ab-2d7cd011db47&skt=2024-05-14T10:18:30Z&ske=2024-05-21T10:18:30Z&sks=b&skv=2021-06-08&sig=1%2BTZYindo7mFjt5oZLcgK97cm5PZ/iKr9Y8UIVJ49AE%3D
+  response:
+    body:
+      string: ''
+    headers:
+      Accept-Ranges:
+      - bytes
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - x-ms-request-id,Server,x-ms-version,Content-Type,Last-Modified,ETag,x-ms-creation-time,Content-MD5,x-ms-lease-status,x-ms-lease-state,x-ms-blob-type,x-ms-server-encrypted,x-ms-access-tier,x-ms-access-tier-inferred,Accept-Ranges,Content-Length,Date,Transfer-Encoding
+      Content-Length:
+      - '4096'
+      Content-MD5:
+      - AhcBUcRKwcVPYcaN4z/cPQ==
+      Content-Type:
+      - application/octet-stream
+      Date:
+      - Tue, 14 May 2024 18:15:50 GMT
+      Etag:
+      - '"0x8DB5C5106A61ECF"'
+      Last-Modified:
+      - Wed, 24 May 2023 12:18:47 GMT
+      Server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-access-tier:
+      - Hot
+      x-ms-access-tier-inferred:
+      - 'true'
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-creation-time:
+      - Wed, 24 May 2023 12:18:47 GMT
+      x-ms-lease-state:
+      - available
+      x-ms-lease-status:
+      - unlocked
+      x-ms-request-id:
+      - 3de1c11e-601e-0083-432a-a6f4cc000000
+      x-ms-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2021-06-08'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -130,8 +130,8 @@ pre-commit install
 
 ### Testing
 
-All network-touching tests are disabled by default, because we can't use [pytest-vcr](https://pytest-vcr.readthedocs.io/en/latest/) (<https://github.com/kevin1024/vcrpy/issues/597>), and repeatedly hitting the network during testing and CI is bad behavior.
-To enable network-touching tests:
+Some network-touching tests are disabled by default.
+To enable these tests:
 
 ```shell
 pytest --network-access

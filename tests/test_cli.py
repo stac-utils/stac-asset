@@ -83,6 +83,7 @@ def test_download_item_s3_requester_pays(tmp_path: Path) -> None:
             "thumbnail",
             "--alternate-assets",
             "s3",
+            "--fail-fast",
         ],
     )
     assert result.exit_code == 0
