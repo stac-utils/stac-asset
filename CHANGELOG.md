@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Timeout configuration for `HttpClient` ([#163](https://github.com/stac-utils/stac-asset/pull/163))
 - **pytest-recording** and vcr marks to a couple tests ([#166](https://github.com/stac-utils/stac-asset/pull/166))
 
+### Fixed
+
+- Limit the number of concurrent downloads ([#167](https://github.com/stac-utils/stac-asset/pull/167))
+
 ## [0.3.1] - 2024-05-13
 
 ### Added
