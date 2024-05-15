@@ -80,7 +80,7 @@ class Downloads:
         self,
         config: Config,
         clients: Optional[List[Client]] = None,
-        max_concurrent_downloads: int = 1024,
+        max_concurrent_downloads: int = 500,
     ) -> None:
         config.validate()
         self.config = config
