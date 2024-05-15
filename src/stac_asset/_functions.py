@@ -4,7 +4,7 @@ import asyncio
 import json
 import os.path
 import warnings
-from asyncio import Semaphore, Task 
+from asyncio import Semaphore, Task
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
@@ -176,11 +176,11 @@ class Downloads:
         if exceptions:
             raise DownloadError(exceptions)
 
-    async def _download_with_release(self, download, messages):
+    async def _download_with_release(
+        self, download: Download, messages: Optional[MessageQueue]
+    ) -> Download | WrappedError:
         try:
             return await download.download(messages=messages)
-        except Exception as e:
-            return WrappedError(download=download, error=e)
         finally:
             self.semaphore.release()
 
