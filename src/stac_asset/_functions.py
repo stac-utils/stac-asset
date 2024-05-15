@@ -4,7 +4,7 @@ import asyncio
 import json
 import os.path
 import warnings
-from asyncio import Task
+from asyncio import Semaphore, Task
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
@@ -74,12 +74,19 @@ class Downloads:
     clients: Clients
     config: Config
     downloads: List[Download]
+    semaphore: Semaphore
 
-    def __init__(self, config: Config, clients: Optional[List[Client]] = None) -> None:
+    def __init__(
+        self,
+        config: Config,
+        clients: Optional[List[Client]] = None,
+        max_concurrent_downloads: int = 500,
+    ) -> None:
         config.validate()
         self.config = config
         self.downloads = list()
         self.clients = Clients(config, clients)
+        self.semaphore = Semaphore(max_concurrent_downloads)
 
     async def add(
         self,
@@ -136,11 +143,9 @@ class Downloads:
     async def download(self, messages: Optional[MessageQueue]) -> None:
         tasks: Set[Task[Union[Download, WrappedError]]] = set()
         for download in self.downloads:
-            task = asyncio.create_task(
-                download.download(
-                    messages=messages,
-                )
-            )
+            # wait to acquire the semaphore before starting a new download task
+            await self.semaphore.acquire()
+            task = asyncio.create_task(self._download_with_release(download, messages))
             tasks.add(task)
             task.add_done_callback(tasks.discard)
 
@@ -170,6 +175,14 @@ class Downloads:
                     exceptions.append(result.error)
         if exceptions:
             raise DownloadError(exceptions)
+
+    async def _download_with_release(
+        self, download: Download, messages: Optional[MessageQueue]
+    ) -> Download | WrappedError:
+        try:
+            return await download.download(messages=messages)
+        finally:
+            self.semaphore.release()
 
     async def __aenter__(self) -> Downloads:
         return self
