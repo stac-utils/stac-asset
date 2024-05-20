@@ -52,19 +52,17 @@ class PlanetaryComputerClient(HttpClient):
     thanks Tom Augspurger!
     """
 
-    _cache: Dict[URL, _Token]
-    _cache_lock: Lock
-    token_request_url: URL
-
     def __init__(
         self,
         session: ClientSession,
         sas_token_endpoint: str = DEFAULT_SAS_TOKEN_ENDPOINT,
     ) -> None:
         super().__init__(session)
-        self._cache = dict()
-        self._cache_lock = Lock()
-        self.sas_token_endpoint = URL(sas_token_endpoint)
+        self._cache: Dict[URL, _Token] = dict()
+        self._cache_lock: Lock = Lock()
+
+        self.sas_token_endpoint: URL = URL(sas_token_endpoint)
+        """The endpoint that will be used to fetch a SAS token for reading."""
 
     async def open_url(
         self,
