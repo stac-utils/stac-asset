@@ -22,16 +22,6 @@ class HttpClient(Client):
     Configure the session to customize its behavior.
     """
 
-    check_content_type: bool
-    """If true, check the asset's content type against the response from the server.
-
-    See :py:func:`stac_asset.validate.content_type` for more information about
-    hte content type check.
-    """
-
-    session: ClientSession
-    """A atiohttp session that will be used for all requests."""
-
     @classmethod
     async def from_config(cls: Type[T], config: Config) -> T:
         """Creates the default http client with a vanilla session object."""
@@ -42,8 +32,16 @@ class HttpClient(Client):
 
     def __init__(self, session: ClientSession, check_content_type: bool = True) -> None:
         super().__init__()
-        self.session = session
-        self.check_content_type = check_content_type
+
+        self.session: ClientSession = session
+        """A aiohttp session that will be used for all requests."""
+
+        self.check_content_type: bool = check_content_type
+        """If true, check the asset's content type against the response from the server.
+
+        See :py:func:`stac_asset.validate.content_type` for more information about
+        the content type check.
+        """
 
     async def open_url(
         self,

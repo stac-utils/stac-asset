@@ -30,27 +30,6 @@ class S3Client(Client):
     for instructions.
     """
 
-    session: AioSession
-    """The session that will be used for all s3 requests."""
-
-    region_name: str
-    """The region that all clients will be rooted in."""
-
-    requester_pays: bool
-    """If True, enable access to `requester pays buckets
-    <https://docs.aws.amazon.com/AmazonS3/latest/userguide/RequesterPaysBuckets.html>`_."""
-
-    retry_mode: str
-    """The retry mode, one of "adaptive", "legacy", or "standard".
-
-    See `the boto3 docs
-    <https://boto3.amazonaws.com/v1/documentation/api/latest/guide/retries.html>`_
-    for more information on the available modes.
-    """
-
-    max_attempts: int
-    """The maximum number of attempts."""
-
     @classmethod
     async def from_config(cls, config: Config) -> S3Client:
         """Creates an s3 client from a config.
@@ -76,11 +55,27 @@ class S3Client(Client):
         max_attempts: int = DEFAULT_S3_MAX_ATTEMPTS,
     ) -> None:
         super().__init__()
-        self.session = aiobotocore.session.get_session()
-        self.region_name = region_name
-        self.requester_pays = requester_pays
-        self.retry_mode = retry_mode
-        self.max_attempts = max_attempts
+
+        self.session: AioSession = aiobotocore.session.get_session()
+        """The session that will be used for all s3 requests."""
+
+        self.region_name: str = region_name
+        """The region that all clients will be rooted in."""
+
+        self.requester_pays: bool = requester_pays
+        """If True, enable access to `requester pays buckets
+        <https://docs.aws.amazon.com/AmazonS3/latest/userguide/RequesterPaysBuckets.html>`_."""
+
+        self.retry_mode: str = retry_mode
+        """The retry mode, one of "adaptive", "legacy", or "standard".
+
+        See `the boto3 docs
+        <https://boto3.amazonaws.com/v1/documentation/api/latest/guide/retries.html>`_
+        for more information on the available modes.
+        """
+
+        self.max_attempts: int = max_attempts
+        """The maximum number of attempts."""
 
     async def open_url(
         self,
