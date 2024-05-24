@@ -584,3 +584,24 @@ def get_absolute_asset_href(asset: Asset, alternate_assets: List[str]) -> Option
                         f"{alternate}"
                     )
     return asset.get_absolute_href()
+
+
+async def download_file(
+    href: str,
+    destination: PathLikeObject,
+    config: Optional[Config] = None,
+    clients: Optional[List[Client]] = None,
+) -> None:
+    """Downloads a file collection to the local filesystem.
+
+    Args:
+        href: The source href
+        destination: The destination file path
+        config: The download configuration
+        clients: Pre-configured clients to use for access
+    """
+    if config is None:
+        config = Config()
+    clients_ = Clients(config, clients=clients)
+    client = await clients_.get_client(href)
+    await client.download_href(href, destination)

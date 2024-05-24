@@ -44,3 +44,10 @@ def test_asset_exists(item: Item) -> None:
 def test_read_href(data_path: Path) -> None:
     text = stac_asset.blocking.read_href(str(data_path / "item.json"))
     Item.from_dict(json.loads(text))
+
+
+def test_download_file(data_path: Path, tmp_path: Path) -> None:
+    stac_asset.blocking.download_file(
+        str(data_path / "item.json"), tmp_path / "item.json"
+    )
+    Item.from_file(tmp_path / "item.json")
