@@ -18,6 +18,7 @@ from ._functions import (
     asset_exists,
     download_asset,
     download_collection,
+    download_file,
     download_item,
     download_item_collection,
     open_href,
@@ -63,6 +64,7 @@ __all__ = [
     "download_collection",
     "download_item",
     "download_item_collection",
+    "download_file",
     "open_href",
     "read_href",
 ]

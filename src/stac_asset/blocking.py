@@ -235,3 +235,20 @@ def read_href(
         bytes: The bytes from the href
     """
     return asyncio.run(_functions.read_href(href, config, clients))
+
+
+def download_file(
+    href: str,
+    destination: PathLikeObject,
+    config: Optional[Config] = None,
+    clients: Optional[List[Client]] = None,
+) -> None:
+    """Downloads a file collection to the local filesystem.
+
+    Args:
+        href: The source href
+        destination: The destination file path
+        config: The download configuration
+        clients: Pre-configured clients to use for access
+    """
+    return asyncio.run(_functions.download_file(href, destination, config, clients))

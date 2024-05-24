@@ -241,3 +241,8 @@ async def test_keep_non_downloaded(item: Item, tmp_path: Path) -> None:
         item, tmp_path, config=Config(include=["data"]), keep_non_downloaded=True
     )
     assert len(item.assets) == 2
+
+
+async def test_download_file(data_path: Path, tmp_path: Path) -> None:
+    await stac_asset.download_file(str(data_path / "item.json"), tmp_path / "item.json")
+    Item.from_file(tmp_path / "item.json")
