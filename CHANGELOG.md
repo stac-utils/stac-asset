@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - `download_file` ([#122](https://github.com/stac-utils/stac-asset/pull/172))
+- content type validation rule for `text/xml` and `application/xml` ([#173](https://github.com/stac-utils/stac-asset/pull/173)) 
 
 ## [0.3.2] - 2024-05-20
 
