@@ -1,7 +1,8 @@
 from .errors import ContentTypeError
 
 ALLOWABLE_PAIRS = [
-    ("image/tiff", "image/tiff; application=geotiff; profile=cloud-optimized")
+    ("image/tiff", "image/tiff; application=geotiff; profile=cloud-optimized"),
+    ("text/xml", "application/xml"),
 ]
 IGNORED_CONTENT_TYPES = ["binary/octet-stream", "application/octet-stream"]
 
