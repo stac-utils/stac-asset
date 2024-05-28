@@ -4,8 +4,6 @@ import os
 from types import TracebackType
 from typing import Optional, Type
 
-from aiohttp import ClientSession
-
 from .config import Config
 from .http_client import HttpClient
 
@@ -20,8 +18,6 @@ class EarthdataClient(HttpClient):
        (you'll need to log in).
     2. Set an environment variable named ``EARTHDATA_PAT`` to your token.
     3. Use :py:meth:`EarthdataClient.from_config()` to create a new client.
-
-    You can also provide your token directly to :py:func:`EarthdataClient.login()`.
     """
 
     @classmethod
@@ -37,21 +33,7 @@ class EarthdataClient(HttpClient):
         Returns:
             EarthdataClient: A logged-in EarthData client.
         """
-        return await cls.login(config.earthdata_token)
-
-    @classmethod
-    async def login(cls, token: Optional[str] = None) -> EarthdataClient:
-        """Logs in to Earthdata and returns a client.
-
-        If token is not provided, it is read from the ``EARTHDATA_PAT``
-        environment variable.
-
-        Args:
-            token: The Earthdata bearer token
-
-        Returns:
-            EarthdataClient: A client configured to use the bearer token
-        """
+        token = config.earthdata_token
         if token is None:
             try:
                 token = os.environ["EARTHDATA_PAT"]
@@ -60,8 +42,9 @@ class EarthdataClient(HttpClient):
                     "token was not provided, and EARTHDATA_PAT environment variable "
                     "not set"
                 )
-        session = ClientSession(headers={"Authorization": f"Bearer {token}"})
-        return cls(session)
+        config.http_headers = {"Authorization": f"Bearer {token}"}
+        client = await super(EarthdataClient, cls).from_config(config)
+        return client
 
     async def __aenter__(self) -> EarthdataClient:
         return self
