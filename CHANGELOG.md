@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- More `HttpClient` attributes to `Config` ([#177](https://github.com/stac-utils/stac-asset/pull/177))
+
+### Removed
+
+- `EarthdataClient.login` ([#177](https://github.com/stac-utils/stac-asset/pull/177))
+- Default value for `HttpClient`'s `check_content_type` ([#177](https://github.com/stac-utils/stac-asset/pull/177))
+
 ## [0.3.3] - 2024-05-28
 
 ### Added
