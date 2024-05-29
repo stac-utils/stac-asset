@@ -246,3 +246,17 @@ async def test_keep_non_downloaded(item: Item, tmp_path: Path) -> None:
 async def test_download_file(data_path: Path, tmp_path: Path) -> None:
     await stac_asset.download_file(str(data_path / "item.json"), tmp_path / "item.json")
     Item.from_file(tmp_path / "item.json")
+
+
+async def test_link_back(item: Item, tmp_path: Path) -> None:
+    item.make_asset_hrefs_absolute()
+    item.set_self_href(None)
+    await stac_asset.download_item(item, tmp_path, file_name="item.json")
+    item = Item.from_file(tmp_path / "item.json")
+    assert not item.get_links(rel="derived_from")
+
+    item.set_self_href("http://stac.test/item.json")
+    await stac_asset.download_item(item, tmp_path, file_name="item.json")
+    item = Item.from_file(tmp_path / "item.json")
+    link = item.get_links(rel="derived_from")[0]
+    assert link.href == "http://stac.test/item.json"
