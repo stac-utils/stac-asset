@@ -27,10 +27,14 @@ class HttpClient(Client):
         """Creates the default http client with a vanilla session object."""
         # TODO add basic auth
         timeout = ClientTimeout(total=config.http_client_timeout)
-        session = ClientSession(timeout=timeout)
-        return cls(session)
+        session = ClientSession(timeout=timeout, headers=config.http_headers)
+        return cls(session, config.http_check_content_type)
 
-    def __init__(self, session: ClientSession, check_content_type: bool = True) -> None:
+    def __init__(
+        self,
+        session: ClientSession,
+        check_content_type: bool,
+    ) -> None:
         super().__init__()
 
         self.session: ClientSession = session

@@ -18,7 +18,7 @@ from typing import (
 )
 
 import pystac.utils
-from pystac import Asset, Collection, Item, ItemCollection, STACError
+from pystac import Asset, Collection, Item, ItemCollection, Link, STACError
 from yarl import URL
 
 from .client import Client, Clients
@@ -99,6 +99,8 @@ class Downloads:
         # Will fail if the stac object doesn't have a self href and there's
         # relative asset hrefs
         stac_object = make_asset_hrefs_absolute(stac_object)
+        if self_href := stac_object.get_self_href():
+            stac_object.add_link(Link(rel="derived_from", target=self_href))
         if file_name:
             stac_object.set_self_href(str(Path(root) / file_name))
         else:

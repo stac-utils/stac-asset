@@ -8,7 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- More `HttpClient` attributes to `Config` ([#177](https://github.com/stac-utils/stac-asset/pull/177))
+- `derived_from` link ([#178](https://github.com/stac-utils/stac-asset/pull/178))
+
+### Removed
+
+- `EarthdataClient.login` ([#177](https://github.com/stac-utils/stac-asset/pull/177))
+- Default value for `HttpClient`'s `check_content_type` ([#177](https://github.com/stac-utils/stac-asset/pull/177))
+
+## [0.3.3] - 2024-05-28
+
+### Added
+
 - `download_file` ([#122](https://github.com/stac-utils/stac-asset/pull/172))
+- allow `text/xml` and `application/xml` to be used interchangeably ([#173](https://github.com/stac-utils/stac-asset/pull/173))
 
 ## [0.3.2] - 2024-05-20
 
@@ -148,7 +161,8 @@ Used to be <https://github.com/gadomski/stac-asset>.
 
 Initial release.
 
-[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.3.2...HEAD
+[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.3.3...HEAD
+[0.3.3]: <https://github.com/stac-utils/stac-asset/compare/v0.3.2...v0.3.3>
 [0.3.2]: <https://github.com/stac-utils/stac-asset/compare/v0.3.1...v0.3.2>
 [0.3.1]: <https://github.com/stac-utils/stac-asset/compare/v0.3.0...v0.3.1>
 [0.3.0]: <https://github.com/stac-utils/stac-asset/compare/v0.2.4...v0.3.0>

@@ -1,6 +1,6 @@
 [project]
 name = "stac-asset"
-version = "0.3.2"
+version = "0.3.3"
 description = "Read and download STAC assets across platforms and providers"
 authors = [{ name = "Pete Gadomski", email = "pete.gadomski@gmail.com" }]
 readme = "README.md"
@@ -40,7 +40,7 @@ dev = [
     "pytest-asyncio~=0.21",
     "pytest-cov>=5.0",
     "pytest-recording~=0.13.1",
-    "ruff==0.4.4",
+    "ruff==0.4.7",
     "types-aiofiles~=23.1",
     "types-python-dateutil~=2.9",
     "types-tqdm~=4.66.0",

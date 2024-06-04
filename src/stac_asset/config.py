@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from .errors import ConfigError
 from .strategy import ErrorStrategy, FileNameStrategy
@@ -62,6 +62,12 @@ class Config:
 
     http_client_timeout: Optional[float] = DEFAULT_HTTP_CLIENT_TIMEOUT
     """Total number of seconds for the whole request."""
+
+    http_check_content_type: bool = True
+    """If true, check the asset's content type against the response from the server."""
+
+    http_headers: Dict[str, str] = field(default_factory=dict)
+    """Extra headers to include in every http request."""
 
     earthdata_token: Optional[str] = None
     """A token for logging in to Earthdata."""
