@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import os
 from types import TracebackType
 from typing import AsyncIterator, Optional, Type, TypeVar
 
 from aiohttp import ClientSession, ClientTimeout
+from aiohttp_oauth2_client.client import OAuth2Client
+from aiohttp_oauth2_client.models.grant import GrantType
 from yarl import URL
 
 from . import validate
@@ -24,10 +27,60 @@ class HttpClient(Client):
 
     @classmethod
     async def from_config(cls: Type[T], config: Config) -> T:
-        """Creates the default http client with a vanilla session object."""
+        """Creates the default http client with an aiohttp session object."""
         # TODO add basic auth
         timeout = ClientTimeout(total=config.http_client_timeout)
-        session = ClientSession(timeout=timeout, headers=config.http_headers)
+        if (oauth2_grant := os.getenv("OAUTH2_GRANT")) is not None:
+            oauth2_token_url = os.getenv("OAUTH2_TOKEN_URL")
+            oauth2_client_id = os.getenv("OAUTH2_CLIENT_ID")
+            if GrantType.DEVICE_CODE.endswith(oauth2_grant):
+                from aiohttp_oauth2_client.grant.device_code import DeviceCodeGrant
+
+                grant = DeviceCodeGrant(
+                    token_url=oauth2_token_url,
+                    device_authorization_url=os.getenv(
+                        "OAUTH2_DEVICE_AUTHORIZATION_URL"
+                    ),
+                    client_id=oauth2_client_id,
+                    pkce=True,
+                )
+            elif oauth2_grant == GrantType.AUTHORIZATION_CODE:
+                from aiohttp_oauth2_client.grant.authorization_code import (
+                    AuthorizationCodeGrant,
+                )
+
+                grant = AuthorizationCodeGrant(
+                    token_url=oauth2_token_url,
+                    authorization_url=os.getenv("OAUTH2_AUTHORIZATION_URL"),
+                    client_id=oauth2_client_id,
+                    pkce=True,
+                )
+            elif oauth2_grant == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS:
+                from aiohttp_oauth2_client.grant.resource_owner_password_credentials import (  # noqa: E501
+                    ResourceOwnerPasswordCredentialsGrant,
+                )
+
+                grant = ResourceOwnerPasswordCredentialsGrant(
+                    token_url=oauth2_token_url,
+                    username=os.getenv("OAUTH2_USERNAME"),
+                    password=os.getenv("OAUTH2_PASSWORD"),
+                    client_id=oauth2_client_id,
+                )
+            elif oauth2_grant == GrantType.CLIENT_CREDENTIALS:
+                from aiohttp_oauth2_client.grant.client_credentials import (
+                    ClientCredentialsGrant,
+                )
+
+                grant = ClientCredentialsGrant(
+                    token_url=oauth2_token_url,
+                    client_id=oauth2_client_id,
+                    client_secret=os.getenv("OAUTH2_CLIENT_SECRET"),
+                )
+            else:
+                raise ValueError("Unknown grant type")
+            session = OAuth2Client(grant, timeout=timeout, headers=config.http_headers)
+        else:
+            session = ClientSession(timeout=timeout, headers=config.http_headers)
         return cls(session, config.http_check_content_type)
 
     def __init__(
