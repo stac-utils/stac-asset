@@ -86,42 +86,74 @@ class Config:
     """The maximum number of attempts when downloading assets from s3."""
 
     oauth2_grant: Optional[str] = field(default=os.getenv("OAUTH2_GRANT"))
-    """OAuth2 grant type"""
+    """OAuth2 grant type.
+
+    If a value is provided for this field,
+    the :py:class:`~stac_asset.http_client.HttpClient` will be configured with
+    support for OAuth2 access tokens.
+    Can be configured with the ``OAUTH2_GRANT`` environment variable.
+    """
 
     oauth2_token_url: Optional[str] = field(default=os.getenv("OAUTH2_TOKEN_URL"))
-    """OAuth2 token URL"""
+    """OAuth2 token URL.
+
+    Can be configured with the ``OAUTH2_TOKEN_URL`` environment variable.
+    """
 
     oauth2_authorization_url: Optional[str] = field(
         default=os.getenv("OAUTH2_AUTHORIZATION_URL")
     )
-    """OAuth2 authorization URL"""
+    """OAuth2 authorization URL.
+
+    Can be configured with the ``OAUTH2_AUTHORIZATION_URL`` environment variable.
+    """
 
     oauth2_device_authorization_url: Optional[str] = field(
         default=os.getenv("OAUTH2_DEVICE_AUTHORIZATION_URL")
     )
-    """OAuth2 device authorization URL"""
+    """OAuth2 device authorization URL.
+
+    Can be configured with the ``OAUTH2_DEVICE_AUTHORIZATION_URL`` environment variable.
+    """
 
     oauth2_client_id: Optional[str] = field(default=os.getenv("OAUTH2_CLIENT_ID"))
-    """OAuth2 client identifier"""
+    """OAuth2 client identifier.
+
+    Can be configured with the ``OAUTH2_CLIENT_ID`` environment variable.
+    """
 
     oauth2_client_secret: Optional[str] = field(
         default=os.getenv("OAUTH2_CLIENT_SECRET")
     )
-    """OAuth2 client secret"""
+    """OAuth2 client secret.
+
+    Can be configured with the ``OAUTH2_CLIENT_SECRET`` environment variable.
+    """
 
     oauth2_pkce: bool = field(
         default=os.getenv("OAUTH2_PKCE", "true").lower() not in ("false", "0")
     )
-    """OAuth2 Proof Key for Code Exchange"""
+    """OAuth2 Proof Key for Code Exchange.
+
+    Can be configured with the ``OAUTH2_PKCE`` environment variable.
+    By default, PKCE is enabled.
+    """
 
     oauth2_username: Optional[str] = field(default=os.getenv("OAUTH2_USERNAME"))
-    """OAuth2 username for resource owner password credentials grant"""
+    """OAuth2 username for resource owner password credentials grant.
+
+    Can be configured with the ``OAUTH2_USERNAME`` environment variable.
+    """
 
     oauth2_password: Optional[str] = field(default=os.getenv("OAUTH2_PASSWORD"))
-    """OAuth2 password for resource owner password credentials grant"""
+    """OAuth2 password for resource owner password credentials grant.
+
+    Can be configured with the ``OAUTH2_PASSWORD`` environment variable.
+    """
 
     oauth2_extra: Dict[str, str] = field(default_factory=dict)
-    """Extra configuration options for the OAuth2 grant"""
+    """Extra configuration options for the OAuth2 grant.
+    """
 
     def validate(self) -> None:
         """Validates this configuration.

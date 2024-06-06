@@ -26,7 +26,35 @@ class HttpClient(Client):
 
     @classmethod
     async def from_config(cls: Type[T], config: Config) -> T:
-        """Creates the default http client with an aiohttp session object."""
+        """Creates an HTTP client with an aiohttp session object.
+
+        To use OAuth2 access tokens, configure the
+        :py:attr:`~stac_asset.Config.oauth2_grant` and the necessary parameters for the
+        chosen grant type.
+
+        OAuth2 device code grant (``urn:ietf:params:oauth:grant-type:device_code`` or ``device_code``):
+          - :py:attr:`~stac_asset.Config.oauth2_token_url`
+          - :py:attr:`~stac_asset.Config.oauth2_device_authorization_url`
+          - :py:attr:`~stac_asset.Config.oauth2_client_id`
+          - :py:attr:`~stac_asset.Config.oauth2_pkce`
+
+        OAuth2 authorization code grant (``authorization_code``):
+          - :py:attr:`~stac_asset.Config.oauth2_token_url`
+          - :py:attr:`~stac_asset.Config.oauth2_authorization_url`
+          - :py:attr:`~stac_asset.Config.oauth2_client_id`
+          - :py:attr:`~stac_asset.Config.oauth2_pkce`
+
+        OAuth2 resource owner password credentials grant (``password``):
+          - :py:attr:`~stac_asset.Config.oauth2_token_url`
+          - :py:attr:`~stac_asset.Config.oauth2_username`
+          - :py:attr:`~stac_asset.Config.oauth2_password`
+          - :py:attr:`~stac_asset.Config.oauth2_client_id`
+
+        OAuth2 client credentials grant (``client_credentials``):
+          - :py:attr:`~stac_asset.Config.oauth2_token_url`
+          - :py:attr:`~stac_asset.Config.oauth2_client_id`
+          - :py:attr:`~stac_asset.Config.oauth2_client_secret`
+        """  # noqa: E501
         # TODO add basic auth
         timeout = ClientTimeout(total=config.http_client_timeout)
         if config.oauth2_grant is not None:
