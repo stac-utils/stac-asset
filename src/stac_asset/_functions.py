@@ -19,6 +19,7 @@ from typing import (
 
 import pystac.utils
 from pystac import Asset, Collection, Item, ItemCollection, Link, STACError
+from pystac.layout import LayoutTemplate
 from yarl import URL
 
 from .client import Client, Clients
@@ -307,6 +308,7 @@ async def download_collection(
 async def download_item_collection(
     item_collection: ItemCollection,
     directory: PathLikeObject,
+    path_template: Optional[str] = None,
     file_name: Optional[str] = "item-collection.json",
     config: Optional[Config] = None,
     messages: Optional[MessageQueue] = None,
@@ -318,6 +320,8 @@ async def download_item_collection(
     Args:
         item_collection: The item collection to download
         directory: The destination directory
+        path_template: String to be interpolated to specify where to store
+            downloaded files.
         file_name: The name of the item collection file to save. If not
             provided, will not be saved.
         config: The download configuration
@@ -335,7 +339,9 @@ async def download_item_collection(
     async with Downloads(config=config or Config(), clients=clients) as downloads:
         for item in item_collection.items:
             item.set_self_href(None)
-            root = Path(directory) / item.id
+            root = Path(directory) / LayoutTemplate(
+                path_template if path_template is not None else "${id}"
+            ).substitute(item)
             await downloads.add(item, root, None, keep_non_downloaded)
         await downloads.download(messages)
     if file_name:

@@ -56,6 +56,11 @@ def cli() -> None:
 @click.argument("href", required=False)
 @click.argument("directory", required=False)
 @click.option(
+    "-p",
+    "--path-template",
+    help="String to be interpolated to specify where to store downloaded files",
+)
+@click.option(
     "-a",
     "--alternate-assets",
     help="Alternate asset hrefs to prefer, if available",
@@ -125,6 +130,7 @@ def cli() -> None:
 def download(
     href: Optional[str],
     directory: Optional[str],
+    path_template: Optional[str],
     alternate_assets: List[str],
     include: List[str],
     exclude: List[str],
@@ -160,6 +166,7 @@ def download(
         download_async(
             href,
             directory,
+            path_template,
             alternate_assets,
             include,
             exclude,
@@ -178,6 +185,7 @@ def download(
 async def download_async(
     href: Optional[str],
     directory: Optional[str],
+    path_template: Optional[str],
     alternate_assets: List[str],
     include: List[str],
     exclude: List[str],
@@ -241,6 +249,7 @@ async def download_async(
             return await _functions.download_item_collection(
                 item_collection,
                 directory_str,
+                path_template,
                 file_name=file_name,
                 config=config,
                 messages=messages,

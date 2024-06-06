@@ -108,6 +108,7 @@ def download_collection(
 def download_item_collection(
     item_collection: ItemCollection,
     directory: PathLikeObject,
+    path_template: Optional[str] = None,
     file_name: Optional[str] = "item-collection.json",
     config: Optional[Config] = None,
     messages: Optional[MessageQueue] = None,
@@ -119,6 +120,8 @@ def download_item_collection(
     Args:
         item_collection: The item collection to download
         directory: The destination directory
+        path_template: String to be interpolated to specify where to store
+            downloaded files.
         file_name: The name of the item collection file to save. If not
             provided, will not be saved.
         config: The download configuration
@@ -142,6 +145,7 @@ def download_item_collection(
             messages=messages,
             clients=clients,
             keep_non_downloaded=keep_non_downloaded,
+            path_template=path_template,
         )
     )
 
