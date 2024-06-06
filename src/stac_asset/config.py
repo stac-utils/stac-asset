@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import os
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
@@ -83,6 +84,44 @@ class Config:
 
     s3_max_attempts: int = DEFAULT_S3_MAX_ATTEMPTS
     """The maximum number of attempts when downloading assets from s3."""
+
+    oauth2_grant: Optional[str] = field(default=os.getenv("OAUTH2_GRANT"))
+    """OAuth2 grant type"""
+
+    oauth2_token_url: Optional[str] = field(default=os.getenv("OAUTH2_TOKEN_URL"))
+    """OAuth2 token URL"""
+
+    oauth2_authorization_url: Optional[str] = field(
+        default=os.getenv("OAUTH2_AUTHORIZATION_URL")
+    )
+    """OAuth2 authorization URL"""
+
+    oauth2_device_authorization_url: Optional[str] = field(
+        default=os.getenv("OAUTH2_DEVICE_AUTHORIZATION_URL")
+    )
+    """OAuth2 device authorization URL"""
+
+    oauth2_client_id: Optional[str] = field(default=os.getenv("OAUTH2_CLIENT_ID"))
+    """OAuth2 client identifier"""
+
+    oauth2_client_secret: Optional[str] = field(
+        default=os.getenv("OAUTH2_CLIENT_SECRET")
+    )
+    """OAuth2 client secret"""
+
+    oauth2_pkce: bool = field(
+        default=os.getenv("OAUTH2_PKCE", "true").lower() not in ("false", "0")
+    )
+    """OAuth2 Proof Key for Code Exchange"""
+
+    oauth2_username: Optional[str] = field(default=os.getenv("OAUTH2_USERNAME"))
+    """OAuth2 username for resource owner password credentials grant"""
+
+    oauth2_password: Optional[str] = field(default=os.getenv("OAUTH2_PASSWORD"))
+    """OAuth2 password for resource owner password credentials grant"""
+
+    oauth2_extra: Dict[str, str] = field(default_factory=dict)
+    """Extra configuration options for the OAuth2 grant"""
 
     def validate(self) -> None:
         """Validates this configuration.

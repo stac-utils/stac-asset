@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from types import TracebackType
 from typing import AsyncIterator, Optional, Type, TypeVar
 
@@ -30,51 +29,51 @@ class HttpClient(Client):
         """Creates the default http client with an aiohttp session object."""
         # TODO add basic auth
         timeout = ClientTimeout(total=config.http_client_timeout)
-        if (oauth2_grant := os.getenv("OAUTH2_GRANT")) is not None:
-            oauth2_token_url = os.getenv("OAUTH2_TOKEN_URL")
-            oauth2_client_id = os.getenv("OAUTH2_CLIENT_ID")
-            if GrantType.DEVICE_CODE.endswith(oauth2_grant):
+        if config.oauth2_grant is not None:
+            if GrantType.DEVICE_CODE.endswith(config.oauth2_grant):
                 from aiohttp_oauth2_client.grant.device_code import DeviceCodeGrant
 
                 grant = DeviceCodeGrant(
-                    token_url=oauth2_token_url,
-                    device_authorization_url=os.getenv(
-                        "OAUTH2_DEVICE_AUTHORIZATION_URL"
-                    ),
-                    client_id=oauth2_client_id,
-                    pkce=True,
+                    token_url=config.oauth2_token_url,
+                    device_authorization_url=config.oauth2_device_authorization_url,
+                    client_id=config.oauth2_client_id,
+                    pkce=config.oauth2_pkce,
+                    **config.oauth2_extra,
                 )
-            elif oauth2_grant == GrantType.AUTHORIZATION_CODE:
+            elif config.oauth2_grant == GrantType.AUTHORIZATION_CODE:
                 from aiohttp_oauth2_client.grant.authorization_code import (
                     AuthorizationCodeGrant,
                 )
 
                 grant = AuthorizationCodeGrant(
-                    token_url=oauth2_token_url,
-                    authorization_url=os.getenv("OAUTH2_AUTHORIZATION_URL"),
-                    client_id=oauth2_client_id,
-                    pkce=True,
+                    token_url=config.oauth2_token_url,
+                    authorization_url=config.oauth2_authorization_url,
+                    client_id=config.oauth2_client_id,
+                    pkce=config.oauth2_pkce,
+                    **config.oauth2_extra,
                 )
-            elif oauth2_grant == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS:
+            elif config.oauth2_grant == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS:
                 from aiohttp_oauth2_client.grant.resource_owner_password_credentials import (  # noqa: E501
                     ResourceOwnerPasswordCredentialsGrant,
                 )
 
                 grant = ResourceOwnerPasswordCredentialsGrant(
-                    token_url=oauth2_token_url,
-                    username=os.getenv("OAUTH2_USERNAME"),
-                    password=os.getenv("OAUTH2_PASSWORD"),
-                    client_id=oauth2_client_id,
+                    token_url=config.oauth2_token_url,
+                    username=config.oauth2_username,
+                    password=config.oauth2_password,
+                    client_id=config.oauth2_client_id,
+                    **config.oauth2_extra,
                 )
-            elif oauth2_grant == GrantType.CLIENT_CREDENTIALS:
+            elif config.oauth2_grant == GrantType.CLIENT_CREDENTIALS:
                 from aiohttp_oauth2_client.grant.client_credentials import (
                     ClientCredentialsGrant,
                 )
 
                 grant = ClientCredentialsGrant(
-                    token_url=oauth2_token_url,
-                    client_id=oauth2_client_id,
-                    client_secret=os.getenv("OAUTH2_CLIENT_SECRET"),
+                    token_url=config.oauth2_token_url,
+                    client_id=config.oauth2_client_id,
+                    client_secret=config.oauth2_client_secret,
+                    **config.oauth2_extra,
                 )
             else:
                 raise ValueError("Unknown grant type")
