@@ -85,7 +85,7 @@ class Config:
     """The maximum number of attempts when downloading assets from s3."""
 
     s3_endpoint_url: Optional[str] = None
-    """Set an optional custom endpoint url for s3"""
+    """Set an optional custom endpoint url for s3."""
 
     def validate(self) -> None:
         """Validates this configuration.
