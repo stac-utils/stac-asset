@@ -80,7 +80,7 @@ class S3Client(Client):
         """The maximum number of attempts."""
 
         self.endpoint_url: Optional[str] = endpoint_url
-        """Custom endpoint url for s3"""
+        """Custom endpoint url for s3."""
 
 
     async def open_url(
