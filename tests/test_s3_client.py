@@ -73,3 +73,25 @@ async def test_download_requester_pays_item(
         )
         == 19554
     )
+
+
+async def test_download_custom_endpoint(
+    tmp_path: Path, requester_pays_asset_href: str, custom_endpoint_url: str
+) -> None:
+    async with S3Client(requester_pays=True, endpoint_url=custom_endpoint_url) as client:
+        if not await client.has_credentials():
+            pytest.skip("aws credentials are invalid or not present")
+        await client.download_href(requester_pays_asset_href, tmp_path / "out.jpg")
+
+
+async def test_download_asset_custom_endpoint_from_config(
+    tmp_path: Path, requester_pays_asset_href: str, custom_endpoint_url: str
+) -> None:
+    
+    config = Config(warn=True, s3_requester_pays=True, s3_endpoint_url=custom_endpoint_url)
+    
+    s3_client = await S3Client.from_config(config=config)
+
+    if not await s3_client.has_credentials():
+        pytest.skip("aws credentials are invalid or not present")
+    await s3_client.download_href(requester_pays_asset_href, tmp_path / "out.jpg")
