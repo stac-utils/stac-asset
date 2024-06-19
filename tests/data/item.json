@@ -10,11 +10,16 @@
         {
             "href": "./catalog.json",
             "rel": "parent"
+        },
+        {
+            "href": "./collection.json",
+            "rel": "collection"
         }
     ],
     "assets": {
         "data": {
             "href": "./20201211_223832_CS2.jpg"
         }
-    }
+    },
+    "collection": "test-collection"
 }
