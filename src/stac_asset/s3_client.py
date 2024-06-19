@@ -45,6 +45,7 @@ class S3Client(Client):
             region_name=config.s3_region_name,
             retry_mode=config.s3_retry_mode,
             max_attempts=config.s3_max_attempts,
+            endpoint_url=config.s3_endpoint_url,
         )
 
     def __init__(
@@ -53,6 +54,7 @@ class S3Client(Client):
         region_name: str = DEFAULT_S3_REGION_NAME,
         retry_mode: str = DEFAULT_S3_RETRY_MODE,
         max_attempts: int = DEFAULT_S3_MAX_ATTEMPTS,
+        endpoint_url: Optional[str] = None,
     ) -> None:
         super().__init__()
 
@@ -76,6 +78,9 @@ class S3Client(Client):
 
         self.max_attempts: int = max_attempts
         """The maximum number of attempts."""
+
+        self.endpoint_url: Optional[str] = endpoint_url
+        """Custom endpoint url for s3."""
 
     async def open_url(
         self,
@@ -127,7 +132,10 @@ class S3Client(Client):
         else:
             config = botocore.config.Config(signature_version=UNSIGNED, retries=retries)
         return self.session.create_client(
-            "s3", region_name=self.region_name, config=config
+            "s3",
+            region_name=self.region_name,
+            endpoint_url=self.endpoint_url,
+            config=config,
         )
 
     def _params(self, url: URL) -> Dict[str, Any]:
