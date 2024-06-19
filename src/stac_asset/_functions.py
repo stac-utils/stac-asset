@@ -336,12 +336,13 @@ async def download_item_collection(
     Raises:
         CantIncludeAndExclude: Raised if both include and exclude are not None.
     """
+    layout_template = LayoutTemplate(
+        path_template if path_template is not None else "${id}"
+    )
     async with Downloads(config=config or Config(), clients=clients) as downloads:
         for item in item_collection.items:
             item.set_self_href(None)
-            root = Path(directory) / LayoutTemplate(
-                path_template if path_template is not None else "${id}"
-            ).substitute(item)
+            root = Path(directory) / layout_template.substitute(item)
             await downloads.add(item, root, None, keep_non_downloaded)
         await downloads.download(messages)
     if file_name:
