@@ -88,6 +88,15 @@ stac-client search https://planetarycomputer.microsoft.com/api/stac/v1 \
     stac-asset download -i rendered_preview -q
 ```
 
+By default, all assets are stored in a folder named after the item ID. To change this, you can use the `-p` flag and specify a path template using PySTAC layout template [variables](https://pystac.readthedocs.io/en/latest/api/layout.html#pystac.layout.LayoutTemplate):
+
+```shell
+stac-client search https://planetarycomputer.microsoft.com/api/stac/v1 \
+        -c landsat-c2-l2 \
+        --max-items 1 | \
+    stac-asset download -i rendered_preview -p '${collection}'
+```
+
 See [the documentation](https://stac-asset.readthedocs.io/en/latest/index.html) for more examples and complete API and CLI documentation.
 
 ### Clients

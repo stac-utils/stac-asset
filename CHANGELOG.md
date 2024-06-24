@@ -7,10 +7,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 ### Added
+- OAuth2 support ([#180](https://github.com/stac-utils/stac-asset/pull/180))
 
+## [0.4.0] - 2024-06-19
+
+### Added
+
+- Support for configuring a custom endpoint URL for `S3Client` ([#184](https://github.com/stac-utils/stac-asset/pull/184))
 - More `HttpClient` attributes to `Config` ([#177](https://github.com/stac-utils/stac-asset/pull/177))
 - `derived_from` link ([#178](https://github.com/stac-utils/stac-asset/pull/178))
-- OAuth2 support ([#180](https://github.com/stac-utils/stac-asset/pull/180))
+- Option for templated paths when downloading item collections ([#181](https://github.com/stac-utils/stac-asset/pull/181))
 
 ### Removed
 
@@ -162,7 +168,8 @@ Used to be <https://github.com/gadomski/stac-asset>.
 
 Initial release.
 
-[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.3.3...HEAD
+[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.4.0...HEAD
+[0.4.0]: <https://github.com/stac-utils/stac-asset/compare/v0.3.3...v0.4.0>
 [0.3.3]: <https://github.com/stac-utils/stac-asset/compare/v0.3.2...v0.3.3>
 [0.3.2]: <https://github.com/stac-utils/stac-asset/compare/v0.3.1...v0.3.2>
 [0.3.1]: <https://github.com/stac-utils/stac-asset/compare/v0.3.0...v0.3.1>

@@ -134,6 +134,22 @@ async def test_download_item_collection_with_file_name_and_cd(
     )
 
 
+async def test_download_item_collection_with_path_template(
+    tmp_path: Path, item_collection: ItemCollection
+) -> None:
+    await stac_asset.download_item_collection(
+        item_collection,
+        tmp_path,
+        file_name="item-collection.json",
+        path_template="${collection}",
+    )
+    item_collection = ItemCollection.from_file(str(tmp_path / "item-collection.json"))
+    assert isinstance(item_collection.items[0].collection_id, str)
+    assert item_collection.items[0].assets["data"].href == str(
+        tmp_path / "test-collection/20201211_223832_CS2.jpg"
+    )
+
+
 async def test_download_collection(tmp_path: Path, collection: Collection) -> None:
     collection = await stac_asset.download_collection(
         collection, tmp_path, file_name="collection.json"
