@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - More `HttpClient` attributes to `Config` ([#177](https://github.com/stac-utils/stac-asset/pull/177))
 - `derived_from` link ([#178](https://github.com/stac-utils/stac-asset/pull/178))
+- OAuth2 support ([#180](https://github.com/stac-utils/stac-asset/pull/180))
 
 ### Removed
 
