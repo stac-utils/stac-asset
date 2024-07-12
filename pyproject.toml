@@ -23,6 +23,7 @@ dependencies = [
     "pystac>=1.8.4",
     "python-dateutil>=2.7.0",
     "yarl>=1.9.2",
+    "aiohttp-oauth2-client>=1.0.2",
 ]
 
 [project.optional-dependencies]
