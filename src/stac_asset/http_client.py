@@ -3,9 +3,11 @@ from __future__ import annotations
 from types import TracebackType
 from typing import AsyncIterator, Optional, Type, TypeVar
 
-from aiohttp import ClientSession, ClientTimeout
+from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 from aiohttp_oauth2_client.client import OAuth2Client
 from aiohttp_oauth2_client.models.grant import GrantType
+from aiohttp_retry import JitterRetry, RetryClient
+from aiohttp_retry.types import ClientType
 from yarl import URL
 
 from . import validate
@@ -108,11 +110,17 @@ class HttpClient(Client):
             session = OAuth2Client(grant, timeout=timeout, headers=config.http_headers)
         else:
             session = ClientSession(timeout=timeout, headers=config.http_headers)
+            session = RetryClient(
+                client_session=session,
+                retry_options=JitterRetry(
+                    attempts=config.http_max_attempts, exceptions={ClientResponseError}
+                ),
+            )
         return cls(session, config.http_check_content_type)
 
     def __init__(
         self,
-        session: ClientSession,
+        session: ClientType,
         check_content_type: bool,
     ) -> None:
         super().__init__()

@@ -21,7 +21,7 @@ async def test_href_exists() -> None:
 
 async def test_default_http_timeout() -> None:
     async with await HttpClient.from_config(Config(http_client_timeout=42)) as client:
-        assert client.session.timeout.total == 42
+        assert client.session._client.timeout.total == 42
 
 
 async def test_oauth2_device_code_config() -> None:
