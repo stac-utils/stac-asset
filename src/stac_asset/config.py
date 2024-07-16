@@ -12,6 +12,7 @@ DEFAULT_S3_REGION_NAME = "us-west-2"
 DEFAULT_S3_RETRY_MODE = "adaptive"
 DEFAULT_S3_MAX_ATTEMPTS = 10
 DEFAULT_HTTP_CLIENT_TIMEOUT = 300
+DEFAULT_HTTP_MAX_ATTEMPTS = 10
 
 
 @dataclass
@@ -63,6 +64,9 @@ class Config:
 
     http_client_timeout: Optional[float] = DEFAULT_HTTP_CLIENT_TIMEOUT
     """Total number of seconds for the whole request."""
+
+    http_max_attempts: int = DEFAULT_HTTP_MAX_ATTEMPTS
+    """The maximum number of attempts when downloading assets via http."""
 
     http_check_content_type: bool = True
     """If true, check the asset's content type against the response from the server."""

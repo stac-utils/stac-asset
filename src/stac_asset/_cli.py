@@ -18,7 +18,11 @@ from pystac import Asset, Item, ItemCollection
 
 from . import Config, ErrorStrategy, _functions
 from .client import Clients
-from .config import DEFAULT_S3_MAX_ATTEMPTS, DEFAULT_S3_RETRY_MODE
+from .config import (
+    DEFAULT_HTTP_MAX_ATTEMPTS,
+    DEFAULT_S3_MAX_ATTEMPTS,
+    DEFAULT_S3_RETRY_MODE,
+)
 from .errors import DownloadError
 from .messages import (
     ErrorAssetDownload,
@@ -101,6 +105,11 @@ def cli() -> None:
     default=DEFAULT_S3_MAX_ATTEMPTS,
 )
 @click.option(
+    "--http-max-attempts",
+    help="If downloading via the http client, the max number of retries",
+    default=DEFAULT_HTTP_MAX_ATTEMPTS,
+)
+@click.option(
     "-k",
     "--keep",
     help=(
@@ -139,6 +148,7 @@ def download(
     s3_requester_pays: bool,
     s3_retry_mode: str,
     s3_max_attempts: int,
+    http_max_attempts: int,
     keep: bool,
     fail_fast: bool,
     overwrite: bool,
@@ -175,6 +185,7 @@ def download(
             s3_requester_pays,
             s3_retry_mode,
             s3_max_attempts,
+            http_max_attempts,
             keep=keep,
             fail_fast=fail_fast,
             overwrite=overwrite,
@@ -194,6 +205,7 @@ async def download_async(
     s3_requester_pays: bool,
     s3_retry_mode: str,
     s3_max_attempts: int,
+    http_max_attempts: int,
     keep: bool,
     fail_fast: bool,
     overwrite: bool,
@@ -205,6 +217,7 @@ async def download_async(
         s3_requester_pays=s3_requester_pays,
         s3_retry_mode=s3_retry_mode,
         s3_max_attempts=s3_max_attempts,
+        http_max_attempts=http_max_attempts,
         error_strategy=ErrorStrategy.KEEP if keep else ErrorStrategy.DELETE,
         warn=not fail_fast,
         fail_fast=fail_fast,
@@ -392,12 +405,18 @@ class Download:
     help="If checking via the s3 client, the max number of retries",
     default=DEFAULT_S3_MAX_ATTEMPTS,
 )
+@click.option(
+    "--http-max-attempts",
+    help="If checking via the http client, the max number of retries",
+    default=DEFAULT_HTTP_MAX_ATTEMPTS,
+)
 def info(
     href: Optional[str],
     alternate_assets: List[str],
     s3_requester_pays: bool,
     s3_retry_mode: str,
     s3_max_attempts: int,
+    http_max_attempts: int,
 ) -> None:
     asyncio.run(
         info_async(
@@ -406,6 +425,7 @@ def info(
             s3_requester_pays=s3_requester_pays,
             s3_max_attempts=s3_max_attempts,
             s3_retry_mode=s3_retry_mode,
+            http_max_attempts=http_max_attempts,
         )
     )
 
@@ -416,6 +436,7 @@ async def info_async(
     s3_requester_pays: bool,
     s3_retry_mode: str,
     s3_max_attempts: int,
+    http_max_attempts: int,
 ) -> None:
     """Prints information about an item or item collection.
 
@@ -426,6 +447,7 @@ async def info_async(
         s3_requester_pays=s3_requester_pays,
         s3_retry_mode=s3_retry_mode,
         s3_max_attempts=s3_max_attempts,
+        http_max_attempts=http_max_attempts,
     )
     input_dict = await read_as_dict(href, config)
     type_ = input_dict.get("type")
