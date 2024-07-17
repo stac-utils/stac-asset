@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.4.1] - 2024-07-17
+
 ### Added
+
 - OAuth2 support ([#180](https://github.com/stac-utils/stac-asset/pull/180))
 - Retry configuration for HTTP ([#192](https://github.com/stac-utils/stac-asset/pull/192))
 
@@ -169,7 +172,8 @@ Used to be <https://github.com/gadomski/stac-asset>.
 
 Initial release.
 
-[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.4.0...HEAD
+[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.4.1...HEAD
+[0.4.1]: <https://github.com/stac-utils/stac-asset/compare/v0.4.0...v0.4.1>
 [0.4.0]: <https://github.com/stac-utils/stac-asset/compare/v0.3.3...v0.4.0>
 [0.3.3]: <https://github.com/stac-utils/stac-asset/compare/v0.3.2...v0.3.3>
 [0.3.2]: <https://github.com/stac-utils/stac-asset/compare/v0.3.1...v0.3.2>
