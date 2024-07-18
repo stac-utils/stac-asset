@@ -71,6 +71,11 @@ module = [
 ]
 ignore_missing_imports = true
 
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+    "ignore:inheritance class OAuth2Client from ClientSession is discouraged:DeprecationWarning", # https://github.com/VITObelgium/aiohttp-oauth2-client/issues/1
+]
 
 [tool.ruff.lint]
 select = ["F", "E", "W", "I", "ERA", "RUF", "D"]
