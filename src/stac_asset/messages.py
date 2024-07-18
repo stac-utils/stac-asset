@@ -46,7 +46,7 @@ class ErrorAssetDownload(Message):
 
 @dataclass
 class SkipAssetDownload(Message):
-    """Sent when an asset errors while downloading."""
+    """Sent when an asset is skipped while downloading."""
 
     key: str
     """The asset key."""
