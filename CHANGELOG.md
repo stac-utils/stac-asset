@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - `--http-timeout` option to the CLI ([#196](https://github.com/stac-utils/stac-asset/pull/196))
+- More info to CLI error reporting ([#200](https://github.com/stac-utils/stac-asset/pull/200))
 
 ### Fixed
 
