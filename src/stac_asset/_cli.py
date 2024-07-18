@@ -19,6 +19,7 @@ from pystac import Asset, Item, ItemCollection
 from . import Config, ErrorStrategy, _functions
 from .client import Clients
 from .config import (
+    DEFAULT_HTTP_CLIENT_TIMEOUT,
     DEFAULT_HTTP_MAX_ATTEMPTS,
     DEFAULT_S3_MAX_ATTEMPTS,
     DEFAULT_S3_RETRY_MODE,
@@ -110,6 +111,11 @@ def cli() -> None:
     default=DEFAULT_HTTP_MAX_ATTEMPTS,
 )
 @click.option(
+    "--http-timeout",
+    help="Total number of seconds for the whole request",
+    default=DEFAULT_HTTP_CLIENT_TIMEOUT,
+)
+@click.option(
     "-k",
     "--keep",
     help=(
@@ -149,6 +155,7 @@ def download(
     s3_retry_mode: str,
     s3_max_attempts: int,
     http_max_attempts: int,
+    http_timeout: int,
     keep: bool,
     fail_fast: bool,
     overwrite: bool,
@@ -186,6 +193,7 @@ def download(
             s3_retry_mode,
             s3_max_attempts,
             http_max_attempts,
+            http_timeout,
             keep=keep,
             fail_fast=fail_fast,
             overwrite=overwrite,
@@ -206,6 +214,7 @@ async def download_async(
     s3_retry_mode: str,
     s3_max_attempts: int,
     http_max_attempts: int,
+    http_timeout: int,
     keep: bool,
     fail_fast: bool,
     overwrite: bool,
@@ -218,6 +227,7 @@ async def download_async(
         s3_retry_mode=s3_retry_mode,
         s3_max_attempts=s3_max_attempts,
         http_max_attempts=http_max_attempts,
+        http_client_timeout=http_timeout,
         error_strategy=ErrorStrategy.KEEP if keep else ErrorStrategy.DELETE,
         warn=not fail_fast,
         fail_fast=fail_fast,
@@ -410,6 +420,11 @@ class Download:
     help="If checking via the http client, the max number of retries",
     default=DEFAULT_HTTP_MAX_ATTEMPTS,
 )
+@click.option(
+    "--http-timeout",
+    help="Total number of seconds for the whole request",
+    default=DEFAULT_HTTP_CLIENT_TIMEOUT,
+)
 def info(
     href: Optional[str],
     alternate_assets: List[str],
@@ -417,6 +432,7 @@ def info(
     s3_retry_mode: str,
     s3_max_attempts: int,
     http_max_attempts: int,
+    http_timeout: int,
 ) -> None:
     asyncio.run(
         info_async(
@@ -426,6 +442,7 @@ def info(
             s3_max_attempts=s3_max_attempts,
             s3_retry_mode=s3_retry_mode,
             http_max_attempts=http_max_attempts,
+            http_timeout=http_timeout,
         )
     )
 
@@ -437,6 +454,7 @@ async def info_async(
     s3_retry_mode: str,
     s3_max_attempts: int,
     http_max_attempts: int,
+    http_timeout: int,
 ) -> None:
     """Prints information about an item or item collection.
 
@@ -448,6 +466,7 @@ async def info_async(
         s3_retry_mode=s3_retry_mode,
         s3_max_attempts=s3_max_attempts,
         http_max_attempts=http_max_attempts,
+        http_client_timeout=http_timeout,
     )
     input_dict = await read_as_dict(href, config)
     type_ = input_dict.get("type")

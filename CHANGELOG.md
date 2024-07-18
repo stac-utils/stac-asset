@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `--http-timeout` option to the CLI ([#196](https://github.com/stac-utils/stac-asset/pull/196))
+
 ### Fixed
 
 - Expand the list of exceptions on which we should retry for HTTP ([#195](https://github.com/stac-utils/stac-asset/pull/195))
