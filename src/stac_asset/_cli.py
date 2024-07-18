@@ -370,7 +370,10 @@ async def report_progress(messages: Optional[MessageQueue]) -> None:
                 name = f"{owners[message.key]}[{message.key}]"
             else:
                 name = f"[{message.key}]"
-            progress_bar.write(f"ERROR: {name} - {message.error}", file=sys.stderr)
+            progress_bar.write(
+                f"ERROR: {name} - {type(message.error).__name__}: {message.error}",
+                file=sys.stderr,
+            )
         elif isinstance(message, WriteChunk):
             n += message.size
             progress_bar.update(message.size)
