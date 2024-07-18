@@ -3,7 +3,7 @@ from __future__ import annotations
 from types import TracebackType
 from typing import AsyncIterator, Optional, Type, TypeVar
 
-from aiohttp import ClientResponseError, ClientSession, ClientTimeout
+from aiohttp import ClientError, ClientSession, ClientTimeout
 from aiohttp_oauth2_client.client import OAuth2Client
 from aiohttp_oauth2_client.models.grant import GrantType
 from aiohttp_retry import JitterRetry, RetryClient
@@ -113,7 +113,7 @@ class HttpClient(Client):
             session = RetryClient(
                 client_session=session,
                 retry_options=JitterRetry(
-                    attempts=config.http_max_attempts, exceptions={ClientResponseError}
+                    attempts=config.http_max_attempts, exceptions={ClientError}
                 ),
             )
         return cls(session, config.http_check_content_type)
