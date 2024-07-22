@@ -34,6 +34,9 @@ from .messages import (
 from .strategy import ErrorStrategy, FileNameStrategy
 from .types import MessageQueue, PathLikeObject
 
+DEFAULT_MAX_CONCURRENT_DOWNLOADS: int = 500
+"""The default number of downloads that can be active at once."""
+
 
 @dataclass
 class Download:
@@ -81,7 +84,7 @@ class Downloads:
         self,
         config: Config,
         clients: Optional[List[Client]] = None,
-        max_concurrent_downloads: int = 500,
+        max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
     ) -> None:
         config.validate()
         self.config = config
@@ -217,6 +220,7 @@ async def download_item(
     messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
     keep_non_downloaded: bool = False,
+    max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
 ) -> Item:
     """Downloads an item to the local filesystem.
 
@@ -232,6 +236,8 @@ async def download_item(
         clients: Pre-configured clients to use for access
         keep_non_downloaded: Keep all assets on the item, even if they're not
             downloaded.
+        max_concurrent_downloads: The maximum number of downloads that can be
+            active at one time.
 
     Returns:
         Item: The `~pystac.Item`, with the updated asset hrefs and self href.
@@ -245,6 +251,7 @@ async def download_item(
     async with Downloads(
         config=config or Config(),
         clients=clients,
+        max_concurrent_downloads=max_concurrent_downloads,
     ) as downloads:
         await downloads.add(item, Path(directory), file_name, keep_non_downloaded)
         await downloads.download(messages)
@@ -268,6 +275,7 @@ async def download_collection(
     messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
     keep_non_downloaded: bool = False,
+    max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
 ) -> Collection:
     """Downloads a collection to the local filesystem.
 
@@ -284,6 +292,8 @@ async def download_collection(
         clients: Pre-configured clients to use for access
         keep_non_downloaded: Keep all assets on the item, even if they're not
             downloaded.
+        max_concurrent_downloads: The maximum number of downloads that can be
+            active at one time.
 
     Returns:
         Collection: The collection, with updated asset hrefs
@@ -291,7 +301,11 @@ async def download_collection(
     Raises:
         CantIncludeAndExclude: Raised if both include and exclude are not None.
     """
-    async with Downloads(config=config or Config(), clients=clients) as downloads:
+    async with Downloads(
+        config=config or Config(),
+        clients=clients,
+        max_concurrent_downloads=max_concurrent_downloads,
+    ) as downloads:
         await downloads.add(collection, Path(directory), file_name, keep_non_downloaded)
         await downloads.download(messages)
 
@@ -314,6 +328,7 @@ async def download_item_collection(
     messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
     keep_non_downloaded: bool = False,
+    max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
 ) -> ItemCollection:
     """Downloads an item collection to the local filesystem.
 
@@ -329,6 +344,8 @@ async def download_item_collection(
         clients: Pre-configured clients to use for access
         keep_non_downloaded: Keep all assets on the item, even if they're not
             downloaded.
+        max_concurrent_downloads: The maximum number of downloads that can be
+            active at one time.
 
     Returns:
         ItemCollection: The item collection, with updated asset hrefs
@@ -339,7 +356,11 @@ async def download_item_collection(
     layout_template = LayoutTemplate(
         path_template if path_template is not None else "${id}"
     )
-    async with Downloads(config=config or Config(), clients=clients) as downloads:
+    async with Downloads(
+        config=config or Config(),
+        clients=clients,
+        max_concurrent_downloads=max_concurrent_downloads,
+    ) as downloads:
         for item in item_collection.items:
             item.set_self_href(None)
             root = Path(directory) / layout_template.substitute(item)
