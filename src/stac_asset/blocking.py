@@ -25,6 +25,7 @@ def download_item(
     messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
     keep_non_downloaded: bool = False,
+    max_concurrent_downloads: int = _functions.DEFAULT_MAX_CONCURRENT_DOWNLOADS,
 ) -> Item:
     """Downloads an item to the local filesystem, synchronously.
 
@@ -40,6 +41,8 @@ def download_item(
         clients: Pre-configured clients to use for access
         keep_non_downloaded: Keep all assets on the item, even if they're not
             downloaded.
+        max_concurrent_downloads: The maximum number of downloads that can be
+            active at one time.
 
     Returns:
         Item: The `~pystac.Item`, with the updated asset hrefs and self href.
@@ -57,6 +60,7 @@ def download_item(
             messages=messages,
             clients=clients,
             keep_non_downloaded=keep_non_downloaded,
+            max_concurrent_downloads=max_concurrent_downloads,
         )
     )
 
@@ -69,6 +73,7 @@ def download_collection(
     messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
     keep_non_downloaded: bool = False,
+    max_concurrent_downloads: int = _functions.DEFAULT_MAX_CONCURRENT_DOWNLOADS,
 ) -> Collection:
     """Downloads a collection to the local filesystem, synchronously.
 
@@ -85,6 +90,8 @@ def download_collection(
         clients: Pre-configured clients to use for access
         keep_non_downloaded: Keep all assets on the item, even if they're not
             downloaded.
+        max_concurrent_downloads: The maximum number of downloads that can be
+            active at one time.
 
     Returns:
         Collection: The collection, with updated asset hrefs
@@ -101,6 +108,7 @@ def download_collection(
             messages=messages,
             clients=clients,
             keep_non_downloaded=keep_non_downloaded,
+            max_concurrent_downloads=max_concurrent_downloads,
         )
     )
 
@@ -114,6 +122,7 @@ def download_item_collection(
     messages: Optional[MessageQueue] = None,
     clients: Optional[List[Client]] = None,
     keep_non_downloaded: bool = False,
+    max_concurrent_downloads: int = _functions.DEFAULT_MAX_CONCURRENT_DOWNLOADS,
 ) -> ItemCollection:
     """Downloads an item collection to the local filesystem, synchronously.
 
@@ -129,6 +138,8 @@ def download_item_collection(
         clients: Pre-configured clients to use for access
         keep_non_downloaded: Keep all assets on the item, even if they're not
             downloaded.
+        max_concurrent_downloads: The maximum number of downloads that can be
+            active at one time.
 
     Returns:
         ItemCollection: The item collection, with updated asset hrefs
@@ -146,6 +157,7 @@ def download_item_collection(
             clients=clients,
             keep_non_downloaded=keep_non_downloaded,
             path_template=path_template,
+            max_concurrent_downloads=max_concurrent_downloads,
         )
     )
 
