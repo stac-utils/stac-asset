@@ -8,14 +8,7 @@ from asyncio import Semaphore, Task
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import (
-    AsyncIterator,
-    List,
-    Optional,
-    Set,
-    Type,
-    Union,
-)
+from typing import AsyncIterator, List, Optional, Set, Type, Union
 
 import pystac.utils
 from pystac import Asset, Collection, Item, ItemCollection, Link, STACError
@@ -75,11 +68,6 @@ class Download:
 
 
 class Downloads:
-    clients: Clients
-    config: Config
-    downloads: List[Download]
-    semaphore: Semaphore
-
     def __init__(
         self,
         config: Config,
@@ -88,7 +76,7 @@ class Downloads:
     ) -> None:
         config.validate()
         self.config = config
-        self.downloads = list()
+        self.downloads: List[Download] = list()
         self.clients = Clients(config, clients)
         self.semaphore = Semaphore(max_concurrent_downloads)
 
@@ -149,9 +137,7 @@ class Downloads:
     async def download(self, messages: Optional[MessageQueue]) -> None:
         tasks: Set[Task[Union[Download, WrappedError]]] = set()
         for download in self.downloads:
-            # wait to acquire the semaphore before starting a new download task
-            await self.semaphore.acquire()
-            task = asyncio.create_task(self._download_with_release(download, messages))
+            task = asyncio.create_task(self.download_with_lock(download, messages))
             tasks.add(task)
             task.add_done_callback(tasks.discard)
 
@@ -182,9 +168,10 @@ class Downloads:
         if exceptions:
             raise DownloadError(exceptions)
 
-    async def _download_with_release(
+    async def download_with_lock(
         self, download: Download, messages: Optional[MessageQueue]
-    ) -> Download | WrappedError:
+    ) -> Union[Download, WrappedError]:
+        await self.semaphore.acquire()
         try:
             return await download.download(messages=messages)
         finally:
