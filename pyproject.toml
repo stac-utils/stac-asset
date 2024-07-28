@@ -73,8 +73,8 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 filterwarnings = [
-    "error",
     "ignore:inheritance class OAuth2Client from ClientSession is discouraged:DeprecationWarning", # https://github.com/VITObelgium/aiohttp-oauth2-client/issues/1
+    "ignore:datetime.datetime.utcnow.*:DeprecationWarning:botocore",                              # https://github.com/boto/boto3/issues/3889
 ]
 
 [tool.ruff.lint]
