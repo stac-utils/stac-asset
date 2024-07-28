@@ -339,7 +339,7 @@ async def report_progress(messages: Optional[MessageQueue]) -> None:
         unit_divisor=1024,
     )
     sizes = dict()
-    owners = dict()
+    ids = dict()
     assets = 0
     done = 0
     errors = 0
@@ -352,7 +352,9 @@ async def report_progress(messages: Optional[MessageQueue]) -> None:
         if isinstance(message, StartAssetDownload):
             assets += 1
             if message.owner_id:
-                owners[message.key] = message.owner_id
+                ids[message.href] = f"{message.owner_id}[{message.key}]"
+            else:
+                ids[message.href] = f"[{message.key}]"
             progress_bar.set_description(f"{done}/{assets}")
         elif isinstance(message, OpenUrl):
             if message.size:
@@ -376,10 +378,8 @@ async def report_progress(messages: Optional[MessageQueue]) -> None:
                 progress_bar.update(n)
             progress_bar.set_postfix_str(f"{errors} errors, {skips} skips")
             progress_bar.set_description_str(f"{done}/{assets}")
-            if message.key in owners:
-                name = f"{owners[message.key]}[{message.key}]"
-            else:
-                name = f"[{message.key}]"
+            if message.href in ids:
+                name = ids[message.href]
             progress_bar.write(
                 f"ERROR: {name} - {type(message.error).__name__}: {message.error}",
                 file=sys.stderr,
