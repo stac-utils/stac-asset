@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Expand the list of exceptions on which we should retry for HTTP ([#195](https://github.com/stac-utils/stac-asset/pull/195))
 - `SkipAssetDownload` docstring ([#199](https://github.com/stac-utils/stac-asset/pull/199))
 - Fast failing when we hit `max_concurrent_downloads` ([#204](https://github.com/stac-utils/stac-asset/pull/204))
+- Id+key reporting in CLI ([#206](https://github.com/stac-utils/stac-asset/pull/206))
 
 ## [0.4.1] - 2024-07-17
 
