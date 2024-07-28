@@ -41,6 +41,7 @@ class Client(ABC):
         url: URL,
         content_type: Optional[str] = None,
         messages: Optional[MessageQueue] = None,
+        stream: bool = True,
     ) -> AsyncIterator[bytes]:
         """Opens a url and yields an iterator over its bytes.
 
@@ -51,6 +52,8 @@ class Client(ABC):
             content_type: The expected content type, to be checked by the client
                 implementations
             messages: An optional queue to use for progress reporting
+            stream: If enabled, it iterates over the bytes of the response;
+                otherwise, it reads the entire file into memory
 
         Yields:
             AsyncIterator[bytes]: An iterator over chunks of the read file
@@ -64,6 +67,7 @@ class Client(ABC):
         href: str,
         content_type: Optional[str] = None,
         messages: Optional[MessageQueue] = None,
+        stream: bool = True,
     ) -> AsyncIterator[bytes]:
         """Opens a href and yields an iterator over its bytes.
 
@@ -71,12 +75,14 @@ class Client(ABC):
             href: The input href
             content_type: The expected content type
             messages: An optional queue to use for progress reporting
+            stream: If enabled, it iterates over the bytes of the response;
+                otherwise, it reads the entire file into memory
 
         Yields:
             AsyncIterator[bytes]: An iterator over chunks of the read file
         """
         async for chunk in self.open_url(
-            URL(href), content_type=content_type, messages=messages
+            URL(href), content_type=content_type, messages=messages, stream=stream
         ):
             yield chunk
 
@@ -87,6 +93,7 @@ class Client(ABC):
         clean: bool = True,
         content_type: Optional[str] = None,
         messages: Optional[MessageQueue] = None,
+        stream: bool = True,
     ) -> None:
         """Downloads a file to the local filesystem.
 
@@ -96,11 +103,13 @@ class Client(ABC):
             clean: If an error occurs, delete the output file if it exists
             content_type: The expected content type
             messages: An optional queue to use for progress reporting
+            stream: If enabled, it iterates over the bytes of the response;
+                otherwise, it reads the entire file into memory
         """
         try:
             async with aiofiles.open(path, mode="wb") as f:
                 async for chunk in self.open_href(
-                    href, content_type=content_type, messages=messages
+                    href, content_type=content_type, messages=messages, stream=stream
                 ):
                     await f.write(chunk)
                     if messages:
@@ -110,6 +119,7 @@ class Client(ABC):
                             )
                         except QueueFull:
                             pass
+
         except Exception as err:
             path_as_path = Path(path)
             if clean and path_as_path.exists():

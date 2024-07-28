@@ -70,6 +70,7 @@ class PlanetaryComputerClient(HttpClient):
         url: URL,
         content_type: Optional[str] = None,
         messages: Optional[Queue[Any]] = None,
+        stream: bool = True,
     ) -> AsyncIterator[bytes]:
         """Opens a url and iterates over its bytes.
 
@@ -88,13 +89,14 @@ class PlanetaryComputerClient(HttpClient):
             url: The url to open
             content_type: The expected content type
             messages: An optional queue to use for progress reporting
+            stream: If enabled, it uses the aiohttp streaming API
 
         Yields:
             AsyncIterator[bytes]: An iterator over the file's bytes
         """
         url = await self._maybe_sign_url(url)
         async for chunk in super().open_url(
-            url, content_type=content_type, messages=messages
+            url, content_type=content_type, messages=messages, stream=stream
         ):
             yield chunk
 

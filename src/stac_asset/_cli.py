@@ -146,6 +146,13 @@ def cli() -> None:
     help="The maximum number of downloads that can be active at one time",
     default=_functions.DEFAULT_MAX_CONCURRENT_DOWNLOADS,
 )
+@click.option(
+    "--no-stream",
+    help="Disable chunked reading of assets",
+    default=False,
+    is_flag=True,
+    show_default=True,
+)
 # TODO add option to disable content type checking
 def download(
     href: Optional[str],
@@ -165,6 +172,7 @@ def download(
     fail_fast: bool,
     overwrite: bool,
     max_concurrent_downloads: int,
+    no_stream: bool,
 ) -> None:
     """Download STAC assets from an item or item collection.
 
@@ -204,6 +212,7 @@ def download(
             fail_fast=fail_fast,
             overwrite=overwrite,
             max_concurrent_downloads=max_concurrent_downloads,
+            no_stream=no_stream,
         )
     )
 
@@ -226,6 +235,7 @@ async def download_async(
     fail_fast: bool,
     overwrite: bool,
     max_concurrent_downloads: int,
+    no_stream: bool,
 ) -> None:
     config = Config(
         alternate_assets=alternate_assets,
@@ -272,6 +282,7 @@ async def download_async(
                 config=config,
                 messages=messages,
                 max_concurrent_downloads=max_concurrent_downloads,
+                stream=not no_stream,
             )
 
     elif type_ == "FeatureCollection":
@@ -286,6 +297,7 @@ async def download_async(
                 config=config,
                 messages=messages,
                 max_concurrent_downloads=max_concurrent_downloads,
+                stream=not no_stream,
             )
 
     else:

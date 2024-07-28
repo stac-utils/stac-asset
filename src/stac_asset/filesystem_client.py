@@ -23,6 +23,7 @@ class FilesystemClient(Client):
         url: URL,
         content_type: Optional[str] = None,
         messages: Optional[MessageQueue] = None,
+        stream: bool = True,
     ) -> AsyncIterator[bytes]:
         """Iterates over data from a local url.
 
@@ -31,6 +32,8 @@ class FilesystemClient(Client):
             content_type: The expected content type. Ignored by this client,
                 because filesystems don't have content types.
             messages: An optional queue to use for progress reporting
+            stream: If enabled, it iterates over the bytes of the file;
+                otherwise, it reads the entire file into memory
 
         Yields:
             AsyncIterator[bytes]: An iterator over the file's bytes.
@@ -47,8 +50,12 @@ class FilesystemClient(Client):
         if messages:
             await messages.put(OpenUrl(size=os.path.getsize(url.path), url=url))
         async with aiofiles.open(url.path, "rb") as f:
-            async for chunk in f:
-                yield chunk
+            if stream:
+                async for chunk in f:
+                    yield chunk
+            else:
+                content = await f.read()
+                yield content
 
     async def assert_href_exists(self, href: str) -> None:
         """Asserts that an href exists."""

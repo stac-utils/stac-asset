@@ -140,6 +140,7 @@ class HttpClient(Client):
         url: URL,
         content_type: Optional[str] = None,
         messages: Optional[MessageQueue] = None,
+        stream: bool = True,
     ) -> AsyncIterator[bytes]:
         """Opens a url with this client's session and iterates over its bytes.
 
@@ -147,6 +148,7 @@ class HttpClient(Client):
             url: The url to open
             content_type: The expected content type
             messages: An optional queue to use for progress reporting
+            stream: If enabled, it uses the aiohttp streaming API
 
         Yields:
             AsyncIterator[bytes]: An iterator over the file's bytes
@@ -162,8 +164,12 @@ class HttpClient(Client):
                 )
             if messages:
                 await messages.put(OpenUrl(url=url, size=response.content_length))
-            async for chunk, _ in response.content.iter_chunks():
-                yield chunk
+            if stream:
+                async for chunk, _ in response.content.iter_chunks():
+                    yield chunk
+            else:
+                content = await response.read()
+                yield content
 
     async def assert_href_exists(self, href: str) -> None:
         """Asserts that the href exists.

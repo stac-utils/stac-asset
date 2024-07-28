@@ -41,8 +41,7 @@ class Download:
     config: Config
 
     async def download(
-        self,
-        messages: Optional[MessageQueue],
+        self, messages: Optional[MessageQueue], stream: bool = True
     ) -> Union[Download, WrappedError]:
         if not os.path.exists(self.path) or self.config.overwrite:
             try:
@@ -53,6 +52,7 @@ class Download:
                     config=self.config,
                     messages=messages,
                     clients=self.clients,
+                    stream=stream,
                 )
             except Exception as error:
                 if self.config.fail_fast:
@@ -134,10 +134,14 @@ class Downloads:
         else:
             stac_object.assets = assets
 
-    async def download(self, messages: Optional[MessageQueue]) -> None:
+    async def download(
+        self, messages: Optional[MessageQueue], stream: bool = True
+    ) -> None:
         tasks: Set[Task[Union[Download, WrappedError]]] = set()
         for download in self.downloads:
-            task = asyncio.create_task(self.download_with_lock(download, messages))
+            task = asyncio.create_task(
+                self.download_with_lock(download, messages, stream)
+            )
             tasks.add(task)
             task.add_done_callback(tasks.discard)
 
@@ -169,11 +173,11 @@ class Downloads:
             raise DownloadError(exceptions)
 
     async def download_with_lock(
-        self, download: Download, messages: Optional[MessageQueue]
+        self, download: Download, messages: Optional[MessageQueue], stream: bool = True
     ) -> Union[Download, WrappedError]:
         await self.semaphore.acquire()
         try:
-            return await download.download(messages=messages)
+            return await download.download(messages=messages, stream=stream)
         finally:
             self.semaphore.release()
 
@@ -208,6 +212,7 @@ async def download_item(
     clients: Optional[List[Client]] = None,
     keep_non_downloaded: bool = False,
     max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
+    stream: bool = True,
 ) -> Item:
     """Downloads an item to the local filesystem.
 
@@ -225,6 +230,8 @@ async def download_item(
             downloaded.
         max_concurrent_downloads: The maximum number of downloads that can be
             active at one time.
+        stream: If enabled, it iterates over the bytes of the response;
+            otherwise, it reads the entire file into memory
 
     Returns:
         Item: The `~pystac.Item`, with the updated asset hrefs and self href.
@@ -241,7 +248,7 @@ async def download_item(
         max_concurrent_downloads=max_concurrent_downloads,
     ) as downloads:
         await downloads.add(item, Path(directory), file_name, keep_non_downloaded)
-        await downloads.download(messages)
+        await downloads.download(messages, stream)
 
     self_href = item.get_self_href()
     if self_href:
@@ -263,6 +270,7 @@ async def download_collection(
     clients: Optional[List[Client]] = None,
     keep_non_downloaded: bool = False,
     max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
+    stream: bool = True,
 ) -> Collection:
     """Downloads a collection to the local filesystem.
 
@@ -281,6 +289,8 @@ async def download_collection(
             downloaded.
         max_concurrent_downloads: The maximum number of downloads that can be
             active at one time.
+        stream: If enabled, it iterates over the bytes of the response;
+            otherwise, it reads the entire file into memory
 
     Returns:
         Collection: The collection, with updated asset hrefs
@@ -294,7 +304,7 @@ async def download_collection(
         max_concurrent_downloads=max_concurrent_downloads,
     ) as downloads:
         await downloads.add(collection, Path(directory), file_name, keep_non_downloaded)
-        await downloads.download(messages)
+        await downloads.download(messages, stream)
 
     self_href = collection.get_self_href()
     if self_href:
@@ -316,6 +326,7 @@ async def download_item_collection(
     clients: Optional[List[Client]] = None,
     keep_non_downloaded: bool = False,
     max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
+    stream: bool = True,
 ) -> ItemCollection:
     """Downloads an item collection to the local filesystem.
 
@@ -333,6 +344,8 @@ async def download_item_collection(
             downloaded.
         max_concurrent_downloads: The maximum number of downloads that can be
             active at one time.
+        stream: If enabled, it iterates over the bytes of the response;
+            otherwise, it reads the entire file into memory
 
     Returns:
         ItemCollection: The item collection, with updated asset hrefs
@@ -352,7 +365,7 @@ async def download_item_collection(
             item.set_self_href(None)
             root = Path(directory) / layout_template.substitute(item)
             await downloads.add(item, root, None, keep_non_downloaded)
-        await downloads.download(messages)
+        await downloads.download(messages, stream)
     if file_name:
         dest_href = Path(directory) / file_name
         for item in item_collection.items:
@@ -372,6 +385,7 @@ async def download_asset(
     config: Config,
     messages: Optional[MessageQueue] = None,
     clients: Optional[Clients] = None,
+    stream: bool = True,
 ) -> Asset:
     """Downloads an asset.
 
@@ -383,6 +397,8 @@ async def download_asset(
         messages: An optional queue to use for progress reporting
         clients: A async-safe cache of clients. If not provided, a new one
             will be created.
+        stream: If enabled, it iterates over the bytes of the response;
+            otherwise, it reads the entire file into memory
 
     Returns:
         Asset: The asset with an updated href
@@ -422,6 +438,7 @@ async def download_asset(
             clean=config.clean,
             content_type=asset.media_type,
             messages=messages,
+            stream=stream,
         )
     except Exception as error:
         if messages:
