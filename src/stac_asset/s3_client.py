@@ -87,6 +87,7 @@ class S3Client(Client):
         url: URL,
         content_type: Optional[str] = None,
         messages: Optional[MessageQueue] = None,
+        stream: bool = True,
     ) -> AsyncIterator[bytes]:
         """Opens an s3 url and iterates over its bytes.
 
@@ -94,6 +95,8 @@ class S3Client(Client):
             url: The url to open
             content_type: The expected content type
             messages: An optional queue to use for progress reporting
+            stream: If enabled, it iterates over the bytes of the response;
+                otherwise, it reads the entire file into memory
 
         Yields:
             AsyncIterator[bytes]: An iterator over the file's bytes
@@ -107,8 +110,12 @@ class S3Client(Client):
                 validate.content_type(response["ContentType"], content_type)
             if messages:
                 await messages.put(OpenUrl(url=url, size=response["ContentLength"]))
-            async for chunk in response["Body"]:
-                yield chunk
+            if stream:
+                async for chunk in response["Body"]:
+                    yield chunk
+            else:
+                content = await response["Body"].read()
+                yield content
 
     async def has_credentials(self) -> bool:
         """Returns true if the sessions has credentials."""
