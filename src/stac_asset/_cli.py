@@ -14,6 +14,7 @@ import click
 import click_logging
 import tabulate
 import tqdm
+from click import Choice
 from pystac import Asset, Item, ItemCollection
 
 from . import Config, ErrorStrategy, _functions
@@ -147,10 +148,10 @@ def cli() -> None:
     default=_functions.DEFAULT_MAX_CONCURRENT_DOWNLOADS,
 )
 @click.option(
-    "--no-stream",
-    help="Disable chunked reading of assets",
-    default=False,
-    is_flag=True,
+    "--stream",
+    help="Enable, disable, or defer to the client for chunked reading of assets",
+    default="defer",
+    type=Choice(["true", "false", "defer"]),
     show_default=True,
 )
 # TODO add option to disable content type checking
@@ -172,7 +173,7 @@ def download(
     fail_fast: bool,
     overwrite: bool,
     max_concurrent_downloads: int,
-    no_stream: bool,
+    stream: str,
 ) -> None:
     """Download STAC assets from an item or item collection.
 
@@ -193,6 +194,14 @@ def download(
 
         $ stac-asset download -i asset-key-to-include item.json
     """
+    if stream == "true":
+        stream_actual = True
+    elif stream == "false":
+        stream_actual = False
+    elif stream == "defer":
+        stream_actual = None
+    else:
+        raise NotImplementedError(f"Unknonwn stream value: {stream}")
     asyncio.run(
         download_async(
             href,
@@ -212,7 +221,7 @@ def download(
             fail_fast=fail_fast,
             overwrite=overwrite,
             max_concurrent_downloads=max_concurrent_downloads,
-            no_stream=no_stream,
+            stream=stream_actual,
         )
     )
 
@@ -235,7 +244,7 @@ async def download_async(
     fail_fast: bool,
     overwrite: bool,
     max_concurrent_downloads: int,
-    no_stream: bool,
+    stream: bool | None,
 ) -> None:
     config = Config(
         alternate_assets=alternate_assets,
@@ -282,7 +291,7 @@ async def download_async(
                 config=config,
                 messages=messages,
                 max_concurrent_downloads=max_concurrent_downloads,
-                stream=not no_stream,
+                stream=stream,
             )
 
     elif type_ == "FeatureCollection":
@@ -297,7 +306,7 @@ async def download_async(
                 config=config,
                 messages=messages,
                 max_concurrent_downloads=max_concurrent_downloads,
-                stream=not no_stream,
+                stream=stream,
             )
 
     else:

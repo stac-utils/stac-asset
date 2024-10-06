@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- `stream` can now be `None`, with each client deciding what its preferred mode is ([#226](https://github.com/stac-utils/stac-asset/pull/226))
+
 ### Removed
 
 - Python 3.9 ([#224](https://github.com/stac-utils/stac-asset/pull/224))

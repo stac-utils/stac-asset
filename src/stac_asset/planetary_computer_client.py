@@ -71,7 +71,7 @@ class PlanetaryComputerClient(HttpClient):
         url: URL,
         content_type: str | None = None,
         messages: Queue[Any] | None = None,
-        stream: bool = True,
+        stream: bool | None = None,
     ) -> AsyncIterator[bytes]:
         """Opens a url and iterates over its bytes.
 

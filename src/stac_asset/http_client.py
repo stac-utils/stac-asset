@@ -141,7 +141,7 @@ class HttpClient(Client):
         url: URL,
         content_type: str | None = None,
         messages: MessageQueue | None = None,
-        stream: bool = True,
+        stream: bool | None = None,
     ) -> AsyncIterator[bytes]:
         """Opens a url with this client's session and iterates over its bytes.
 
@@ -157,6 +157,8 @@ class HttpClient(Client):
         Raises:
             :py:class:`aiohttp.ClientResponseError`: Raised if the response is not OK
         """
+        if stream is None:
+            stream = True
         async with self.session.get(url, allow_redirects=True) as response:
             response.raise_for_status()
             if self.check_content_type and content_type:

@@ -41,7 +41,7 @@ class Download:
     config: Config
 
     async def download(
-        self, messages: MessageQueue | None, stream: bool = True
+        self, messages: MessageQueue | None, stream: bool | None = None
     ) -> Download | WrappedError:
         if not os.path.exists(self.path) or self.config.overwrite:
             try:
@@ -135,7 +135,7 @@ class Downloads:
             stac_object.assets = assets
 
     async def download(
-        self, messages: MessageQueue | None, stream: bool = True
+        self, messages: MessageQueue | None, stream: bool | None = None
     ) -> None:
         tasks: set[Task[Download | WrappedError]] = set()
         for download in self.downloads:
@@ -173,7 +173,10 @@ class Downloads:
             raise DownloadError(exceptions)
 
     async def download_with_lock(
-        self, download: Download, messages: MessageQueue | None, stream: bool = True
+        self,
+        download: Download,
+        messages: MessageQueue | None,
+        stream: bool | None = None,
     ) -> Download | WrappedError:
         await self.semaphore.acquire()
         try:
@@ -212,7 +215,7 @@ async def download_item(
     clients: list[Client] | None = None,
     keep_non_downloaded: bool = False,
     max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
-    stream: bool = True,
+    stream: bool | None = None,
 ) -> Item:
     """Downloads an item to the local filesystem.
 
@@ -326,7 +329,7 @@ async def download_item_collection(
     clients: list[Client] | None = None,
     keep_non_downloaded: bool = False,
     max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
-    stream: bool = True,
+    stream: bool | None = None,
 ) -> ItemCollection:
     """Downloads an item collection to the local filesystem.
 
@@ -385,7 +388,7 @@ async def download_asset(
     config: Config,
     messages: MessageQueue | None = None,
     clients: Clients | None = None,
-    stream: bool = True,
+    stream: bool | None = None,
 ) -> Asset:
     """Downloads an asset.
 

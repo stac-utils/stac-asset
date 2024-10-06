@@ -23,7 +23,7 @@ class FilesystemClient(Client):
         url: URL,
         content_type: str | None = None,
         messages: MessageQueue | None = None,
-        stream: bool = True,
+        stream: bool | None = None,
     ) -> AsyncIterator[bytes]:
         """Iterates over data from a local url.
 
@@ -42,6 +42,8 @@ class FilesystemClient(Client):
             ValueError: Raised if the url has a scheme. This behavior will
                 change if/when we support Windows paths.
         """
+        if stream is None:
+            stream = False
         if url.scheme:
             raise ValueError(
                 "cannot read a file with the filesystem client if it has a url scheme: "
