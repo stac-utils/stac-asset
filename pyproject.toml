@@ -60,6 +60,7 @@ filterwarnings = [
     "ignore:inheritance class OAuth2Client from ClientSession is discouraged:DeprecationWarning", # https://github.com/VITObelgium/aiohttp-oauth2-client/issues/1
     "ignore:datetime.datetime.utcnow.*:DeprecationWarning:botocore",                              # https://github.com/boto/boto3/issues/3889
 ]
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff.lint]
 select = ["F", "E", "W", "I", "ERA", "RUF", "D"]
