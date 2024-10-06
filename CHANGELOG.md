@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Removed
+
+- Python 3.9 ([#224](https://github.com/stac-utils/stac-asset/pull/224))
+
 ## [0.4.3] - 2024-07-29
 
 ### Added
