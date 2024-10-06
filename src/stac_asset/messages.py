@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from yarl import URL
 
@@ -17,7 +16,7 @@ class StartAssetDownload(Message):
     key: str
     """The asset key."""
 
-    owner_id: Optional[str]
+    owner_id: str | None
     """The owner id."""
 
     href: str
@@ -90,5 +89,5 @@ class OpenUrl(Message):
     url: URL
     """The URL"""
 
-    size: Optional[int]
+    size: int | None
     """The file size."""

@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import datetime
 from asyncio import Lock, Queue
+from collections.abc import AsyncIterator
 from datetime import timezone
 from types import TracebackType
-from typing import Any, AsyncIterator, Dict, Optional, Type
+from typing import Any
 
 import dateutil.parser
 from aiohttp import ClientSession
@@ -20,7 +21,7 @@ class _Token:
     token: str
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> _Token:
+    def from_dict(cls, data: dict[str, Any]) -> _Token:
         try:
             expiry = dateutil.parser.isoparse(data["msft:expiry"])
         except KeyError:
@@ -59,7 +60,7 @@ class PlanetaryComputerClient(HttpClient):
         sas_token_endpoint: str = DEFAULT_SAS_TOKEN_ENDPOINT,
     ) -> None:
         super().__init__(session, check_content_type)
-        self._cache: Dict[URL, _Token] = dict()
+        self._cache: dict[URL, _Token] = dict()
         self._cache_lock: Lock = Lock()
 
         self.sas_token_endpoint: URL = URL(sas_token_endpoint)
@@ -68,8 +69,8 @@ class PlanetaryComputerClient(HttpClient):
     async def open_url(
         self,
         url: URL,
-        content_type: Optional[str] = None,
-        messages: Optional[Queue[Any]] = None,
+        content_type: str | None = None,
+        messages: Queue[Any] | None = None,
         stream: bool = True,
     ) -> AsyncIterator[bytes]:
         """Opens a url and iterates over its bytes.
@@ -146,9 +147,9 @@ class PlanetaryComputerClient(HttpClient):
 
     async def __aexit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> Optional[bool]:
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool | None:
         await self.close()
         return await super().__aexit__(exc_type, exc_val, exc_tb)

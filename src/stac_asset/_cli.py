@@ -8,7 +8,7 @@ import sys
 from asyncio import Queue
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import click
 import click_logging
@@ -155,13 +155,13 @@ def cli() -> None:
 )
 # TODO add option to disable content type checking
 def download(
-    href: Optional[str],
-    directory: Optional[str],
-    path_template: Optional[str],
-    alternate_assets: List[str],
-    include: List[str],
-    exclude: List[str],
-    file_name: Optional[str],
+    href: str | None,
+    directory: str | None,
+    path_template: str | None,
+    alternate_assets: list[str],
+    include: list[str],
+    exclude: list[str],
+    file_name: str | None,
     quiet: bool,
     s3_requester_pays: bool,
     s3_retry_mode: str,
@@ -218,13 +218,13 @@ def download(
 
 
 async def download_async(
-    href: Optional[str],
-    directory: Optional[str],
-    path_template: Optional[str],
-    alternate_assets: List[str],
-    include: List[str],
-    exclude: List[str],
-    file_name: Optional[str],
+    href: str | None,
+    directory: str | None,
+    path_template: str | None,
+    alternate_assets: list[str],
+    include: list[str],
+    exclude: list[str],
+    file_name: str | None,
     quiet: bool,
     s3_requester_pays: bool,
     s3_retry_mode: str,
@@ -273,7 +273,7 @@ async def download_async(
             item.set_self_href(href)
             item.make_asset_hrefs_absolute()
 
-        async def download() -> Union[Item, ItemCollection]:
+        async def download() -> Item | ItemCollection:
             return await _functions.download_item(
                 item,
                 directory_str,
@@ -288,7 +288,7 @@ async def download_async(
     elif type_ == "FeatureCollection":
         item_collection = ItemCollection.from_dict(input_dict)
 
-        async def download() -> Union[Item, ItemCollection]:
+        async def download() -> Item | ItemCollection:
             return await _functions.download_item_collection(
                 item_collection,
                 directory_str,
@@ -322,7 +322,7 @@ async def download_async(
             json.dump(output.to_dict(transform_hrefs=False), sys.stdout)
 
 
-async def read_as_dict(href: Optional[str], config: Config) -> Dict[str, Any]:
+async def read_as_dict(href: str | None, config: Config) -> dict[str, Any]:
     if href is None or href == "-":
         data = json.load(sys.stdin)
     else:
@@ -342,7 +342,7 @@ async def read(href: str, config: Config) -> bytes:
         return data
 
 
-async def report_progress(messages: Optional[MessageQueue]) -> None:
+async def report_progress(messages: MessageQueue | None) -> None:
     if messages is None:
         return
     progress_bar = tqdm.tqdm(
@@ -408,7 +408,7 @@ async def report_progress(messages: Optional[MessageQueue]) -> None:
 @dataclass
 class Download:
     key: str
-    item_id: Optional[str]
+    item_id: str | None
     href: str
     path: str
     progress_bar: Tqdm
@@ -451,8 +451,8 @@ class Download:
     default=DEFAULT_HTTP_CLIENT_TIMEOUT,
 )
 def info(
-    href: Optional[str],
-    alternate_assets: List[str],
+    href: str | None,
+    alternate_assets: list[str],
     s3_requester_pays: bool,
     s3_retry_mode: str,
     s3_max_attempts: int,
@@ -473,8 +473,8 @@ def info(
 
 
 async def info_async(
-    href: Optional[str],
-    alternate_assets: List[str],
+    href: str | None,
+    alternate_assets: list[str],
     s3_requester_pays: bool,
     s3_retry_mode: str,
     s3_max_attempts: int,
@@ -598,7 +598,7 @@ class AssetInfo:
     key: str
     client: str
     exists: bool
-    media_type: Optional[str] = None
+    media_type: str | None = None
     note: str = ""
 
 

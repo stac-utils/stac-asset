@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from types import TracebackType
-from typing import Any, AsyncIterator, Dict, Optional, Type
+from typing import Any
 
 import aiobotocore.session
 import botocore.config
@@ -54,7 +55,7 @@ class S3Client(Client):
         region_name: str = DEFAULT_S3_REGION_NAME,
         retry_mode: str = DEFAULT_S3_RETRY_MODE,
         max_attempts: int = DEFAULT_S3_MAX_ATTEMPTS,
-        endpoint_url: Optional[str] = None,
+        endpoint_url: str | None = None,
     ) -> None:
         super().__init__()
 
@@ -79,14 +80,14 @@ class S3Client(Client):
         self.max_attempts: int = max_attempts
         """The maximum number of attempts."""
 
-        self.endpoint_url: Optional[str] = endpoint_url
+        self.endpoint_url: str | None = endpoint_url
         """Custom endpoint url for s3."""
 
     async def open_url(
         self,
         url: URL,
-        content_type: Optional[str] = None,
-        messages: Optional[MessageQueue] = None,
+        content_type: str | None = None,
+        messages: MessageQueue | None = None,
         stream: bool = True,
     ) -> AsyncIterator[bytes]:
         """Opens an s3 url and iterates over its bytes.
@@ -145,7 +146,7 @@ class S3Client(Client):
             config=config,
         )
 
-    def _params(self, url: URL) -> Dict[str, Any]:
+    def _params(self, url: URL) -> dict[str, Any]:
         bucket = url.host
         key = url.path[1:]
         params = {
@@ -161,8 +162,8 @@ class S3Client(Client):
 
     async def __aexit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> Optional[bool]:
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool | None:
         return None

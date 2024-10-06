@@ -5,10 +5,10 @@ import json
 import os.path
 import warnings
 from asyncio import Semaphore, Task
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import AsyncIterator, List, Optional, Set, Type, Union
 
 import pystac.utils
 from pystac import Asset, Collection, Item, ItemCollection, Link, STACError
@@ -33,7 +33,7 @@ DEFAULT_MAX_CONCURRENT_DOWNLOADS: int = 500
 
 @dataclass
 class Download:
-    owner: Union[Item, Collection]
+    owner: Item | Collection
     key: str
     asset: Asset
     path: Path
@@ -41,8 +41,8 @@ class Download:
     config: Config
 
     async def download(
-        self, messages: Optional[MessageQueue], stream: bool = True
-    ) -> Union[Download, WrappedError]:
+        self, messages: MessageQueue | None, stream: bool = True
+    ) -> Download | WrappedError:
         if not os.path.exists(self.path) or self.config.overwrite:
             try:
                 await download_asset(
@@ -71,20 +71,20 @@ class Downloads:
     def __init__(
         self,
         config: Config,
-        clients: Optional[List[Client]] = None,
+        clients: list[Client] | None = None,
         max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
     ) -> None:
         config.validate()
         self.config = config
-        self.downloads: List[Download] = list()
+        self.downloads: list[Download] = list()
         self.clients = Clients(config, clients)
         self.semaphore = Semaphore(max_concurrent_downloads)
 
     async def add(
         self,
-        stac_object: Union[Item, Collection],
+        stac_object: Item | Collection,
         root: Path,
-        file_name: Optional[str],
+        file_name: str | None,
         keep_non_downloaded: bool,
     ) -> None:
         stac_object = make_link_hrefs_absolute(stac_object)
@@ -98,7 +98,7 @@ class Downloads:
         else:
             stac_object.set_self_href(None)
 
-        asset_file_names: Set[str] = set()
+        asset_file_names: set[str] = set()
         assets = dict()
         for key, asset in (
             (k, a)
@@ -135,9 +135,9 @@ class Downloads:
             stac_object.assets = assets
 
     async def download(
-        self, messages: Optional[MessageQueue], stream: bool = True
+        self, messages: MessageQueue | None, stream: bool = True
     ) -> None:
-        tasks: Set[Task[Union[Download, WrappedError]]] = set()
+        tasks: set[Task[Download | WrappedError]] = set()
         for download in self.downloads:
             task = asyncio.create_task(
                 self.download_with_lock(download, messages, stream)
@@ -173,8 +173,8 @@ class Downloads:
             raise DownloadError(exceptions)
 
     async def download_with_lock(
-        self, download: Download, messages: Optional[MessageQueue], stream: bool = True
-    ) -> Union[Download, WrappedError]:
+        self, download: Download, messages: MessageQueue | None, stream: bool = True
+    ) -> Download | WrappedError:
         await self.semaphore.acquire()
         try:
             return await download.download(messages=messages, stream=stream)
@@ -186,9 +186,9 @@ class Downloads:
 
     async def __aexit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None:
         await self.clients.close_all()
 
@@ -205,11 +205,11 @@ class WrappedError:
 async def download_item(
     item: Item,
     directory: PathLikeObject,
-    file_name: Optional[str] = None,
+    file_name: str | None = None,
     infer_file_name: bool = True,
-    config: Optional[Config] = None,
-    messages: Optional[MessageQueue] = None,
-    clients: Optional[List[Client]] = None,
+    config: Config | None = None,
+    messages: MessageQueue | None = None,
+    clients: list[Client] | None = None,
     keep_non_downloaded: bool = False,
     max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
     stream: bool = True,
@@ -264,10 +264,10 @@ async def download_item(
 async def download_collection(
     collection: Collection,
     directory: PathLikeObject,
-    file_name: Optional[str] = "collection.json",
-    config: Optional[Config] = None,
-    messages: Optional[MessageQueue] = None,
-    clients: Optional[List[Client]] = None,
+    file_name: str | None = "collection.json",
+    config: Config | None = None,
+    messages: MessageQueue | None = None,
+    clients: list[Client] | None = None,
     keep_non_downloaded: bool = False,
     max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
     stream: bool = True,
@@ -319,11 +319,11 @@ async def download_collection(
 async def download_item_collection(
     item_collection: ItemCollection,
     directory: PathLikeObject,
-    path_template: Optional[str] = None,
-    file_name: Optional[str] = "item-collection.json",
-    config: Optional[Config] = None,
-    messages: Optional[MessageQueue] = None,
-    clients: Optional[List[Client]] = None,
+    path_template: str | None = None,
+    file_name: str | None = "item-collection.json",
+    config: Config | None = None,
+    messages: MessageQueue | None = None,
+    clients: list[Client] | None = None,
     keep_non_downloaded: bool = False,
     max_concurrent_downloads: int = DEFAULT_MAX_CONCURRENT_DOWNLOADS,
     stream: bool = True,
@@ -383,8 +383,8 @@ async def download_asset(
     asset: Asset,
     path: Path,
     config: Config,
-    messages: Optional[MessageQueue] = None,
-    clients: Optional[Clients] = None,
+    messages: MessageQueue | None = None,
+    clients: Clients | None = None,
     stream: bool = True,
 ) -> Asset:
     """Downloads an asset.
@@ -455,8 +455,8 @@ async def download_asset(
 
 async def assert_asset_exists(
     asset: Asset,
-    config: Optional[Config] = None,
-    clients: Optional[List[Client]] = None,
+    config: Config | None = None,
+    clients: list[Client] | None = None,
 ) -> None:
     """Asserts that an asset exists.
 
@@ -483,8 +483,8 @@ async def assert_asset_exists(
 
 async def asset_exists(
     asset: Asset,
-    config: Optional[Config] = None,
-    clients: Optional[List[Client]] = None,
+    config: Config | None = None,
+    clients: list[Client] | None = None,
 ) -> bool:
     """Returns true if an asset exists.
 
@@ -505,7 +505,7 @@ async def asset_exists(
 
 
 async def open_href(
-    href: str, config: Optional[Config] = None, clients: Optional[List[Client]] = None
+    href: str, config: Config | None = None, clients: list[Client] | None = None
 ) -> AsyncIterator[bytes]:
     """Opens an href and yields byte chunks.
 
@@ -526,7 +526,7 @@ async def open_href(
 
 
 async def read_href(
-    href: str, config: Optional[Config] = None, clients: Optional[List[Client]] = None
+    href: str, config: Config | None = None, clients: list[Client] | None = None
 ) -> bytes:
     """Reads an href and returns its bytes.
 
@@ -545,8 +545,8 @@ async def read_href(
 
 
 def make_asset_hrefs_relative(
-    stac_object: Union[Item, Collection],
-) -> Union[Item, Collection]:
+    stac_object: Item | Collection,
+) -> Item | Collection:
     # Copied from
     # https://github.com/stac-utils/pystac/blob/381cf89fc25c15142fb5a187d905e22681de42a2/pystac/item.py#L284C5-L298C20
     # until a fix for https://github.com/stac-utils/pystac/issues/1199 is
@@ -563,8 +563,8 @@ def make_asset_hrefs_relative(
 
 
 def make_asset_hrefs_absolute(
-    stac_object: Union[Item, Collection],
-) -> Union[Item, Collection]:
+    stac_object: Item | Collection,
+) -> Item | Collection:
     # Copied from
     # https://github.com/stac-utils/pystac/blob/381cf89fc25c15142fb5a187d905e22681de42a2/pystac/item.py#L309C3-L319C1
     # until a fix for https://github.com/stac-utils/pystac/issues/1199 is
@@ -581,8 +581,8 @@ def make_asset_hrefs_absolute(
 
 
 def make_link_hrefs_absolute(
-    stac_object: Union[Item, Collection], drop: bool = True
-) -> Union[Item, Collection]:
+    stac_object: Item | Collection, drop: bool = True
+) -> Item | Collection:
     # This could be in pystac w/ STACObject as the input+output type
     links = list()
     for link in stac_object.links:
@@ -596,7 +596,7 @@ def make_link_hrefs_absolute(
     return stac_object
 
 
-def get_absolute_asset_href(asset: Asset, alternate_assets: List[str]) -> Optional[str]:
+def get_absolute_asset_href(asset: Asset, alternate_assets: list[str]) -> str | None:
     alternate = asset.extra_fields.get("alternate")
     if not isinstance(alternate, dict):
         alternate = None
@@ -623,8 +623,8 @@ def get_absolute_asset_href(asset: Asset, alternate_assets: List[str]) -> Option
 async def download_file(
     href: str,
     destination: PathLikeObject,
-    config: Optional[Config] = None,
-    clients: Optional[List[Client]] = None,
+    config: Config | None = None,
+    clients: list[Client] | None = None,
 ) -> None:
     """Downloads a file collection to the local filesystem.
 
