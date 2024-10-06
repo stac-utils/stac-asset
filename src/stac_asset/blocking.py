@@ -6,7 +6,6 @@ code in your application, prefer the top-level functions.
 
 import asyncio
 from pathlib import Path
-from typing import List, Optional
 
 from pystac import Asset, Collection, Item, ItemCollection
 
@@ -19,11 +18,11 @@ from .types import MessageQueue, PathLikeObject
 def download_item(
     item: Item,
     directory: PathLikeObject,
-    file_name: Optional[str] = None,
+    file_name: str | None = None,
     infer_file_name: bool = True,
-    config: Optional[Config] = None,
-    messages: Optional[MessageQueue] = None,
-    clients: Optional[List[Client]] = None,
+    config: Config | None = None,
+    messages: MessageQueue | None = None,
+    clients: list[Client] | None = None,
     keep_non_downloaded: bool = False,
     max_concurrent_downloads: int = _functions.DEFAULT_MAX_CONCURRENT_DOWNLOADS,
 ) -> Item:
@@ -68,10 +67,10 @@ def download_item(
 def download_collection(
     collection: Collection,
     directory: PathLikeObject,
-    file_name: Optional[str] = "collection.json",
-    config: Optional[Config] = None,
-    messages: Optional[MessageQueue] = None,
-    clients: Optional[List[Client]] = None,
+    file_name: str | None = "collection.json",
+    config: Config | None = None,
+    messages: MessageQueue | None = None,
+    clients: list[Client] | None = None,
     keep_non_downloaded: bool = False,
     max_concurrent_downloads: int = _functions.DEFAULT_MAX_CONCURRENT_DOWNLOADS,
 ) -> Collection:
@@ -116,11 +115,11 @@ def download_collection(
 def download_item_collection(
     item_collection: ItemCollection,
     directory: PathLikeObject,
-    path_template: Optional[str] = None,
-    file_name: Optional[str] = "item-collection.json",
-    config: Optional[Config] = None,
-    messages: Optional[MessageQueue] = None,
-    clients: Optional[List[Client]] = None,
+    path_template: str | None = None,
+    file_name: str | None = "item-collection.json",
+    config: Config | None = None,
+    messages: MessageQueue | None = None,
+    clients: list[Client] | None = None,
     keep_non_downloaded: bool = False,
     max_concurrent_downloads: int = _functions.DEFAULT_MAX_CONCURRENT_DOWNLOADS,
 ) -> ItemCollection:
@@ -167,8 +166,8 @@ def download_asset(
     asset: Asset,
     path: Path,
     config: Config,
-    messages: Optional[MessageQueue] = None,
-    clients: Optional[Clients] = None,
+    messages: MessageQueue | None = None,
+    clients: Clients | None = None,
 ) -> Asset:
     """Downloads an asset, synchronously.
 
@@ -201,8 +200,8 @@ def download_asset(
 
 def assert_asset_exists(
     asset: Asset,
-    config: Optional[Config] = None,
-    clients: Optional[List[Client]] = None,
+    config: Config | None = None,
+    clients: list[Client] | None = None,
 ) -> None:
     """Asserts that an asset exists, synchronously.
 
@@ -221,8 +220,8 @@ def assert_asset_exists(
 
 def asset_exists(
     asset: Asset,
-    config: Optional[Config] = None,
-    clients: Optional[List[Client]] = None,
+    config: Config | None = None,
+    clients: list[Client] | None = None,
 ) -> bool:
     """Returns true if an asset exists, synchronously.
 
@@ -238,7 +237,7 @@ def asset_exists(
 
 
 def read_href(
-    href: str, config: Optional[Config] = None, clients: Optional[List[Client]] = None
+    href: str, config: Config | None = None, clients: list[Client] | None = None
 ) -> bytes:
     """Reads an href and returns its bytes.
 
@@ -256,8 +255,8 @@ def read_href(
 def download_file(
     href: str,
     destination: PathLikeObject,
-    config: Optional[Config] = None,
-    clients: Optional[List[Client]] = None,
+    config: Config | None = None,
+    clients: list[Client] | None = None,
 ) -> None:
     """Downloads a file collection to the local filesystem.
 

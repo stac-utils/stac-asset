@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import os
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 from .errors import ConfigError
 from .strategy import ErrorStrategy, FileNameStrategy
@@ -19,7 +18,7 @@ DEFAULT_HTTP_MAX_ATTEMPTS = 10
 class Config:
     """Configuration for downloading items and their assets."""
 
-    alternate_assets: List[str] = field(default_factory=list)
+    alternate_assets: list[str] = field(default_factory=list)
     """Alternate asset keys to prefer, if available."""
 
     file_name_strategy: FileNameStrategy = FileNameStrategy.FILE_NAME
@@ -38,13 +37,13 @@ class Config:
     error_strategy: ErrorStrategy = ErrorStrategy.DELETE
     """The strategy to use when errors occur during download."""
 
-    exclude: List[str] = field(default_factory=list)
+    exclude: list[str] = field(default_factory=list)
     """Assets to exclude from the download.
 
     Mutually exclusive with ``include``.
     """
 
-    include: List[str] = field(default_factory=list)
+    include: list[str] = field(default_factory=list)
     """Assets to include in the download.
 
     Mutually exclusive with ``exclude``.
@@ -62,7 +61,7 @@ class Config:
     overwrite: bool = False
     """Download files even if they already exist locally."""
 
-    http_client_timeout: Optional[float] = DEFAULT_HTTP_CLIENT_TIMEOUT
+    http_client_timeout: float | None = DEFAULT_HTTP_CLIENT_TIMEOUT
     """Total number of seconds for the whole request."""
 
     http_max_attempts: int = DEFAULT_HTTP_MAX_ATTEMPTS
@@ -71,10 +70,10 @@ class Config:
     http_check_content_type: bool = True
     """If true, check the asset's content type against the response from the server."""
 
-    http_headers: Dict[str, str] = field(default_factory=dict)
+    http_headers: dict[str, str] = field(default_factory=dict)
     """Extra headers to include in every http request."""
 
-    earthdata_token: Optional[str] = None
+    earthdata_token: str | None = None
     """A token for logging in to Earthdata."""
 
     s3_region_name: str = DEFAULT_S3_REGION_NAME
@@ -89,10 +88,10 @@ class Config:
     s3_max_attempts: int = DEFAULT_S3_MAX_ATTEMPTS
     """The maximum number of attempts when downloading assets from s3."""
 
-    s3_endpoint_url: Optional[str] = None
+    s3_endpoint_url: str | None = None
     """Set an optional custom endpoint url for s3."""
 
-    oauth2_grant: Optional[str] = field(default=os.getenv("OAUTH2_GRANT"))
+    oauth2_grant: str | None = field(default=os.getenv("OAUTH2_GRANT"))
     """OAuth2 grant type.
 
     If a value is provided for this field,
@@ -101,13 +100,13 @@ class Config:
     Can be configured with the ``OAUTH2_GRANT`` environment variable.
     """
 
-    oauth2_token_url: Optional[str] = field(default=os.getenv("OAUTH2_TOKEN_URL"))
+    oauth2_token_url: str | None = field(default=os.getenv("OAUTH2_TOKEN_URL"))
     """OAuth2 token URL.
 
     Can be configured with the ``OAUTH2_TOKEN_URL`` environment variable.
     """
 
-    oauth2_authorization_url: Optional[str] = field(
+    oauth2_authorization_url: str | None = field(
         default=os.getenv("OAUTH2_AUTHORIZATION_URL")
     )
     """OAuth2 authorization URL.
@@ -115,7 +114,7 @@ class Config:
     Can be configured with the ``OAUTH2_AUTHORIZATION_URL`` environment variable.
     """
 
-    oauth2_device_authorization_url: Optional[str] = field(
+    oauth2_device_authorization_url: str | None = field(
         default=os.getenv("OAUTH2_DEVICE_AUTHORIZATION_URL")
     )
     """OAuth2 device authorization URL.
@@ -123,15 +122,13 @@ class Config:
     Can be configured with the ``OAUTH2_DEVICE_AUTHORIZATION_URL`` environment variable.
     """
 
-    oauth2_client_id: Optional[str] = field(default=os.getenv("OAUTH2_CLIENT_ID"))
+    oauth2_client_id: str | None = field(default=os.getenv("OAUTH2_CLIENT_ID"))
     """OAuth2 client identifier.
 
     Can be configured with the ``OAUTH2_CLIENT_ID`` environment variable.
     """
 
-    oauth2_client_secret: Optional[str] = field(
-        default=os.getenv("OAUTH2_CLIENT_SECRET")
-    )
+    oauth2_client_secret: str | None = field(default=os.getenv("OAUTH2_CLIENT_SECRET"))
     """OAuth2 client secret.
 
     Can be configured with the ``OAUTH2_CLIENT_SECRET`` environment variable.
@@ -146,19 +143,19 @@ class Config:
     By default, PKCE is enabled.
     """
 
-    oauth2_username: Optional[str] = field(default=os.getenv("OAUTH2_USERNAME"))
+    oauth2_username: str | None = field(default=os.getenv("OAUTH2_USERNAME"))
     """OAuth2 username for resource owner password credentials grant.
 
     Can be configured with the ``OAUTH2_USERNAME`` environment variable.
     """
 
-    oauth2_password: Optional[str] = field(default=os.getenv("OAUTH2_PASSWORD"))
+    oauth2_password: str | None = field(default=os.getenv("OAUTH2_PASSWORD"))
     """OAuth2 password for resource owner password credentials grant.
 
     Can be configured with the ``OAUTH2_PASSWORD`` environment variable.
     """
 
-    oauth2_extra: Dict[str, str] = field(default_factory=dict)
+    oauth2_extra: dict[str, str] = field(default_factory=dict)
     """Extra configuration options for the OAuth2 grant.
     """
 

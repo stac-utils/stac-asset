@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 from types import TracebackType
-from typing import Optional, Type
 
 from .config import Config
 from .http_client import HttpClient
@@ -43,7 +42,7 @@ class EarthdataClient(HttpClient):
                     "not set"
                 )
         config.http_headers = {"Authorization": f"Bearer {token}"}
-        client = await super(EarthdataClient, cls).from_config(config)
+        client = await super().from_config(config)
         return client
 
     async def __aenter__(self) -> EarthdataClient:
@@ -51,9 +50,9 @@ class EarthdataClient(HttpClient):
 
     async def __aexit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> Optional[bool]:
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool | None:
         await self.close()
         return await super().__aexit__(exc_type, exc_val, exc_tb)

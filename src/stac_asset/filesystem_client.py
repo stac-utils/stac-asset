@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import os.path
+from collections.abc import AsyncIterator
 from types import TracebackType
-from typing import AsyncIterator, Optional, Type
 
 import aiofiles
 from yarl import URL
@@ -21,8 +21,8 @@ class FilesystemClient(Client):
     async def open_url(
         self,
         url: URL,
-        content_type: Optional[str] = None,
-        messages: Optional[MessageQueue] = None,
+        content_type: str | None = None,
+        messages: MessageQueue | None = None,
         stream: bool = True,
     ) -> AsyncIterator[bytes]:
         """Iterates over data from a local url.
@@ -67,8 +67,8 @@ class FilesystemClient(Client):
 
     async def __aexit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> Optional[bool]:
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool | None:
         return None

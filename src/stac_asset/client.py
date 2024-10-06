@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from asyncio import Lock, QueueFull
+from collections.abc import AsyncIterator
 from pathlib import Path
 from types import TracebackType
-from typing import AsyncIterator, Dict, List, Optional, Type, TypeVar
+from typing import TypeVar
 
 import aiofiles
 from yarl import URL
@@ -22,7 +23,7 @@ class Client(ABC):
     """An abstract base class for all clients."""
 
     @classmethod
-    async def from_config(cls: Type[T], config: Config) -> T:
+    async def from_config(cls: type[T], config: Config) -> T:
         """Creates a client using the provided configuration.
 
         Needed because some client setups require async operations.
@@ -39,8 +40,8 @@ class Client(ABC):
     async def open_url(
         self,
         url: URL,
-        content_type: Optional[str] = None,
-        messages: Optional[MessageQueue] = None,
+        content_type: str | None = None,
+        messages: MessageQueue | None = None,
         stream: bool = True,
     ) -> AsyncIterator[bytes]:
         """Opens a url and yields an iterator over its bytes.
@@ -65,8 +66,8 @@ class Client(ABC):
     async def open_href(
         self,
         href: str,
-        content_type: Optional[str] = None,
-        messages: Optional[MessageQueue] = None,
+        content_type: str | None = None,
+        messages: MessageQueue | None = None,
         stream: bool = True,
     ) -> AsyncIterator[bytes]:
         """Opens a href and yields an iterator over its bytes.
@@ -91,8 +92,8 @@ class Client(ABC):
         href: str,
         path: PathLikeObject,
         clean: bool = True,
-        content_type: Optional[str] = None,
-        messages: Optional[MessageQueue] = None,
+        content_type: str | None = None,
+        messages: MessageQueue | None = None,
         stream: bool = True,
     ) -> None:
         """Downloads a file to the local filesystem.
@@ -172,10 +173,10 @@ class Client(ABC):
 
     async def __aexit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> Optional[bool]:
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool | None:
         return None
 
 
@@ -183,10 +184,10 @@ class Clients:
     """An async-safe cache of clients."""
 
     lock: Lock
-    clients: Dict[Type[Client], Client]
+    clients: dict[type[Client], Client]
     config: Config
 
-    def __init__(self, config: Config, clients: Optional[List[Client]] = None) -> None:
+    def __init__(self, config: Config, clients: list[Client] | None = None) -> None:
         self.lock = Lock()
         self.clients = dict()
         if clients:
@@ -211,7 +212,7 @@ class Clients:
 
         url = URL(href)
         if not url.host:
-            client_class: Type[Client] = FilesystemClient
+            client_class: type[Client] = FilesystemClient
         elif url.scheme == "s3":
             client_class = S3Client
         elif url.host.endswith("blob.core.windows.net"):

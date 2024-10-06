@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from types import TracebackType
-from typing import AsyncIterator, Optional, Type, TypeVar
+from typing import TypeVar
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
 from aiohttp_oauth2_client.client import OAuth2Client
@@ -27,7 +28,7 @@ class HttpClient(Client):
     """
 
     @classmethod
-    async def from_config(cls: Type[T], config: Config) -> T:
+    async def from_config(cls: type[T], config: Config) -> T:
         """Creates an HTTP client with an aiohttp session object.
 
         To use OAuth2 access tokens, configure the
@@ -138,8 +139,8 @@ class HttpClient(Client):
     async def open_url(
         self,
         url: URL,
-        content_type: Optional[str] = None,
-        messages: Optional[MessageQueue] = None,
+        content_type: str | None = None,
+        messages: MessageQueue | None = None,
         stream: bool = True,
     ) -> AsyncIterator[bytes]:
         """Opens a url with this client's session and iterates over its bytes.
@@ -191,9 +192,9 @@ class HttpClient(Client):
 
     async def __aexit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> Optional[bool]:
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool | None:
         await self.close()
         return await super().__aexit__(exc_type, exc_val, exc_tb)

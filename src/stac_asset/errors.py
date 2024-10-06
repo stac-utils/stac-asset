@@ -1,10 +1,10 @@
-from typing import Any, List
+from typing import Any
 
 
 class AssetOverwriteError(Exception):
     """Raised when an asset would be overwritten during download."""
 
-    def __init__(self, hrefs: List[str]) -> None:
+    def __init__(self, hrefs: list[str]) -> None:
         super().__init__(
             f"assets have the same file names and would overwrite each other: {hrefs}"
         )
@@ -37,9 +37,9 @@ class ContentTypeError(Exception):
 class DownloadError(Exception):
     """A collection of exceptions encountered while downloading."""
 
-    exceptions: List[Exception]
+    exceptions: list[Exception]
 
-    def __init__(self, exceptions: List[Exception], *args: Any, **kwargs: Any) -> None:
+    def __init__(self, exceptions: list[Exception], *args: Any, **kwargs: Any) -> None:
         self.exceptions = exceptions
         messages = list()
         for exception in exceptions:
