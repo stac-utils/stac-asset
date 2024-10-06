@@ -133,7 +133,7 @@ Clone, install with the dev dependencies, and install **pre-commit**:
 ```shell
 git clone git@github.com:stac-utils/stac-asset.git
 cd stac-asset
-pip install '.[dev]'
+pip install -e '.' -r requirements-dev.txt
 pre-commit install
 ```
 
@@ -154,7 +154,7 @@ See [each client's documentation](#clients) for instructions on setting up your 
 Install the documentation dependencies:
 
 ```shell
-pip install -e '.[docs]'
+pip install -e . -r requirements-docs.txt
 ```
 
 Then, build the docs:
