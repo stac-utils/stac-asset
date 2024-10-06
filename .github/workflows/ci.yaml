@@ -36,13 +36,15 @@ jobs:
       - name: Update pip
         run: pip install -U pip
       - name: Install with development dependencies
-        run: pip install .[cli,dev]
+        run: pip install .[cli] -r requirements-dev.txt
       - name: Check with pre-commit
         run: pre-commit run --all-files
       - name: Test
         run: pytest
   min-dependencies:
     runs-on: ubuntu-latest
+    env:
+      UV_SYSTEM_PYTHON: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,12 +53,10 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-      - name: Update pip
-        run: pip install -U pip
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
       - name: Install with development dependencies
-        run: pip install .[cli,dev]
-      - name: Install minimum versions of dependencies
-        run: scripts/install-min-dependencies
+        run: uv pip install .[cli] -r requirements-dev.txt --resolution lowest-direct
       - name: Check with pre-commit
         run: pre-commit run --all-files
       - name: Test
@@ -74,7 +74,7 @@ jobs:
       - name: Update pip
         run: pip install -U pip
       - name: Install with development dependencies
-        run: pip install .[cli,dev]
+        run: pip install .[cli] -r requirements-dev.txt
       - name: Test with coverage
         run: pytest --cov=stac_asset
       - name: Upload coverage reports
