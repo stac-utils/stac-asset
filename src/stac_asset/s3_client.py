@@ -88,7 +88,7 @@ class S3Client(Client):
         url: URL,
         content_type: str | None = None,
         messages: MessageQueue | None = None,
-        stream: bool = True,
+        stream: bool | None = None,
     ) -> AsyncIterator[bytes]:
         """Opens an s3 url and iterates over its bytes.
 
@@ -105,6 +105,8 @@ class S3Client(Client):
         Raises:
             SchemeError: Raised if the url's scheme is not ``s3``
         """
+        if stream is None:
+            stream = True
         async with self._create_client() as client:
             response = await client.get_object(**self._params(url))
             if content_type:

@@ -42,7 +42,7 @@ class Client(ABC):
         url: URL,
         content_type: str | None = None,
         messages: MessageQueue | None = None,
-        stream: bool = True,
+        stream: bool | None = None,
     ) -> AsyncIterator[bytes]:
         """Opens a url and yields an iterator over its bytes.
 
@@ -68,7 +68,7 @@ class Client(ABC):
         href: str,
         content_type: str | None = None,
         messages: MessageQueue | None = None,
-        stream: bool = True,
+        stream: bool | None = None,
     ) -> AsyncIterator[bytes]:
         """Opens a href and yields an iterator over its bytes.
 
@@ -94,7 +94,7 @@ class Client(ABC):
         clean: bool = True,
         content_type: str | None = None,
         messages: MessageQueue | None = None,
-        stream: bool = True,
+        stream: bool | None = None,
     ) -> None:
         """Downloads a file to the local filesystem.
 
