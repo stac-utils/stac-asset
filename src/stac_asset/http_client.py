@@ -1,6 +1,6 @@
 from __future__ import annotations
-import warnings
 
+import warnings
 from collections.abc import AsyncIterator
 from types import TracebackType
 from typing import TypeVar
@@ -13,9 +13,9 @@ from aiohttp_retry.types import ClientType
 from yarl import URL
 
 from . import validate
-from .errors import ContentTypeError
 from .client import Client
 from .config import Config
+from .errors import ContentTypeError
 from .messages import OpenUrl
 from .types import MessageQueue
 
