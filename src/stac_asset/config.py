@@ -67,7 +67,7 @@ class Config:
     http_max_attempts: int = DEFAULT_HTTP_MAX_ATTEMPTS
     """The maximum number of attempts when downloading assets via http."""
 
-    http_check_content_type: bool = True
+    http_assert_content_type: bool = False
     """If true, check the asset's content type against the response from the server."""
 
     http_headers: dict[str, str] = field(default_factory=dict)

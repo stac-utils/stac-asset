@@ -1,4 +1,5 @@
 from __future__ import annotations
+import warnings
 
 from collections.abc import AsyncIterator
 from types import TracebackType
@@ -12,6 +13,7 @@ from aiohttp_retry.types import ClientType
 from yarl import URL
 
 from . import validate
+from .errors import ContentTypeError
 from .client import Client
 from .config import Config
 from .messages import OpenUrl
@@ -117,19 +119,19 @@ class HttpClient(Client):
                     attempts=config.http_max_attempts, exceptions={ClientError}
                 ),
             )
-        return cls(session, config.http_check_content_type)
+        return cls(session, config.http_assert_content_type)
 
     def __init__(
         self,
         session: ClientType,
-        check_content_type: bool,
+        assert_content_type: bool,
     ) -> None:
         super().__init__()
 
         self.session: ClientSession = session
         """A aiohttp session that will be used for all requests."""
 
-        self.check_content_type: bool = check_content_type
+        self.assert_content_type: bool = assert_content_type
         """If true, check the asset's content type against the response from the server.
 
         See :py:func:`stac_asset.validate.content_type` for more information about
@@ -161,10 +163,16 @@ class HttpClient(Client):
             stream = True
         async with self.session.get(url, allow_redirects=True) as response:
             response.raise_for_status()
-            if self.check_content_type and content_type:
-                validate.content_type(
-                    actual=response.content_type, expected=content_type
-                )
+            if content_type:
+                try:
+                    validate.content_type(
+                        actual=response.content_type, expected=content_type
+                    )
+                except ContentTypeError as err:
+                    if self.assert_content_type:
+                        raise err
+                    else:
+                        warnings.warn(str(err))
             if messages:
                 await messages.put(OpenUrl(url=url, size=response.content_length))
             if stream:
