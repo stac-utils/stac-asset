@@ -4,8 +4,9 @@ from typing import cast
 
 import pystac
 import pytest
-import stac_asset
 from pystac import Item
+
+import stac_asset
 from stac_asset import Config, S3Client
 
 pytestmark = [

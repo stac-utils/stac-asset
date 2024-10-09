@@ -56,10 +56,10 @@ class PlanetaryComputerClient(HttpClient):
     def __init__(
         self,
         session: ClientSession,
-        check_content_type: bool,
+        assert_content_type: bool,
         sas_token_endpoint: str = DEFAULT_SAS_TOKEN_ENDPOINT,
     ) -> None:
-        super().__init__(session, check_content_type)
+        super().__init__(session, assert_content_type)
         self._cache: dict[URL, _Token] = dict()
         self._cache_lock: Lock = Lock()
 

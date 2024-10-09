@@ -6,6 +6,7 @@ from aiohttp_oauth2_client.grant.device_code import DeviceCodeGrant
 from aiohttp_oauth2_client.grant.resource_owner_password_credentials import (
     ResourceOwnerPasswordCredentialsGrant,
 )
+
 from stac_asset import Config, HttpClient
 
 pytestmark = [

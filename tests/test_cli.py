@@ -3,9 +3,10 @@ import os
 from pathlib import Path
 
 import pytest
-import stac_asset._cli
 from click.testing import CliRunner
 from pystac import Item, ItemCollection
+
+import stac_asset._cli
 
 
 def test_download_item(tmp_path: Path, item_path: Path) -> None:

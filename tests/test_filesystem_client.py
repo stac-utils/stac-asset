@@ -2,6 +2,7 @@ import os.path
 from pathlib import Path
 
 import pytest
+
 from stac_asset import FilesystemClient
 
 pytestmark = pytest.mark.asyncio

@@ -4,9 +4,10 @@ from asyncio import Queue
 from pathlib import Path
 
 import pytest
-import stac_asset
 from pystac import Asset, Collection, Item, ItemCollection
 from pytest import MonkeyPatch
+
+import stac_asset
 from stac_asset import (
     AssetOverwriteError,
     Config,

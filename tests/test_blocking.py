@@ -1,8 +1,9 @@
 import json
 from pathlib import Path
 
-import stac_asset.blocking
 from pystac import Collection, Item, ItemCollection
+
+import stac_asset.blocking
 from stac_asset import Config
 
 
