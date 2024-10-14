@@ -1,4 +1,5 @@
 import pytest
+
 from stac_asset import ContentTypeError, validate
 
 
