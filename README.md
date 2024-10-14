@@ -10,13 +10,13 @@ Download STAC Assets using a variety of authentication schemes.
 ## Installation
 
 ```shell
-pip install stac-asset
+python -m pip install stac-asset
 ```
 
 To use the command-line interface (CLI):
 
 ```shell
-pip install 'stac-asset[cli]'
+python -m pip install 'stac-asset[cli]'
 ```
 
 ## Usage
@@ -128,12 +128,13 @@ Use Github [pull requests](https://github.com/stac-utils/stac-asset/pulls) to fi
 
 ## Developing
 
-Clone, install with the dev dependencies, and install **pre-commit**:
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/).
+Then clone, sync, and install **pre-commit**:
 
 ```shell
 git clone git@github.com:stac-utils/stac-asset.git
 cd stac-asset
-pip install -e '.' -r requirements-dev.txt
+uv sync
 pre-commit install
 ```
 
@@ -143,7 +144,7 @@ Some network-touching tests are disabled by default.
 To enable these tests:
 
 ```shell
-pytest --network-access
+uv run pytest --network-access
 ```
 
 Some tests are client-specific and need your environment to be configured correctly.
@@ -151,13 +152,7 @@ See [each client's documentation](#clients) for instructions on setting up your 
 
 ### Docs
 
-Install the documentation dependencies:
-
-```shell
-pip install -e . -r requirements-docs.txt
-```
-
-Then, build the docs:
+To build:
 
 ```shell
 make -C docs html && open docs/_build/html/index.html
@@ -166,7 +161,7 @@ make -C docs html && open docs/_build/html/index.html
 It can be handy to use [sphinx-autobuild](https://pypi.org/project/sphinx-autobuild/) if you're doing a lot of doc work:
 
 ```shell
-pip install sphinx-autobuild
+uv pip install sphinx-autobuild
 sphinx-autobuild --watch src docs docs/_build/html
 ```
 

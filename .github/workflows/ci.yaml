@@ -14,6 +14,7 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
         os:
           - ubuntu-latest
           - macos-latest
@@ -29,19 +30,17 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-      - name: Update pip
-        run: pip install -U pip
-      - name: Install with development dependencies
-        run: pip install .[cli] -r requirements-dev.txt
-      - name: Check with pre-commit
-        run: pre-commit run --all-files
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - name: Sync
+        run: uv sync --all-extras
+      - name: pre-commit
+        run: uv run pre-commit run --all-files
       - name: Test
-        run: pytest
+        run: uv run pytest
   min-dependencies:
     runs-on: ubuntu-latest
-    env:
-      UV_SYSTEM_PYTHON: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,15 +48,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-      - name: Install with development dependencies
-        run: uv pip install .[cli] -r requirements-dev.txt --resolution lowest-direct
-      - name: Check with pre-commit
-        run: pre-commit run --all-files
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - name: Sync with lowest-direct resolution
+        run: uv sync --all-extras --resolution lowest-direct
       - name: Test
-        run: pytest
+        run: uv run pytest
   coverage:
     runs-on: ubuntu-latest
     steps:
@@ -67,13 +64,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
-      - name: Update pip
-        run: pip install -U pip
-      - name: Install with development dependencies
-        run: pip install .[cli] -r requirements-dev.txt
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+      - name: Sync
+        run: uv sync --all-extras
       - name: Test with coverage
-        run: pytest --cov=stac_asset
+        run: uv run pytest --cov=stac_asset
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
         env:
