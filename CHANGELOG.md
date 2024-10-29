@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.4.5] - 2024-10-29
+
 ### Added
 
 - Added logic to select `EarthdataClient` when appropriate ([#235](https://github.com/stac-utils/stac-asset/pull/235))
@@ -208,7 +210,8 @@ Used to be <https://github.com/gadomski/stac-asset>.
 
 Initial release.
 
-[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.4.4...HEAD
+[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.4.5...HEAD
+[0.4.5]: https://github.com/stac-utils/stac-asset/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/stac-utils/stac-asset/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/stac-utils/stac-asset/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/stac-utils/stac-asset/compare/v0.4.1...v0.4.2
