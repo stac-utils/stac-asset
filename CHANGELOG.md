@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added logic to select `EarthdataClient` when appropriate ([#235](https://github.com/stac-utils/stac-asset/pull/235))
+
 ## [0.4.4] - 2024-10-23
 
 ### Changed
