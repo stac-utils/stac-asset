@@ -205,6 +205,7 @@ class Clients:
         Returns:
             Client: An instance of that client.
         """
+        from .earthdata_client import EarthdataClient
         from .filesystem_client import FilesystemClient
         from .http_client import HttpClient
         from .planetary_computer_client import PlanetaryComputerClient
@@ -217,6 +218,8 @@ class Clients:
             client_class = S3Client
         elif url.host.endswith("blob.core.windows.net"):
             client_class = PlanetaryComputerClient
+        elif url.scheme == "https" and "earthdata" in url.host:
+            client_class = EarthdataClient
         elif url.scheme == "http" or url.scheme == "https":
             client_class = HttpClient
         else:
