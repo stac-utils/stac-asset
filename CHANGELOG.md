@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `--http-header` CLI argument ([#238](https://github.com/stac-utils/stac-asset/pull/238))
+
 ## [0.4.5] - 2024-10-29
 
 ### Added

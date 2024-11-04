@@ -117,6 +117,12 @@ def cli() -> None:
     default=DEFAULT_HTTP_CLIENT_TIMEOUT,
 )
 @click.option(
+    "--http-header",
+    "http_headers",
+    help="key=value header pairs to use when making HTTP requests",
+    multiple=True,
+)
+@click.option(
     "-k",
     "--keep",
     help=(
@@ -169,6 +175,7 @@ def download(
     s3_max_attempts: int,
     http_max_attempts: int,
     http_timeout: int,
+    http_headers: list[str],
     keep: bool,
     fail_fast: bool,
     overwrite: bool,
@@ -217,6 +224,7 @@ def download(
             s3_max_attempts,
             http_max_attempts,
             http_timeout,
+            http_headers=http_headers,
             keep=keep,
             fail_fast=fail_fast,
             overwrite=overwrite,
@@ -240,12 +248,20 @@ async def download_async(
     s3_max_attempts: int,
     http_max_attempts: int,
     http_timeout: int,
+    http_headers: list[str],
     keep: bool,
     fail_fast: bool,
     overwrite: bool,
     max_concurrent_downloads: int,
     stream: bool | None,
 ) -> None:
+    http_headers_dict = {}
+    for http_header in http_headers:
+        values = http_header.split("=", 1)
+        if len(values) == 2:
+            http_headers_dict[values[0]] = values[1]
+        else:
+            http_headers_dict[values[0]] = ""
     config = Config(
         alternate_assets=alternate_assets,
         include=include,
