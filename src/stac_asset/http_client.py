@@ -29,6 +29,8 @@ class HttpClient(Client):
     Configure the session to customize its behavior.
     """
 
+    name = "http"
+
     @classmethod
     async def from_config(cls: type[T], config: Config) -> T:
         """Creates an HTTP client with an aiohttp session object.

@@ -31,6 +31,8 @@ class S3Client(Client):
     for instructions.
     """
 
+    name = "s3"
+
     @classmethod
     async def from_config(cls, config: Config) -> S3Client:
         """Creates an s3 client from a config.

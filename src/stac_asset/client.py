@@ -22,6 +22,9 @@ T = TypeVar("T", bound="Client")
 class Client(ABC):
     """An abstract base class for all clients."""
 
+    name: str
+    """The name of this client."""
+
     @classmethod
     async def from_config(cls: type[T], config: Config) -> T:
         """Creates a client using the provided configuration.
@@ -184,7 +187,7 @@ class Clients:
     """An async-safe cache of clients."""
 
     lock: Lock
-    clients: dict[type[Client], Client]
+    clients: dict[str, Client]
     config: Config
 
     def __init__(self, config: Config, clients: list[Client] | None = None) -> None:
@@ -193,7 +196,7 @@ class Clients:
         if clients:
             # TODO check for duplicate types in clients list
             for client in clients:
-                self.clients[type(client)] = client
+                self.clients[client.name] = client
         self.config = config
 
     async def get_client(self, href: str) -> Client:
@@ -226,11 +229,11 @@ class Clients:
             raise ValueError(f"could not guess client class for href: {href}")
 
         async with self.lock:
-            if client_class in self.clients:
-                return self.clients[client_class]
+            if client_class.name in self.clients:
+                return self.clients[client_class.name]
             else:
                 client = await client_class.from_config(self.config)
-                self.clients[client_class] = client
+                self.clients[client_class.name] = client
                 return client
 
     async def close_all(self) -> None:

@@ -19,6 +19,8 @@ class EarthdataClient(HttpClient):
     3. Use :py:meth:`EarthdataClient.from_config()` to create a new client.
     """
 
+    name = "earthdata"
+
     @classmethod
     async def from_config(cls, config: Config) -> EarthdataClient:
         """Logs in to Earthdata and returns the default earthdata client.
