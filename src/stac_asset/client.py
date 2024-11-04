@@ -208,6 +208,8 @@ class Clients:
         Returns:
             Client: An instance of that client.
         """
+        # TODO allow dynamic registration of new clients, e.g. via a plugin mechanism
+
         from .earthdata_client import EarthdataClient
         from .filesystem_client import FilesystemClient
         from .http_client import HttpClient
@@ -215,8 +217,12 @@ class Clients:
         from .s3_client import S3Client
 
         url = URL(href)
-        if not url.host:
-            client_class: type[Client] = FilesystemClient
+        if self.config.client_override:
+            client_class: type[Client] = _get_client_class_by_name(
+                self.config.client_override
+            )
+        elif not url.host:
+            client_class = FilesystemClient
         elif url.scheme == "s3":
             client_class = S3Client
         elif url.host.endswith("blob.core.windows.net"):
@@ -241,3 +247,23 @@ class Clients:
         async with self.lock:
             for client in self.clients.values():
                 await client.close()
+
+
+def _get_client_class_by_name(name: str) -> type[Client]:
+    from .earthdata_client import EarthdataClient
+    from .filesystem_client import FilesystemClient
+    from .http_client import HttpClient
+    from .planetary_computer_client import PlanetaryComputerClient
+    from .s3_client import S3Client
+
+    client_classes: list[type[Client]] = [
+        EarthdataClient,
+        FilesystemClient,
+        HttpClient,
+        PlanetaryComputerClient,
+        S3Client,
+    ]
+    for client_class in client_classes:
+        if client_class.name == name:
+            return client_class
+    raise ValueError(f"no client with name: {name}")

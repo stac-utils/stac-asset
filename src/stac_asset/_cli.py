@@ -62,6 +62,12 @@ def cli() -> None:
 @click.argument("href", required=False)
 @click.argument("directory", required=False)
 @click.option(
+    "-c",
+    "--client",
+    help="Set the client to use for all downloads. If not "
+    "provided, the client will be guessed from the asset href.",
+)
+@click.option(
     "-p",
     "--path-template",
     help="String to be interpolated to specify where to store downloaded files",
@@ -164,6 +170,7 @@ def cli() -> None:
 def download(
     href: str | None,
     directory: str | None,
+    client: str | None,
     path_template: str | None,
     alternate_assets: list[str],
     include: list[str],
@@ -213,6 +220,7 @@ def download(
         download_async(
             href,
             directory,
+            client,
             path_template,
             alternate_assets,
             include,
@@ -237,6 +245,7 @@ def download(
 async def download_async(
     href: str | None,
     directory: str | None,
+    client: str | None,
     path_template: str | None,
     alternate_assets: list[str],
     include: list[str],
@@ -275,6 +284,7 @@ async def download_async(
         warn=not fail_fast,
         fail_fast=fail_fast,
         overwrite=overwrite,
+        client_override=client,
     )
 
     input_dict = await read_as_dict(href, config)
