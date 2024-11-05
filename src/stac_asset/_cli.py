@@ -18,7 +18,7 @@ from click import Choice
 from pystac import Asset, Item, ItemCollection
 
 from . import Config, ErrorStrategy, _functions
-from .client import Clients
+from .client import Clients, get_client_classes
 from .config import (
     DEFAULT_HTTP_CLIENT_TIMEOUT,
     DEFAULT_HTTP_MAX_ATTEMPTS,
@@ -64,6 +64,7 @@ def cli() -> None:
 @click.option(
     "-c",
     "--client",
+    type=Choice([c.name for c in get_client_classes()]),
     help="Set the client to use for all downloads. If not "
     "provided, the client will be guessed from the asset href.",
 )

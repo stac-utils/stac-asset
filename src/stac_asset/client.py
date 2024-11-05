@@ -250,20 +250,19 @@ class Clients:
 
 
 def _get_client_class_by_name(name: str) -> type[Client]:
-    from .earthdata_client import EarthdataClient
-    from .filesystem_client import FilesystemClient
-    from .http_client import HttpClient
-    from .planetary_computer_client import PlanetaryComputerClient
-    from .s3_client import S3Client
-
-    client_classes: list[type[Client]] = [
-        EarthdataClient,
-        FilesystemClient,
-        HttpClient,
-        PlanetaryComputerClient,
-        S3Client,
-    ]
-    for client_class in client_classes:
+    for client_class in get_client_classes():
         if client_class.name == name:
             return client_class
     raise ValueError(f"no client with name: {name}")
+
+
+def get_client_classes() -> list[type[Client]]:
+    """Returns a list of all known subclasses of Client."""
+
+    # https://stackoverflow.com/questions/3862310/how-to-find-all-the-subclasses-of-a-class-given-its-name
+    def all_subclasses(cls: type[Client]) -> set[type[Client]]:
+        return set(cls.__subclasses__()).union(
+            [s for c in cls.__subclasses__() for s in all_subclasses(c)]
+        )
+
+    return list(all_subclasses(Client))  # type: ignore
