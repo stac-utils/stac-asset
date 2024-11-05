@@ -18,6 +18,8 @@ class FilesystemClient(Client):
     Mostly used for testing, but could be useful in some real-world cases.
     """
 
+    name = "filesystem"
+
     async def open_url(
         self,
         url: URL,

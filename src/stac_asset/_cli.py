@@ -18,7 +18,7 @@ from click import Choice
 from pystac import Asset, Item, ItemCollection
 
 from . import Config, ErrorStrategy, _functions
-from .client import Clients
+from .client import Clients, get_client_classes
 from .config import (
     DEFAULT_HTTP_CLIENT_TIMEOUT,
     DEFAULT_HTTP_MAX_ATTEMPTS,
@@ -61,6 +61,13 @@ def cli() -> None:
 @cli.command()
 @click.argument("href", required=False)
 @click.argument("directory", required=False)
+@click.option(
+    "-c",
+    "--client",
+    type=Choice([c.name for c in get_client_classes()]),
+    help="Set the client to use for all downloads. If not "
+    "provided, the client will be guessed from the asset href.",
+)
 @click.option(
     "-p",
     "--path-template",
@@ -164,6 +171,7 @@ def cli() -> None:
 def download(
     href: str | None,
     directory: str | None,
+    client: str | None,
     path_template: str | None,
     alternate_assets: list[str],
     include: list[str],
@@ -213,6 +221,7 @@ def download(
         download_async(
             href,
             directory,
+            client,
             path_template,
             alternate_assets,
             include,
@@ -237,6 +246,7 @@ def download(
 async def download_async(
     href: str | None,
     directory: str | None,
+    client: str | None,
     path_template: str | None,
     alternate_assets: list[str],
     include: list[str],
@@ -275,6 +285,7 @@ async def download_async(
         warn=not fail_fast,
         fail_fast=fail_fast,
         overwrite=overwrite,
+        client_override=client,
     )
 
     input_dict = await read_as_dict(href, config)

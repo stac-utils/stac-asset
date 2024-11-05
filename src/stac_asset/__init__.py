@@ -24,7 +24,7 @@ from ._functions import (
     open_href,
     read_href,
 )
-from .client import Client
+from .client import Client, get_client_classes
 from .config import Config
 from .earthdata_client import EarthdataClient
 from .errors import (
@@ -65,6 +65,7 @@ __all__ = [
     "download_item",
     "download_item_collection",
     "download_file",
+    "get_client_classes",
     "open_href",
     "read_href",
 ]

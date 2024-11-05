@@ -61,6 +61,12 @@ class Config:
     overwrite: bool = False
     """Download files even if they already exist locally."""
 
+    client_override: str | None = None
+    """Use the same client for all asset requests.
+
+    If not set, each asset's client will be guessed from its href.
+    """
+
     http_client_timeout: float | None = DEFAULT_HTTP_CLIENT_TIMEOUT
     """Total number of seconds for the whole request."""
 

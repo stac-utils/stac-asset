@@ -22,6 +22,9 @@ T = TypeVar("T", bound="Client")
 class Client(ABC):
     """An abstract base class for all clients."""
 
+    name: str
+    """The name of this client."""
+
     @classmethod
     async def from_config(cls: type[T], config: Config) -> T:
         """Creates a client using the provided configuration.
@@ -184,7 +187,7 @@ class Clients:
     """An async-safe cache of clients."""
 
     lock: Lock
-    clients: dict[type[Client], Client]
+    clients: dict[str, Client]
     config: Config
 
     def __init__(self, config: Config, clients: list[Client] | None = None) -> None:
@@ -193,7 +196,7 @@ class Clients:
         if clients:
             # TODO check for duplicate types in clients list
             for client in clients:
-                self.clients[type(client)] = client
+                self.clients[client.name] = client
         self.config = config
 
     async def get_client(self, href: str) -> Client:
@@ -205,6 +208,8 @@ class Clients:
         Returns:
             Client: An instance of that client.
         """
+        # TODO allow dynamic registration of new clients, e.g. via a plugin mechanism
+
         from .earthdata_client import EarthdataClient
         from .filesystem_client import FilesystemClient
         from .http_client import HttpClient
@@ -212,8 +217,12 @@ class Clients:
         from .s3_client import S3Client
 
         url = URL(href)
-        if not url.host:
-            client_class: type[Client] = FilesystemClient
+        if self.config.client_override:
+            client_class: type[Client] = _get_client_class_by_name(
+                self.config.client_override
+            )
+        elif not url.host:
+            client_class = FilesystemClient
         elif url.scheme == "s3":
             client_class = S3Client
         elif url.host.endswith("blob.core.windows.net"):
@@ -226,11 +235,11 @@ class Clients:
             raise ValueError(f"could not guess client class for href: {href}")
 
         async with self.lock:
-            if client_class in self.clients:
-                return self.clients[client_class]
+            if client_class.name in self.clients:
+                return self.clients[client_class.name]
             else:
                 client = await client_class.from_config(self.config)
-                self.clients[client_class] = client
+                self.clients[client_class.name] = client
                 return client
 
     async def close_all(self) -> None:
@@ -238,3 +247,22 @@ class Clients:
         async with self.lock:
             for client in self.clients.values():
                 await client.close()
+
+
+def _get_client_class_by_name(name: str) -> type[Client]:
+    for client_class in get_client_classes():
+        if client_class.name == name:
+            return client_class
+    raise ValueError(f"no client with name: {name}")
+
+
+def get_client_classes() -> list[type[Client]]:
+    """Returns a list of all known subclasses of Client."""
+
+    # https://stackoverflow.com/questions/3862310/how-to-find-all-the-subclasses-of-a-class-given-its-name
+    def all_subclasses(cls: type[Client]) -> set[type[Client]]:
+        return set(cls.__subclasses__()).union(
+            [s for c in cls.__subclasses__() for s in all_subclasses(c)]
+        )
+
+    return list(all_subclasses(Client))  # type: ignore

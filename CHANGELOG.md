@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - `--http-header` CLI argument ([#238](https://github.com/stac-utils/stac-asset/pull/238))
+- `--client` CLI argument, names to clients ([#239](https://github.com/stac-utils/stac-asset/pull/239))
 
 ## [0.4.5] - 2024-10-29
 

@@ -53,6 +53,8 @@ class PlanetaryComputerClient(HttpClient):
     thanks Tom Augspurger!
     """
 
+    name = "planetary-computer"
+
     def __init__(
         self,
         session: ClientSession,
