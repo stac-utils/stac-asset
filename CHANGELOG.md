@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Added support for local asset paths using file URIs: ([#254](https://github.com/stac-utils/stac-asset/pull/254))
+
 ## [0.4.7] - 2025-06-18
 
 ### Changed
