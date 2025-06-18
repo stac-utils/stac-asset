@@ -23,3 +23,8 @@ async def test_download(tmp_path: Path, asset_href: str) -> None:
 async def test_href_exists(asset_href: str) -> None:
     async with FilesystemClient() as client:
         assert await client.href_exists(asset_href)
+
+
+async def test_href_exists_file_uri(asset_href: str) -> None:
+    async with FilesystemClient() as client:
+        assert await client.href_exists(f"file://{asset_href}")
