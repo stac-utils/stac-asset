@@ -1,6 +1,6 @@
 [project]
 name = "stac-asset"
-version = "0.4.6"
+version = "0.4.7"
 description = "Read and download STAC assets across platforms and providers"
 authors = [{ name = "Pete Gadomski", email = "pete.gadomski@gmail.com" }]
 readme = "README.md"
@@ -77,7 +77,7 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 filterwarnings = [
-    "ignore:datetime.datetime.utcnow.*:DeprecationWarning:botocore",                              # https://github.com/boto/boto3/issues/3889
+    "ignore:datetime.datetime.utcnow.*:DeprecationWarning:botocore", # https://github.com/boto/boto3/issues/3889
 ]
 asyncio_default_fixture_loop_scope = "function"
 
