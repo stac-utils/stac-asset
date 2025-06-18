@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.4.7] - 2025-06-18
+
 ### Changed
 
 - Handle OAuth2 support via middleware of the HTTP client instead of a subclass ([252](https://github.com/stac-utils/stac-asset/pull/252))
@@ -221,7 +223,8 @@ Used to be <https://github.com/gadomski/stac-asset>.
 
 Initial release.
 
-[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.4.6...HEAD
+[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.4.7...HEAD
+[0.4.7]: https://github.com/stac-utils/stac-asset/compare/v0.4.6...v0.4.7
 [0.4.6]: https://github.com/stac-utils/stac-asset/compare/v0.4.5...v0.4.6
 [0.4.5]: https://github.com/stac-utils/stac-asset/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/stac-utils/stac-asset/compare/v0.4.3...v0.4.4
