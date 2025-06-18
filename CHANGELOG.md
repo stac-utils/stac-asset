@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Handle OAuth2 support via middleware of the HTTP client instead of a subclass ([252](https://github.com/stac-utils/stac-asset/pull/252))
+
 ## [0.4.6] - 2024-11-05
 
 ### Added

@@ -6,7 +6,7 @@ from types import TracebackType
 from typing import TypeVar
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
-from aiohttp_oauth2_client.client import OAuth2Client
+from aiohttp_oauth2_client.middleware import OAuth2Middleware
 from aiohttp_oauth2_client.models.grant import GrantType
 from aiohttp_retry import JitterRetry, RetryClient
 from aiohttp_retry.types import ClientType
@@ -64,6 +64,7 @@ class HttpClient(Client):
         """  # noqa: E501
         # TODO add basic auth
         timeout = ClientTimeout(total=config.http_client_timeout)
+        middlewares = []
         if config.oauth2_grant is not None:
             if GrantType.DEVICE_CODE.endswith(config.oauth2_grant):
                 from aiohttp_oauth2_client.grant.device_code import DeviceCodeGrant
@@ -112,15 +113,16 @@ class HttpClient(Client):
                 )
             else:
                 raise ValueError("Unknown grant type")
-            session = OAuth2Client(grant, timeout=timeout, headers=config.http_headers)
-        else:
-            session = ClientSession(timeout=timeout, headers=config.http_headers)
-            session = RetryClient(
-                client_session=session,
-                retry_options=JitterRetry(
-                    attempts=config.http_max_attempts, exceptions={ClientError}
-                ),
-            )
+            middlewares.append(OAuth2Middleware(grant))
+        session = ClientSession(
+            timeout=timeout, headers=config.http_headers, middlewares=middlewares
+        )
+        session = RetryClient(
+            client_session=session,
+            retry_options=JitterRetry(
+                attempts=config.http_max_attempts, exceptions={ClientError}
+            ),
+        )
         return cls(session, config.http_assert_content_type)
 
     def __init__(
