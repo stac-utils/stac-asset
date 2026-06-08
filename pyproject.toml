@@ -37,6 +37,7 @@ cli = [
 
 [dependency-groups]
 dev = [
+    "aiohttp<3.14",  # https://github.com/kevin1024/vcrpy/issues/995
     "mypy>=1.12.0",
     "pre-commit>=4.0.1",
     "pystac[validation]>=1.11.0",
