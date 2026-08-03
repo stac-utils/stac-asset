@@ -32,7 +32,7 @@ cli = [
     "click~=8.4.0",
     "click-logging~=1.0.1",
     "tabulate~=0.10.0",
-    "tqdm~=4.69.0",
+    "tqdm~=4.70.0",
 ]
 
 [dependency-groups]
