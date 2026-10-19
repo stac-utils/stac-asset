@@ -286,6 +286,7 @@ async def download_async(
         fail_fast=fail_fast,
         overwrite=overwrite,
         client_override=client,
+        http_headers=http_headers_dict,
     )
 
     input_dict = await read_as_dict(href, config)

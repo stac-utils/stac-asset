@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+from typing import Any
 
 import pytest
 from click.testing import CliRunner
@@ -96,3 +97,32 @@ def test_info(item_path: Path) -> None:
     )
     assert result.exit_code == 0, result.stdout
 
+
+def test_download_http_headers(
+    tmp_path: Path, item_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from stac_asset import Config
+
+    configs: list[Config] = []
+
+    def spy(**kwargs: Any) -> Config:
+        config = Config(**kwargs)
+        configs.append(config)
+        return config
+
+    monkeypatch.setattr("stac_asset._cli.Config", spy)
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "download",
+            str(item_path),
+            str(tmp_path),
+            "--http-header",
+            "x-api-key=secret",
+            "--http-header",
+            "x-empty",
+        ],
+    )
+    assert result.exit_code == 0
+    assert configs[0].http_headers == {"x-api-key": "secret", "x-empty": ""}

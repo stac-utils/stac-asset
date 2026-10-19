@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added support for local asset paths using file URIs ([#254](https://github.com/stac-utils/stac-asset/pull/254))
 
+### Fixed
+
+- `--http-header` CLI values are now sent with requests ([#293](https://github.com/stac-utils/stac-asset/pull/293))
+
 ## [0.4.7] - 2025-06-18
 
 ### Changed
