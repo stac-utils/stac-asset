@@ -295,7 +295,7 @@ async def download_async(
     else:
         directory_str = str(directory)
     if quiet:
-        messages = None
+        messages: MessageQueue | None = None
     else:
         messages = Queue()
 

@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.4.8] - 2026-10-19
+
 ### Added
 
 - Added support for local asset paths using file URIs ([#254](https://github.com/stac-utils/stac-asset/pull/254))
@@ -231,7 +233,8 @@ Used to be <https://github.com/gadomski/stac-asset>.
 
 Initial release.
 
-[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.4.7...HEAD
+[unreleased]: https://github.com/stac-utils/stac-asset/compare/v0.4.8...HEAD
+[0.4.8]: https://github.com/stac-utils/stac-asset/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/stac-utils/stac-asset/compare/v0.4.6...v0.4.7
 [0.4.6]: https://github.com/stac-utils/stac-asset/compare/v0.4.5...v0.4.6
 [0.4.5]: https://github.com/stac-utils/stac-asset/compare/v0.4.4...v0.4.5
