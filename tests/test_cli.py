@@ -6,7 +6,7 @@ import pytest
 from click.testing import CliRunner
 from pystac import Item, ItemCollection
 
-cli = pytest.importorskip("stac_asset._cli.cli")
+cli = pytest.importorskip("stac_asset._cli").cli
 
 
 def test_download_item(tmp_path: Path, item_path: Path) -> None:
@@ -95,3 +95,4 @@ def test_info(item_path: Path) -> None:
         ["info", str(item_path)],
     )
     assert result.exit_code == 0, result.stdout
+
