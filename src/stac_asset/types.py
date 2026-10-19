@@ -4,7 +4,7 @@ from typing import Any, Union
 
 from .messages import Message
 
-MessageQueue = Queue[Message]
+MessageQueue = Queue[Message | None]
 
 PathLikeObject = Union[PathLike[Any], str]
 """An object representing a file system path, except we exclude `bytes` because

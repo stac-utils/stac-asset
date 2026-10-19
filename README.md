@@ -34,11 +34,13 @@ import pystac
 import stac_asset
 import asyncio
 
+
 async def main():
     href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
     item = pystac.read_file(href)
     item = await stac_asset.download_item(item, ".")
     return item
+
 
 asyncio.run(main())
 ```
@@ -47,6 +49,7 @@ If you're working in a fully synchronous application, you can use our blocking i
 
 ```python
 import stac_asset.blocking
+
 href = "https://raw.githubusercontent.com/radiantearth/stac-spec/master/examples/simple-item.json"
 item = pystac.read_file(href)
 item = stac_asset.blocking.download_item(item, ".")
@@ -58,6 +61,7 @@ Simply run the following before using any functions from `stac_asset.blocking`.
 
 ```python
 import nest_asyncio
+
 nest_asyncio.apply()
 ```
 

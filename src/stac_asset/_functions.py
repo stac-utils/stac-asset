@@ -559,7 +559,7 @@ def make_asset_hrefs_relative(
         if pystac.utils.is_absolute_href(asset.href):
             if self_href is None:
                 raise STACError(
-                    "Cannot make asset HREFs relative " "if no self_href is set."
+                    "Cannot make asset HREFs relative if no self_href is set."
                 )
             asset.href = pystac.utils.make_relative_href(asset.href, self_href)
     return stac_object
